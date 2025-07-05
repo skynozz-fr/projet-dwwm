@@ -1,68 +1,168 @@
+@import "tailwindcss";
+
+/* 🎨 Thème clair */
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  --radius: 0.5rem;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* 🎨 Couleurs de base */
+  --background: #fbfaf9;
+  --foreground: #111827;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+  --primary: #2563eb; /* bleu 600 */
+  --primary-foreground: #ffffff;
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
+  --secondary: #dc2626; /* rouge 600 */
+  --secondary-foreground: #ffffff;
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
+  /* 🧊 Couleurs neutres */
+  --muted: #f3f4f6;
+  --muted-foreground: #4b5563;
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
+  --accent: #93c5fd;
+  --accent-foreground: #1e3a8a;
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  /* 🧱 UI */
+  --border: #e5e7eb;
+  --input: #e5e7eb;
+  --ring: #3b82f6;
+
+  /* 📊 Couleurs supplémentaires */
+  --info: #2563eb;
+  --success: #10b981;
+  --warning: #facc15;
+  --error: #dc2626;
+
+  --info-foreground: #ffffff;
+  --success-foreground: #ffffff;
+  --warning-foreground: #111827;
+  --error-foreground: #ffffff;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+/* 🌙 Thème sombre */
+.dark {
+  --background: #0f172a;
+  --foreground: #f8fafc;
+
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+
+  --secondary: #ef4444;
+  --secondary-foreground: #ffffff;
+
+  --muted: #1e293b;
+  --muted-foreground: #9ca3af;
+
+  --accent: #1e40af;
+  --accent-foreground: #93c5fd;
+
+  --border: #334155;
+  --input: #1e293b;
+  --ring: #60a5fa;
+
+  --info: #60a5fa;
+  --success: #22c55e;
+  --warning: #eab308;
+  --error: #f87171;
+
+  --info-foreground: #0f172a;
+  --success-foreground: #0f172a;
+  --warning-foreground: #0f172a;
+  --error-foreground: #0f172a;
+}
+
+/* 🌐 Styles de base */
+@layer base {
+  * {
+    border-color: var(--border);
   }
-  a:hover {
-    color: #747bff;
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
   }
-  button {
-    background-color: #f9f9f9;
+}
+
+/* ⚙️ Utilitaires personnalisés */
+@layer utilities {
+  /* Backgrounds */
+  .bg-background {
+    background-color: var(--background);
+  }
+  .bg-primary {
+    background-color: var(--primary);
+  }
+  .bg-secondary {
+    background-color: var(--secondary);
+  }
+  .bg-muted {
+    background-color: var(--muted);
+  }
+  .bg-accent {
+    background-color: var(--accent);
+  }
+  .bg-info {
+    background-color: var(--info);
+  }
+  .bg-success {
+    background-color: var(--success);
+  }
+  .bg-warning {
+    background-color: var(--warning);
+  }
+  .bg-error {
+    background-color: var(--error);
+  }
+
+  /* Text colors */
+  .text-foreground {
+    color: var(--foreground);
+  }
+  .text-primary-foreground {
+    color: var(--primary-foreground);
+  }
+  .text-secondary-foreground {
+    color: var(--secondary-foreground);
+  }
+  .text-muted-foreground {
+    color: var(--muted-foreground);
+  }
+  .text-accent-foreground {
+    color: var(--accent-foreground);
+  }
+  .text-info-foreground {
+    color: var(--info-foreground);
+  }
+  .text-success-foreground {
+    color: var(--success-foreground);
+  }
+  .text-warning-foreground {
+    color: var(--warning-foreground);
+  }
+  .text-error-foreground {
+    color: var(--error-foreground);
+  }
+
+  /* Borders & Inputs */
+  .border-border {
+    border-color: var(--border);
+  }
+  .border-input {
+    border-color: var(--input);
+  }
+
+  /* Ring */
+  .ring {
+    --tw-ring-color: var(--ring);
+  }
+
+  /* Radius helpers */
+  .rounded-sm {
+    border-radius: calc(var(--radius) - 2px);
+  }
+  .rounded {
+    border-radius: var(--radius);
+  }
+  .rounded-lg {
+    border-radius: calc(var(--radius) + 4px);
   }
 }
