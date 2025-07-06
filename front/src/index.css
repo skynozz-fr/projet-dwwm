@@ -37,6 +37,9 @@
   --error: #f87171;
   --error-foreground: #1f2937;
 
+  --ghost: transparent;
+  --ghost-foreground: #6b7280;
+
   /* 🧱 UI */
   --border: #e5e7eb;
   --input: #e5e7eb;
@@ -75,6 +78,9 @@
   --error: #f87171;
   --error-foreground: #fef2f2;
 
+  --ghost: transparent;
+  --ghost-foreground: #9ca3af;
+
   --border: #334155;
   --input: #1e293b;
   --ring: #facc15;
@@ -105,6 +111,7 @@
   .bg-info { background-color: var(--info); }
   .bg-warning { background-color: var(--warning); }
   .bg-error { background-color: var(--error); }
+  .bg-ghost { background-color: var(--ghost); }
 
   /* Hover Backgrounds */
   .hover\:bg-primary:hover { background-color: var(--primary); filter: brightness(0.9); }
@@ -114,6 +121,7 @@
   .hover\:bg-info:hover { background-color: var(--info); filter: brightness(0.9); }
   .hover\:bg-warning:hover { background-color: var(--warning); filter: brightness(0.9); }
   .hover\:bg-error:hover { background-color: var(--error); filter: brightness(0.9); }
+  .hover\:bg-ghost:hover { background-color: var(--muted); }
 
   /* Texts */
   .text-foreground { color: var(--foreground); }
@@ -126,6 +134,7 @@
   .text-info-foreground { color: var(--info-foreground); }
   .text-warning-foreground { color: var(--warning-foreground); }
   .text-error-foreground { color: var(--error-foreground); }
+  .text-ghost-foreground { color: var(--ghost-foreground); }
 
   /* Hover Texts */
   .hover\:text-primary-foreground:hover { color: var(--primary-foreground); }
@@ -135,6 +144,7 @@
   .hover\:text-info-foreground:hover { color: var(--info-foreground); }
   .hover\:text-warning-foreground:hover { color: var(--warning-foreground); }
   .hover\:text-error-foreground:hover { color: var(--error-foreground); }
+  .hover\:text-ghost-foreground:hover { color: var(--ghost-foreground); }
 
   /* Borders / Inputs */
   .border-border { border-color: var(--border); }
