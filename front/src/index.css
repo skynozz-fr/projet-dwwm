@@ -5,7 +5,7 @@
   --radius: 0.5rem;
 
   /* 🎨 Couleurs principales */
-  --background: #fefce8;
+  --background: #ffffff;
   --foreground: #1f2937;
 
   --primary: #facc15;
@@ -49,7 +49,7 @@
 /* 🌙 Thème sombre */
 .dark {
   --background: #1f2937;
-  --foreground: #fef9c3;
+  --foreground: #f9fafb;
 
   --primary: #facc15;
   --primary-foreground: #1f2937;
@@ -81,9 +81,9 @@
   --ghost: transparent;
   --ghost-foreground: #9ca3af;
 
-  --border: #334155;
-  --input: #1e293b;
-  --ring: #facc15;
+  --border: #4b5563;
+  --input: #374151;
+  --ring: #60a5fa;
 }
 
 /* 🔧 Base styles */
@@ -102,6 +102,7 @@
 @layer utilities {
   /* Backgrounds */
   .bg-background { background-color: var(--background); }
+  .bg-card { background-color: var(--background); }
   .bg-primary { background-color: var(--primary); }
   .bg-secondary { background-color: var(--secondary); }
   .bg-tertiary { background-color: var(--tertiary); }
@@ -125,6 +126,16 @@
 
   /* Texts */
   .text-foreground { color: var(--foreground); }
+  .text-primary { color: var(--primary); }
+  .text-secondary { color: var(--secondary); }
+  .text-tertiary { color: var(--tertiary); }
+  .text-muted { color: var(--muted); }
+  .text-accent { color: var(--accent); }
+  .text-success { color: var(--success); }
+  .text-info { color: var(--info); }
+  .text-warning { color: var(--warning); }
+  .text-error { color: var(--error); }
+  .text-ghost { color: var(--ghost); }
   .text-primary-foreground { color: var(--primary-foreground); }
   .text-secondary-foreground { color: var(--secondary-foreground); }
   .text-tertiary-foreground { color: var(--tertiary-foreground); }
@@ -137,6 +148,13 @@
   .text-ghost-foreground { color: var(--ghost-foreground); }
 
   /* Hover Texts */
+  .hover\:text-primary:hover { color: var(--primary); }
+  .hover\:text-secondary:hover { color: var(--secondary); }
+  .hover\:text-tertiary:hover { color: var(--tertiary); }
+  .hover\:text-success:hover { color: var(--success); }
+  .hover\:text-info:hover { color: var(--info); }
+  .hover\:text-warning:hover { color: var(--warning); }
+  .hover\:text-error:hover { color: var(--error); }
   .hover\:text-primary-foreground:hover { color: var(--primary-foreground); }
   .hover\:text-secondary-foreground:hover { color: var(--secondary-foreground); }
   .hover\:text-tertiary-foreground:hover { color: var(--tertiary-foreground); }
@@ -149,6 +167,13 @@
   /* Borders / Inputs */
   .border-border { border-color: var(--border); }
   .border-input { border-color: var(--input); }
+  .border-primary { border-color: var(--primary); }
+  .border-secondary { border-color: var(--secondary); }
+  .border-tertiary { border-color: var(--tertiary); }
+  .border-success { border-color: var(--success); }
+  .border-info { border-color: var(--info); }
+  .border-warning { border-color: var(--warning); }
+  .border-error { border-color: var(--error); }
 
   /* Ring */
   .ring { --tw-ring-color: var(--ring); }
