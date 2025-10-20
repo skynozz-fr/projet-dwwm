@@ -175,7 +175,7 @@ export const Register = () => {
           >
             {isLoading ? (
               <>
-                <div className="w-4 h-4 border-2 border-secondary-foreground border-t-transparent rounded-full animate-spin" />
+                <div className="w-4 h-4 mr-2 border-2 border-secondary-foreground border-t-transparent rounded-full animate-spin" />
                 Création du compte...
               </>
             ) : (

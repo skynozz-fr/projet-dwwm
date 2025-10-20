@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react"
 
-interface UsePaginationProps<T> {
+type UsePaginationProps<T> = {
   data: T[]
   itemsPerPage: number
 }

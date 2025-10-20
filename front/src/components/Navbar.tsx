@@ -1,4 +1,4 @@
-import Logo from "@/components/navbar-components/logo"
+import { Logo } from "@/components/navbar-components/logo"
 import UserMenu from "@/components/navbar-components/user-menu"
 import { Button } from "@/components/ui/button"
 import {
@@ -14,10 +14,22 @@ import {
 } from "@/components/ui/popover"
 import { navigationRoutes } from "@/routes"
 import { Link, useLocation } from "react-router-dom"
+import { useEffect, useState } from "react"
 
 export const Navbar = () => {
   const location = useLocation()
-  console.log("Current location:", location.pathname)
+  const [open, setOpen] = useState(false)
+  
+  const isActiveRoute = (routePath: string) => {
+    if (routePath === "/admin") {
+      return location.pathname.startsWith("/admin")
+    }
+    return location.pathname === routePath
+  }
+
+  useEffect(() => {
+    setOpen(false)
+  }, [location.pathname])
   
   return (
     <header className="border-b">
@@ -25,7 +37,7 @@ export const Navbar = () => {
         {/* Left side */}
         <div className="flex items-center gap-2">
           {/* Mobile menu trigger */}
-          <Popover>
+          <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
               <Button
                 className="group size-8 md:hidden"
@@ -59,7 +71,11 @@ export const Navbar = () => {
                 </svg>
               </Button>
             </PopoverTrigger>
-            <PopoverContent align="start" className="w-36 p-1 md:hidden">
+            <PopoverContent 
+              align="start" 
+              sideOffset={8}
+              className="w-36 p-1 md:hidden z-50 bg-background border shadow-xl relative"
+            >
               <NavigationMenu className="max-w-none *:w-full">
                 <NavigationMenuList className="flex-col items-start gap-0 md:gap-2">
                   {navigationRoutes.map((link, index) => (
@@ -88,7 +104,7 @@ export const Navbar = () => {
                     <NavigationMenuLink 
                       asChild
                       className={`text-muted-foreground hover:text-primary py-1.5 font-medium ${
-                        location.pathname === link.path ? 'text-primary' : ''
+                        isActiveRoute(link.path) ? 'text-primary' : ''
                       }`}
                     >
                       <Link to={link.path}>

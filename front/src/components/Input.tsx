@@ -1,9 +1,9 @@
 import { useId } from "react"
 
 import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
+import { Input as InputBase } from "@/components/ui/input"
 
-interface InputProps {
+type InputProps = {
   label: string
   value?: string
   onChange?: (value: string) => void
@@ -12,20 +12,20 @@ interface InputProps {
   className?: string
 }
 
-export default function InputComponent({ 
+export const Input = ({ 
   label, 
   value, 
   onChange, 
   placeholder = "",
   type = "text",
-  className = "" 
-}: InputProps) {
+  className = ""
+}: InputProps) => {
   const id = useId()
   
   return (
-    <div className={`*:not-first:mt-2 ${className}`}>
+    <div className={className}>
       <Label htmlFor={id}>{label}</Label>
-      <Input 
+      <InputBase
         id={id} 
         type={type}
         placeholder={placeholder}

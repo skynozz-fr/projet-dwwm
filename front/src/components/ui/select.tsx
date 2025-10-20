@@ -3,39 +3,55 @@ import { useId } from "react"
 import { Label } from "@/components/ui/label"
 import { SelectNative } from "@/components/ui/select-native"
 
-interface SelectOption {
+type SelectOption = {
   value: string
   label: string
 }
 
-interface SelectProps {
+type SelectProps = {
   label: string
   options: SelectOption[]
   value?: string
   onChange?: (value: string) => void
   placeholder?: string
+  placeholderSelectable?: boolean
   className?: string
+  required?: boolean
 }
 
-export default function Select({ 
+export const Select = ({ 
   label, 
   options, 
   value, 
   onChange, 
   placeholder = "Sélectionnez une option",
-  className = "" 
-}: SelectProps) {
+  placeholderSelectable = false,
+  className = "",
+  required = false
+}: SelectProps) =>{
   const id = useId()
   
   return (
-    <div className={`*:not-first:mt-2 ${className}`}>
-      <Label htmlFor={id}>{label}</Label>
+    <div className={className}>
+      <Label htmlFor={id}>
+        {label} {required && <span className="text-error">*</span>}
+      </Label>
       <SelectNative 
         id={id} 
-        value={value} 
+        value={value ?? ""} 
         onChange={(e) => onChange?.(e.target.value)}
+        required={required}
+        aria-required={required}
       >
-        {placeholder && <option value="">{placeholder}</option>}
+        {placeholder && (
+          <option 
+            value="" 
+            disabled={!placeholderSelectable}
+            hidden={!placeholderSelectable}
+          >
+            {placeholder}
+          </option>
+        )}
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}

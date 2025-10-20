@@ -1,4 +1,4 @@
-export interface ToastProps {
+export type ToastProps = {
   type: "success" | "error" | "warning" | "info"
   title: string
   message?: string
@@ -6,7 +6,7 @@ export interface ToastProps {
   onClose?: () => void
 }
 
-export interface ToastState extends ToastProps {
+export type ToastState = ToastProps & {
   id: string
   visible: boolean
 }
@@ -19,15 +19,15 @@ export const toastStore = {
   listeners: [] as ((toasts: ToastState[]) => void)[],
   
   addToast: (toast: ToastProps) => {
-    const id = `toast-${++toastId}`
+    const id = `toast-${++toastId}-${Date.now()}`
     const newToast: ToastState = {
       ...toast,
       id,
       visible: true,
-      duration: toast.duration || 5000
+      duration: toast.duration || 3000
     }
     
-    toastStore.toasts.push(newToast)
+    toastStore.toasts = [...toastStore.toasts, newToast] // Crée un nouveau tableau
     toastStore.notify()
     
     // Auto-remove après la durée spécifiée

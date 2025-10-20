@@ -1,6 +1,7 @@
 import { Button } from "@/components/Button"
 import { Calendar, MapPin, Trophy, Users, Zap, Clock, Target } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import { truncateText, getUpcomingItems, getLatestItems } from "@/lib/utils"
 
 export const Home = () => {
   const navigate = useNavigate()
@@ -11,8 +12,8 @@ export const Home = () => {
       id: 1,
       homeTeam: "FC Popcorn",
       awayTeam: "AS Rivaux",
-      date: "2025-07-15",
-      dateFormatted: "15 Juil",
+      date: "2025-10-15",
+      dateFormatted: "15 Sept",
       time: "15h00",
       location: "Domicile",
       competition: "Championnat",
@@ -44,7 +45,7 @@ export const Home = () => {
       id: 4,
       homeTeam: "FC Popcorn",
       awayTeam: "United FC",
-      date: "2025-08-05",
+      date: "2026-08-05",
       dateFormatted: "5 Août",
       time: "16h00",
       location: "Extérieur",
@@ -96,30 +97,9 @@ export const Home = () => {
     }
   ]
 
-  // Fonction pour récupérer les 3 prochains matchs
-  const getNextMatches = () => {
-    const today = new Date()
-    return matchsData
-      .filter(match => new Date(match.date) >= today)
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-      .slice(0, 3)
-  }
-
-  // Fonction pour récupérer les 3 dernières actualités
-  const getLatestNews = () => {
-    return actualitesData
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, 3)
-  }
-
-  // Fonction pour limiter le texte
-  const truncateText = (text: string, maxLength: number) => {
-    if (text.length <= maxLength) return text
-    return text.substring(0, maxLength).trim() + "..."
-  }
-
-  const nextMatches = getNextMatches()
-  const latestNews = getLatestNews()
+  const nextMatches = getUpcomingItems(matchsData)
+  const latestNews = getLatestItems(actualitesData)
+  
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -127,7 +107,7 @@ export const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="flex items-center justify-center mb-6">
             <Target className="w-8 h-8 text-background mr-3" />
-            <h1 className="text-5xl md:text-6xl font-bold text-background">
+            <h1 className="text-5xl md:text-6xl font-bold">
               FC Popcorn
             </h1>
           </div>
@@ -164,48 +144,56 @@ export const Home = () => {
       {/* Prochains matchs */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-foreground text-center mb-12">
+          <h2 className="text-3xl font-bold text-foreground text-center mb-6">
             Prochains Matchs
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {nextMatches.map((match) => (
-              <div 
-                key={match.id}
-                className="bg-muted border border-border rounded-lg p-6 hover:shadow-lg transition-shadow cursor-pointer"
-                onClick={() => navigate(`/match/${match.id}`)}
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${match.competitionColor}`}>
-                    {match.competition}
-                  </span>
-                  <div className="flex items-center text-muted-foreground text-sm">
-                    <Calendar className="w-4 h-4 mr-1" />
-                    {match.dateFormatted}
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="text-lg font-semibold text-foreground mb-2">
-                    {match.homeTeam} vs {match.awayTeam}
-                  </div>
-                  <div className="flex items-center justify-center text-muted-foreground text-sm mb-3">
-                    <Clock className="w-4 h-4 mr-1" />
-                    {match.time}
-                    <MapPin className="w-4 h-4 ml-3 mr-1" />
-                    {match.location}
-                  </div>
-                  <Button 
-                    variant="secondary" 
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      navigate(`/match/${match.id}`)
-                    }}
-                  >
-                    Voir les détails
-                  </Button>
-                </div>
+            {nextMatches.length === 0 ? (
+              <div className="col-span-full flex flex-col items-center justify-center py-12">
+                <Calendar className="w-16 h-16 text-primary mb-4 animate-bounce" />
+                <h3 className="text-2xl font-bold text-foreground mb-2">Aucun match à venir</h3>
+                <p className="text-muted-foreground text-lg">Restez connecté, de nouveaux matchs seront bientôt annoncés ! ⚽</p>
               </div>
-            ))}
+            ) : (
+              nextMatches.map((match) => (
+                <div 
+                  key={match.id}
+                  className="bg-background border border-border rounded-lg p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                  onClick={() => navigate(`/match/${match.id}`)}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${match.competitionColor}`}>
+                      {match.competition}
+                    </span>
+                    <div className="flex items-center text-muted-foreground text-sm">
+                      <Calendar className="w-4 h-4 mr-1" />
+                      {match.dateFormatted}
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-semibold text-foreground mb-2">
+                      {match.homeTeam} vs {match.awayTeam}
+                    </div>
+                    <div className="flex items-center justify-center text-muted-foreground text-sm mb-3">
+                      <Clock className="w-4 h-4 mr-1" />
+                      {match.time}
+                      <MapPin className="w-4 h-4 ml-3 mr-1" />
+                      {match.location}
+                    </div>
+                    <Button 
+                      variant="secondary" 
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        navigate(`/match/${match.id}`)
+                      }}
+                    >
+                      Voir les détails
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </section>
@@ -213,36 +201,44 @@ export const Home = () => {
       {/* Actualités */}
       <section className="py-16 bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-foreground text-center mb-12">
+          <h2 className="text-3xl font-bold text-foreground text-center mb-6">
             Actualités du Club
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {latestNews.map((actualite) => {
-              const IconComponent = actualite.icon
-              return (
-                <article 
-                  key={actualite.id}
-                  className="bg-background border border-border rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-[400px] flex flex-col"
-                  onClick={() => navigate(`/actualite/${actualite.id}`)}
-                >
-                  <div className={`h-48 ${actualite.bgColor} flex items-center justify-center`}>
-                    <IconComponent className={`w-16 h-16 ${actualite.color}`} />
-                  </div>
-                  <div className="p-6 flex-1 flex flex-col">
-                    <div className="flex items-center text-muted-foreground text-sm mb-2">
-                      <Calendar className="w-4 h-4 mr-1" />
-                      {actualite.dateFormatted}
+            {latestNews.length === 0 ? (
+              <div className="col-span-full flex flex-col items-center justify-center py-12">
+                <Trophy className="w-16 h-16 text-secondary mb-4 animate-bounce" />
+                <h3 className="text-2xl font-bold text-foreground mb-2">Aucune actualité pour le moment</h3>
+                <p className="text-muted-foreground text-lg">Revenez bientôt pour découvrir les dernières nouvelles du club ! 📰</p>
+              </div>
+            ) : (
+              latestNews.map((actualite) => {
+                const IconComponent = actualite.icon
+                return (
+                  <article 
+                    key={actualite.id}
+                    className="bg-background border border-border rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-[400px] flex flex-col"
+                    onClick={() => navigate(`/news/${actualite.id}`)}
+                  >
+                    <div className={`h-48 ${actualite.bgColor} flex items-center justify-center`}>
+                      <IconComponent className={`w-16 h-16 ${actualite.color}`} />
                     </div>
-                    <h3 className="text-xl font-semibold text-foreground mb-3">
-                      {actualite.title}
-                    </h3>
-                    <p className="text-muted-foreground flex-1 leading-relaxed">
-                      {truncateText(actualite.description, 120)}
-                    </p>
-                  </div>
-                </article>
-              )
-            })}
+                    <div className="p-6 flex-1 flex flex-col">
+                      <div className="flex items-center text-muted-foreground text-sm mb-2">
+                        <Calendar className="w-4 h-4 mr-1" />
+                        {actualite.dateFormatted}
+                      </div>
+                      <h3 className="text-xl font-semibold text-foreground mb-3">
+                        {actualite.title}
+                      </h3>
+                      <p className="text-muted-foreground flex-1 leading-relaxed">
+                        {truncateText(actualite.description, 120)}
+                      </p>
+                    </div>
+                  </article>
+                )
+              })
+            )}
           </div>
         </div>
       </section>
@@ -256,7 +252,11 @@ export const Home = () => {
           <p className="text-xl text-muted-foreground mb-8">
             Que vous soyez joueur, supporter ou bénévole, il y a une place pour vous dans notre famille !
           </p>
-          <Button variant="secondary">
+          <Button 
+            variant="secondary"
+            size="md"
+            onClick={() => window.location.href = 'mailto:contact@fc-popcorn.fr'}
+          >
             Nous contacter
           </Button>
         </div>

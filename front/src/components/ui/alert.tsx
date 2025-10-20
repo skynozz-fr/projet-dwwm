@@ -9,7 +9,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 
-interface AlertComponentProps {
+type AlertProps = {
   title: string
   description?: string
   confirmText?: string
@@ -20,7 +20,7 @@ interface AlertComponentProps {
   onOpenChange: (open: boolean) => void
 }
 
-export const AlertComponent = ({
+export const Alert = ({
   title,
   description,
   confirmText = "Confirmer",
@@ -29,7 +29,7 @@ export const AlertComponent = ({
   onCancel,
   open,
   onOpenChange,
-}: AlertComponentProps) => {
+}: AlertProps) => {
   const handleConfirm = () => {
     onConfirm?.()
     onOpenChange(false)

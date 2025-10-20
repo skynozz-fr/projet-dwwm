@@ -1,20 +1,43 @@
-import * as React from "react"
+import { useId } from "react"
 
-import { cn } from "@/lib/utils"
+import { Label } from "@/components/ui/label"
+import { TextareaBase } from "@/components/ui/textarea-base"
 
-function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
+type TextareaProps = {
+  label: string
+  value?: string
+  onChange?: (value: string) => void
+  placeholder?: string
+  rows?: number
+  className?: string
+  required?: boolean
+}
+
+export const Textarea = ({ 
+  label, 
+  value, 
+  onChange, 
+  placeholder = "Tapez votre texte ici...", 
+  rows = 3,
+  className = "",
+  required = false
+}: TextareaProps) => {
+  const id = useId()
+  
   return (
-    <textarea
-      data-slot="textarea"
-      className={cn(
-        "border-input bg-background placeholder:text-muted-foreground/70 focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex min-h-19.5 w-full rounded-md border px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50",
-        "dark:bg-input dark:text-foreground dark:border-border",
-        className
-      )}
-      {...props}
-    />
+    <div className={`*:not-first:mt-2 ${className}`}>
+      <Label htmlFor={id}>
+        {label} {required && <span className="text-error">*</span>}
+      </Label>
+      <TextareaBase 
+        id={id} 
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange?.(e.target.value)}
+        rows={rows}
+        required={required}
+        aria-required={required}
+      />
+    </div>
   )
 }
-Textarea.displayName = "Textarea"
-
-export { Textarea }
