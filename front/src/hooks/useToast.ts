@@ -7,7 +7,9 @@ export const useToast = () => {
   const [toasts, setToasts] = useState<ToastState[]>([])
   
   useEffect(() => {
-    const unsubscribe = toastStore.subscribe(setToasts)
+    const unsubscribe = toastStore.subscribe((newToasts) => {
+      setToasts([...newToasts]) // Force une nouvelle référence pour déclencher le re-rendu
+    })
     return unsubscribe
   }, [])
   

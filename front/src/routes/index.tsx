@@ -1,74 +1,71 @@
-import { AppLayout } from "@/components/layouts/AppLayout"
-import { About } from "@/pages/about"
-import { Home } from "@/pages/home"
-import { Login } from "@/pages/login"
-import { Register } from "@/pages/register"
-import { MatchDetail } from "@/pages/match-detail"
-import { ActualiteDetail } from "@/pages/actualite-detail"
-import { Calendar } from "@/pages/calendar"
-import { Admin } from "@/pages/admin"
 import { createBrowserRouter, Navigate } from "react-router-dom"
 
-// Navigation routes that will be used in the navbar
+import { AppLayout } from "@/components/layouts/AppLayout"
+import { AdminLayout } from "@/components/layouts/AdminLayout"
+
+import {
+  Login,
+  Register,
+  Home,
+  Calendar,
+  About,
+  MatchDetail,
+  NewsDetail,
+  Unauthorized,
+  NotFound,
+} from "@/pages/"
+
+import {
+  AdminDashboard,
+  NewsAdmin,
+  NewsForm,
+  MatchsAdmin,
+  MatchForm,
+  UsersAdmin,
+} from "@/pages/admin/"
+
+// Navigation routes used in the navbar
 export const navigationRoutes = [
   { path: "/home", label: "Accueil" },
   { path: "/calendar", label: "Calendrier" },
   { path: "/about", label: "À propos" },
+  { path: "/admin", label: "Administration" },
 ]
 
 export const router = createBrowserRouter([
+  { path: "/login", element: <Login /> },
+  { path: "/register", element: <Register /> },
+
   {
     path: "/",
-    element: <Navigate to="/login" replace />,
-  },
-  {
-    path: "/login",
-    element: <Login />,
-  },
-  {
-    path: "/register",
-    element: <Register />,
-  },
-  {
-    path: "/home",
     element: <AppLayout />,
     children: [
-      { path: "", element: <Home /> },
-    ],
-  },
-  {
-    path: "/calendar",
-    element: <AppLayout />,
-    children: [
-      { path: "", element: <Calendar /> },
-    ],
-  },
-  {
-    path: "/about", 
-    element: <AppLayout />,
-    children: [
-      { path: "", element: <About /> },
-    ],
-  },
-  {
-    path: "/match/:id",
-    element: <AppLayout />,
-    children: [
-      { path: "", element: <MatchDetail /> },
-    ],
-  },
-  {
-    path: "/actualite/:id",
-    element: <AppLayout />,
-    children: [
-      { path: "", element: <ActualiteDetail /> },
-    ],
-  },
-  {
-    path: "/admin",
-    element: <AppLayout />,
-    children: [
-      { path: "", element: <Admin /> },
+      { index: true, element: <Navigate to="home" replace /> },
+
+      { path: "home", element: <Home /> },
+      { path: "calendar", element: <Calendar /> },
+      { path: "about", element: <About /> },
+
+      { path: "match/:id", element: <MatchDetail /> },
+      { path: "news/:id", element: <NewsDetail /> },
+
+      {
+        path: "admin",
+        element: <AdminLayout />,
+        children: [
+          { index: true, element: <AdminDashboard /> },
+          { path: "news", element: <NewsAdmin /> },
+          { path: "news/create", element: <NewsForm /> },
+          { path: "news/edit/:id", element: <NewsForm /> },
+          { path: "matchs", element: <MatchsAdmin /> },
+          { path: "match/create", element: <MatchForm /> },
+          { path: "match/edit/:id", element: <MatchForm /> },
+          { path: "users", element: <UsersAdmin /> },
+        ],
+      },
+
+      { path: "unauthorized", element: <Unauthorized /> },
+      { path: "*", element: <NotFound /> },
     ],
   },
 ])

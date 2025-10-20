@@ -3,7 +3,7 @@ import { EyeIcon, EyeOffIcon } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-interface SimplePasswordInputProps {
+type SimplePasswordInputProps = {
   label?: string
   placeholder?: string
   value?: string

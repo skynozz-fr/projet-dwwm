@@ -1,6 +1,6 @@
 import { Button } from "@/components/Button"
 import { useNavigate } from "react-router-dom"
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock } from "lucide-react"
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Home, Car } from "lucide-react"
 import { useState } from "react"
 
 export const Calendar = () => {
@@ -141,21 +141,32 @@ export const Calendar = () => {
           <div className={`text-sm font-medium mb-1 ${isToday ? 'text-primary' : 'text-foreground'}`}>
             {day}
           </div>
-          <div className="space-y-1">
+          <div className="flex flex-col gap-1">
             {matches.map((match) => (
-              <div
+              <button
                 key={match.id}
-                className={`text-xs p-1 rounded cursor-pointer hover:opacity-80 transition-opacity ${match.competitionColor}`}
+                type="button"
                 onClick={() => navigate(`/match/${match.id}`)}
+                className={`w-full flex flex-col items-center px-2 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition ${match.competitionColor} shadow-sm hover:scale-[1.03]`}
+                style={{ minHeight: 38 }}
+                title={`${match.homeTeam} vs ${match.awayTeam} - ${match.time}`}
               >
-                <div className="font-medium truncate">
-                  {match.homeTeam === "FC Popcorn" ? "vs" : "@"} {match.homeTeam === "FC Popcorn" ? match.awayTeam : match.homeTeam}
-                </div>
-                <div className="flex items-center text-xs opacity-90">
-                  <Clock className="w-3 h-3 mr-1" />
+                <span className="text-xs font-bold text-foreground mb-1 truncate flex items-center gap-2">
+                  {match.homeTeam === "FC Popcorn" ? match.awayTeam : match.homeTeam}
+                  {match.location === 'Domicile' ? (
+                    <Home className="w-4 h-4 text-foreground" />
+                  ) : (
+                    <Car className="w-4 h-4 text-foreground" />
+                  )}
+                </span>
+                <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                  match.competition === 'Championnat' ? 'bg-primary text-primary-foreground' :
+                  match.competition === 'Coupe' ? 'bg-secondary text-secondary-foreground' :
+                  match.competition === 'Amical' ? 'bg-tertiary text-tertiary-foreground' : 'bg-muted text-muted-foreground'
+                }`}>
                   {match.time}
-                </div>
-              </div>
+                </span>
+              </button>
             ))}
           </div>
         </div>
@@ -198,36 +209,39 @@ export const Calendar = () => {
       <div className="py-8 bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-6">
-            <Button 
-              variant="ghost" 
-              onClick={() => navigateMonth('prev')}
-              className="flex items-center"
-            >
-              <ChevronLeft className="w-4 h-4 mr-2" />
-              Mois précédent
-            </Button>
-            
-            <div className="flex items-center space-x-4">
-              <h2 className="text-3xl font-bold text-foreground">
-                {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
-              </h2>
+            <div className="flex flex-col gap-4 items-center md:flex-row md:items-center justify-center w-full mb-6">
               <Button 
-                variant="secondary" 
-                size="sm"
-                onClick={goToToday}
+                variant="ghost" 
+                onClick={() => navigateMonth('prev')}
+                className="flex items-center justify-center w-full md:w-auto"
               >
-                Aujourd'hui
+                <ChevronLeft className="w-4 h-4 mr-2" />
+                Mois précédent
+              </Button>
+
+              <div className="flex flex-col gap-2 items-center md:flex-row md:space-x-4 md:justify-center">
+                <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center md:text-left">
+                  {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
+                </h2>
+                <Button 
+                  variant="secondary" 
+                  size="sm"
+                  onClick={goToToday}
+                  className="w-full md:w-auto"
+                >
+                  Aujourd'hui
+                </Button>
+              </div>
+
+              <Button 
+                variant="ghost" 
+                onClick={() => navigateMonth('next')}
+                className="flex items-center justify-center w-full md:w-auto"
+              >
+                Mois suivant
+                <ChevronRight className="w-4 h-4 ml-2" />
               </Button>
             </div>
-            
-            <Button 
-              variant="ghost" 
-              onClick={() => navigateMonth('next')}
-              className="flex items-center"
-            >
-              Mois suivant
-              <ChevronRight className="w-4 h-4 ml-2" />
-            </Button>
           </div>
         </div>
       </div>

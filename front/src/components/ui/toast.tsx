@@ -85,7 +85,7 @@ const Toast = ({ toast }: { toast: ToastState }) => {
 // Composant conteneur pour tous les toasts
 export const ToastContainer = () => {
   const { toasts } = useToast()
-  
+    
   if (toasts.length === 0) return null
   
   return (

@@ -1,10 +1,14 @@
 import { Button } from "@/components/Button"
 import { useParams, useNavigate } from "react-router-dom"
 import { Calendar, MapPin, Clock, ArrowLeft, Target, Shield } from "lucide-react"
+import { useToast } from "@/hooks/useToast"
+import { copyToClipboardWithToast } from "@/lib/utils"
+import { NotFound } from "./errors/NotFound"
 
 export const MatchDetail = () => {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { toast } = useToast()
 
   // Données mockées - à remplacer par tes appels API
   const matchData = {
@@ -64,16 +68,7 @@ export const MatchDetail = () => {
   const match = matchData[id as '1' | '2' | '3']
 
   if (!match) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-4">Match non trouvé</h1>
-          <Button onClick={() => navigate('/home')}>
-            Retour à l'accueil
-          </Button>
-        </div>
-      </div>
-    )
+    return <NotFound />
   }
 
   const getCompetitionColor = (competition: string) => {
@@ -211,8 +206,10 @@ export const MatchDetail = () => {
           <p className="text-xl text-muted-foreground mb-8">
             Votre soutien est précieux pour nos joueurs. Rejoignez-nous au stade !
           </p>
-          <Button variant="secondary">
-            Partager le match
+          <Button 
+            variant="secondary"
+            onClick={() => copyToClipboardWithToast(window.location.href, toast)}>
+              Partager le match
           </Button>
         </div>
       </div>

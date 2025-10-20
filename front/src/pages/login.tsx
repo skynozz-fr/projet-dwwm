@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { LogIn, User, Mail } from "lucide-react"
 import { RequiredInput } from "@/components/ui/required-input"
 import { SimplePasswordInput } from "@/components/ui/simple-password-input"
@@ -8,6 +8,7 @@ import { ToastContainer } from "@/components/ui/toast"
 import { Button } from "@/components/Button"
 
 export const Login = () => {
+  const navigate = useNavigate()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -22,14 +23,14 @@ export const Login = () => {
     
     try {
       // Simulation d'une requête de connexion
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await new Promise(resolve => setTimeout(resolve, 2000))
       
       // Simulation d'une vérification d'authentification
       // Remplacez cette logique par votre vraie authentification
       if (email === "admin@example.com" && password === "password123") {
         toast.success("Connexion réussie", "Bienvenue !")
         // Rediriger vers la page d'accueil ou tableau de bord
-        // navigate("/home")
+        navigate("/home")
       } else {
         toast.error("Erreur de connexion", "Email ou mot de passe incorrect")
       }
@@ -86,7 +87,7 @@ export const Login = () => {
           >
             {isLoading ? (
               <>
-                <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 mr-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
                 Connexion...
               </>
             ) : (

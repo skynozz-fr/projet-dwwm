@@ -1,13 +1,17 @@
 import { Button } from "@/components/Button"
 import { useParams, useNavigate } from "react-router-dom"
-import { Calendar, ArrowLeft, Trophy, Users, Zap, Share2, BookOpen } from "lucide-react"
+import { Calendar, ArrowLeft, Trophy, Users, Zap, BookOpen } from "lucide-react"
+import { copyToClipboardWithToast } from "@/lib/utils"
+import { useToast } from "@/hooks/useToast"
+import { NotFound } from "./errors/NotFound"
 
-export const ActualiteDetail = () => {
+export const NewsDetail = () => {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { toast } = useToast()
 
   // Données mockées - à remplacer par tes appels API
-  const actualiteData = {
+  const newsData = {
     1: {
       title: "Victoire en finale de coupe !",
       date: "10 Juillet 2025",
@@ -91,22 +95,13 @@ export const ActualiteDetail = () => {
     }
   }
 
-  const actualite = actualiteData[id as '1' | '2' | '3']
+  const news = newsData[id as '1' | '2' | '3']
 
-  if (!actualite) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-4">Actualité non trouvée</h1>
-          <Button onClick={() => navigate('/home')}>
-            Retour à l'accueil
-          </Button>
-        </div>
-      </div>
-    )
+  if (!news) {
+    return <NotFound />
   }
 
-  const IconComponent = actualite.icon
+  const IconComponent = news.icon
 
   return (
     <div className="min-h-screen bg-background">
@@ -125,14 +120,14 @@ export const ActualiteDetail = () => {
           <div className="text-center">
             <div className="inline-flex items-center bg-background/20 px-4 py-2 rounded-full text-sm font-medium text-background mb-4">
               <BookOpen className="w-4 h-4 mr-2" />
-              {actualite.category}
+              {news.category}
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-background mb-4">
-              {actualite.title}
+              {news.title}
             </h1>
             <div className="flex items-center justify-center text-background/90">
               <Calendar className="w-5 h-5 mr-2" />
-              {actualite.date} - Par {actualite.author}
+              {news.date} - Par {news.author}
             </div>
           </div>
         </div>
@@ -141,8 +136,8 @@ export const ActualiteDetail = () => {
       {/* Hero Image */}
       <div className="py-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className={`h-64 ${actualite.bgColor} rounded-lg flex items-center justify-center mb-8`}>
-            <IconComponent className={`w-24 h-24 ${actualite.color}`} />
+          <div className="rounded-lg flex items-center justify-center mb-8">
+            <IconComponent className={`w-12 h-12 ${news.color}`} />
           </div>
         </div>
       </div>
@@ -153,13 +148,13 @@ export const ActualiteDetail = () => {
           
           {/* Excerpt */}
           <div className="text-xl text-muted-foreground mb-8 p-4 bg-background rounded-lg border-l-4 border-primary">
-            {actualite.excerpt}
+            {news.excerpt}
           </div>
 
           {/* Article content */}
           <div 
             className="prose prose-lg max-w-none text-foreground"
-            dangerouslySetInnerHTML={{ __html: actualite.content }}
+            dangerouslySetInnerHTML={{ __html: news.content }}
             style={{
               fontSize: '1.125rem',
               lineHeight: '1.75',
@@ -170,9 +165,9 @@ export const ActualiteDetail = () => {
 
             {/* Share buttons */}
             <div className="flex items-center gap-4">
-              <span className="text-muted-foreground">Partager :</span>
-              <Button variant="ghost" size="sm">
-                <Share2 className="w-4 h-4 mr-2" />
+              <Button 
+                variant="secondary"
+                onClick={() => copyToClipboardWithToast(window.location.href, toast)}>
                 Partager
               </Button>
             </div>
@@ -187,15 +182,15 @@ export const ActualiteDetail = () => {
             Articles similaires
           </h2>
           <div className="grid md:grid-cols-2 gap-6">
-            {actualite.relatedArticles.map((relatedId) => {
-              const relatedArticle = actualiteData[relatedId.toString() as '1' | '2' | '3']
+            {news.relatedArticles.map((relatedId) => {
+              const relatedArticle = newsData[relatedId.toString() as '1' | '2' | '3']
               const RelatedIcon = relatedArticle.icon
               
               return (
                 <div 
                   key={relatedId}
                   className="bg-background border border-border rounded-lg p-6 hover:shadow-lg transition-shadow cursor-pointer"
-                  onClick={() => navigate(`/actualite/${relatedId}`)}
+                  onClick={() => navigate(`/news/${relatedId}`)}
                 >
                   <div className={`w-12 h-12 ${relatedArticle.bgColor} rounded-lg flex items-center justify-center mb-4`}>
                     <RelatedIcon className={`w-6 h-6 ${relatedArticle.color}`} />

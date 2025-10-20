@@ -12,8 +12,10 @@ import {
   Shield
 } from 'lucide-react'
 import { Button } from '@/components/Button'
+import { useNavigate } from 'react-router-dom'
 
 export const About = () => {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -226,14 +228,16 @@ export const About = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
-              variant="primary" 
+              variant="primary"
               size="lg"
+              onClick={() => navigate('/register')}
             >
               Nous rejoindre
             </Button>
             <Button 
               variant="secondary"
               size="lg"
+              onClick={() => window.location.href = 'mailto:contact@fc-popcorn.fr'}
             >
               Nous contacter
             </Button>
