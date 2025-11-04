@@ -3,7 +3,7 @@ export { AdminDashboard } from "./dashboard"
 export { NewsAdmin } from "./news/index"
 export { NewsForm } from "./news/form"
 
-export { MatchsAdmin } from "./matches/index"
-export { MatchForm } from "./matches/form"
+export { MatchsAdmin } from "./match/index"
+export { MatchForm } from "./match/form"
 
-export { UsersAdmin } from "./users/index"
+export { UsersAdmin } from "./user/index"

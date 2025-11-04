@@ -9,13 +9,13 @@ export const AdminDashboard = () => {
   const quickActions = [
     {
       title: "Actualités",
-      description: "Gérer les actualités du site",
+      description: "Gérer les actualités",
       icon: FileText,
       link: "/admin/news",
     },
     {
       title: "Matchs",
-      description: "Gérer les matchs et calendrier",
+      description: "Gérer les matchs",
       icon: Calendar,
       link: "/admin/matchs",
     },
@@ -38,7 +38,7 @@ export const AdminDashboard = () => {
           {quickActions.map((action) => (
             <Card 
               key={action.title} 
-              className="p-5 md:p-7 border border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+              className="p-5 md:p-7 hover:shadow-lg transition-all cursor-pointer hover:border-primary"
               onClick={() => navigate(action.link)}
             >
               <div className="flex items-center gap-4">

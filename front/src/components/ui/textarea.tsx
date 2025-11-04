@@ -25,7 +25,7 @@ export const Textarea = ({
   const id = useId()
   
   return (
-    <div className={`*:not-first:mt-2 ${className}`}>
+    <div className={className}>
       <Label htmlFor={id}>
         {label} {required && <span className="text-error">*</span>}
       </Label>

@@ -1,140 +1,129 @@
+import { useState, useEffect } from "react"
 import { Button } from "@/components/Button"
 import { useParams, useNavigate } from "react-router-dom"
-import { Calendar, MapPin, Clock, ArrowLeft, Target, Shield } from "lucide-react"
+import { Calendar, MapPin, Clock, ArrowLeft, Home, Plane } from "lucide-react"
 import { useToast } from "@/hooks/useToast"
-import { copyToClipboardWithToast } from "@/lib/utils"
-import { NotFound } from "./errors/NotFound"
+import { copyToClipboardWithToast, formatDate } from "@/lib/utils"
+import { getCompetitionColor, translateCompetition, translateMatchStatus } from "@/lib/match-helpers"
+import { getMatchById } from "@/services/match.service"
+import { Loader } from "@/components/Loader"
+import { ErrorPage } from "../errors/ErrorPage"
+import { NotFound } from "../errors/NotFound"
+import type { Match } from "@/types/match"
 
 export const MatchDetail = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { toast } = useToast()
+  const [match, setMatch] = useState<Match | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  // Données mockées - à remplacer par tes appels API
-  const matchData = {
-    1: {
-      homeTeam: "FC Popcorn",
-      awayTeam: "AS Rivaux",
-      date: "15 Juillet 2025",
-      time: "15h00",
-      venue: "Stade Municipal",
-      location: "Domicile",
-      competition: "Championnat",
-      status: "À venir",
-      homeScore: null,
-      awayScore: null,
-      description: "Match crucial pour le maintien en tête du championnat. Nos adversaires sont redoutables mais nous sommes confiants dans nos capacités.",
-      homeFormation: "4-3-3",
-      awayFormation: "4-4-2",
-      referee: "M. Dupont",
-      weather: "Ensoleillé, 24°C",
-    },
-    2: {
-      homeTeam: "FC Champions",
-      awayTeam: "FC Popcorn",
-      date: "22 Juillet 2025",
-      time: "17h30",
-      venue: "Stade des Champions",
-      location: "Extérieur",
-      competition: "Coupe",
-      status: "À venir",
-      homeScore: null,
-      awayScore: null,
-      description: "Quart de finale de coupe face à une équipe de division supérieure. Un défi de taille qui nous motive énormément !",
-      homeFormation: "4-2-3-1",
-      awayFormation: "4-3-3",
-      referee: "Mme Martin",
-      weather: "Nuageux, 21°C"
-    },
-    3: {
-      homeTeam: "FC Popcorn",
-      awayTeam: "Étoiles FC",
-      date: "29 Juillet 2025",
-      time: "14h00",
-      venue: "Stade Municipal",
-      location: "Domicile",
-      competition: "Amical",
-      status: "À venir",
-      homeScore: null,
-      awayScore: null,
-      description: "Match amical de préparation avant la reprise du championnat. L'occasion de tester de nouvelles tactiques.",
-      homeFormation: "3-5-2",
-      awayFormation: "4-3-3",
-      referee: "M. Bernard",
-      weather: "Ensoleillé, 26°C"
+  useEffect(() => {
+    const fetchMatch = async () => {
+      if (!id) return
+
+      try {
+        setLoading(true)
+        setError(null)
+        const data = await getMatchById(parseInt(id))
+        setMatch(data)
+      } catch (err: unknown) {
+        console.error("Erreur lors du chargement du match:", err)
+        type HttpErr = { response?: { status?: number } }
+        const status = (err as HttpErr).response?.status
+        if (status === 404) {
+          setMatch(null)
+        } else {
+          setError("Impossible de charger le match")
+        }
+      } finally {
+        setLoading(false)
+      }
     }
+
+    fetchMatch()
+  }, [id])
+
+  // État de chargement
+  if (loading) {
+    return <Loader message="Chargement du match..." />
   }
 
-  const match = matchData[id as '1' | '2' | '3']
+  // État d'erreur
+  if (error) {
+    return (
+      <ErrorPage
+        title="Erreur de chargement"
+        message="Une erreur est survenue lors du chargement du match. Veuillez réessayer."
+        onRetry={() => window.location.reload()}
+        onGoBack={() => navigate('/matches')}
+      />
+    )
+  }
 
+  // Match non trouvé
   if (!match) {
     return <NotFound />
   }
 
-  const getCompetitionColor = (competition: string) => {
-    switch (competition) {
-      case "Championnat": return "bg-primary/10 text-primary"
-      case "Coupe": return "bg-secondary/10 text-secondary"
-      case "Amical": return "bg-tertiary/10 text-tertiary"
-      default: return "bg-muted text-muted-foreground"
-    }
-  }
+  const iconColor = getCompetitionColor(match.competition)
+  const translatedCategory = translateCompetition(match.competition)
+  const translatedStatus = translateMatchStatus(match.status)
 
   return (
-    <div className="min-h-screen bg-background">
+    <div>
       {/* Header */}
       <div className="bg-gradient-to-r from-primary to-secondary py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4">
           <Button 
             variant="ghost" 
             className="mb-6 text-background hover:bg-background/20"
-            onClick={() => navigate('/home')}
+            onClick={() => navigate('/matches')}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Retour à l'accueil
+            Retour aux matchs
           </Button>
           
           <div className="text-center">
-            <div className={`inline-block px-4 py-2 rounded-full text-sm font-medium mb-4 ${getCompetitionColor(match.competition)}`}>
-              {match.competition}
+            <div className={`inline-block px-4 py-2 rounded-full text-sm font-medium mb-4 ${iconColor}`}>
+              {translatedCategory}
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-background mb-4">
-              {match.homeTeam} vs {match.awayTeam}
+              {match.home_team} vs {match.away_team}
             </h1>
             <div className="flex items-center justify-center text-background/90 text-lg">
               <Calendar className="w-5 h-5 mr-2" />
-              {match.date} - {match.time}
+              {formatDate(match.date)} - {match.time}
             </div>
           </div>
         </div>
       </div>
 
       {/* Score/Status */}
-      <div className="py-8 bg-muted/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="py-6 bg-muted/30">
+        <div className="max-w-7xl mx-auto px-4">
           <div className="bg-background border border-border rounded-lg p-8 text-center">
             <div className="flex items-center justify-center space-x-8 mb-6">
               <div className="text-center">
                 <div className="flex items-center justify-center mb-2">
-                  <Target className="w-6 h-6 text-primary mr-2" />
-                  <span className="text-2xl font-bold text-foreground">{match.homeTeam}</span>
+                  <Home className="w-6 h-6 text-primary mr-2" />
+                  <span className="text-2xl font-bold text-foreground">{match.home_team}</span>
                 </div>
-                <div className="text-sm text-muted-foreground">Formation: {match.homeFormation}</div>
               </div>
               
               <div className="text-center">
                 <div className="text-6xl font-bold text-primary mb-2">
-                  {match.homeScore ?? '-'} : {match.awayScore ?? '-'}
+                  {match.home_score !== null ? match.home_score : '-'} : {match.away_score !== null ? match.away_score : '-'}
                 </div>
-                <div className="text-lg font-medium text-muted-foreground">{match.status}</div>
+                <div className="text-lg font-medium text-muted-foreground">{translatedStatus}</div>
               </div>
               
               <div className="text-center">
                 <div className="flex items-center justify-center mb-2">
-                  <Shield className="w-6 h-6 text-secondary mr-2" />
-                  <span className="text-2xl font-bold text-foreground">{match.awayTeam}</span>
+                  <Plane className="w-6 h-6 text-secondary mr-2" />
+                  <span className="text-2xl font-bold text-foreground">{match.away_team}</span>
                 </div>
-                <div className="text-sm text-muted-foreground">Formation: {match.awayFormation}</div>
               </div>
             </div>
             
@@ -154,9 +143,15 @@ export const MatchDetail = () => {
             {/* Description */}
             <div className="bg-muted border border-border rounded-lg p-6">
               <h2 className="text-2xl font-bold text-foreground mb-4">À propos du match</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                {match.description}
-              </p>
+              {match.description ? (
+                <p className="text-muted-foreground leading-relaxed">
+                  {match.description}
+                </p>
+              ) : (
+                <p className="text-muted-foreground italic">
+                  Aucune description disponible pour ce match.
+                </p>
+              )}
             </div>
 
             {/* Détails */}
@@ -178,17 +173,21 @@ export const MatchDetail = () => {
               <div className="bg-muted border border-border rounded-lg p-6">
                 <h3 className="text-xl font-semibold text-foreground mb-4">Détails du match</h3>
                 <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Arbitre :</span>
-                    <span className="text-foreground">{match.referee}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Météo :</span>
-                    <span className="text-foreground">{match.weather}</span>
-                  </div>
+                  {match.referee && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Arbitre :</span>
+                      <span className="text-foreground">{match.referee}</span>
+                    </div>
+                  )}
+                  {match.weather && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Météo :</span>
+                      <span className="text-foreground">{match.weather}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Compétition :</span>
-                    <span className="text-foreground">{match.competition}</span>
+                    <span className="text-foreground">{translateCompetition(match.competition)}</span>
                   </div>
                 </div>
               </div>

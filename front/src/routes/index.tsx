@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate } from "react-router-dom"
 
 import { AppLayout } from "@/components/layouts/AppLayout"
 import { AdminLayout } from "@/components/layouts/AdminLayout"
+import { ProtectedRoute } from "@/components/ProtectedRoute"
 
 import {
   Login,
@@ -11,6 +12,8 @@ import {
   About,
   MatchDetail,
   NewsDetail,
+  Matches,
+  News,
   Unauthorized,
   NotFound,
 } from "@/pages/"
@@ -27,9 +30,11 @@ import {
 // Navigation routes used in the navbar
 export const navigationRoutes = [
   { path: "/home", label: "Accueil" },
+  { path: "/matches", label: "Matchs" },
+  { path: "/news", label: "Actualités" },
   { path: "/calendar", label: "Calendrier" },
   { path: "/about", label: "À propos" },
-  { path: "/admin", label: "Administration" },
+  { path: "/admin", label: "Administration", requiredRole: "ADMIN" },
 ]
 
 export const router = createBrowserRouter([
@@ -43,6 +48,8 @@ export const router = createBrowserRouter([
       { index: true, element: <Navigate to="home" replace /> },
 
       { path: "home", element: <Home /> },
+      { path: "matches", element: <Matches /> },
+      { path: "news", element: <News /> },
       { path: "calendar", element: <Calendar /> },
       { path: "about", element: <About /> },
 
@@ -51,7 +58,11 @@ export const router = createBrowserRouter([
 
       {
         path: "admin",
-        element: <AdminLayout />,
+        element: (
+          <ProtectedRoute requiredRole="ADMIN">
+            <AdminLayout />
+          </ProtectedRoute>
+        ),
         children: [
           { index: true, element: <AdminDashboard /> },
           { path: "news", element: <NewsAdmin /> },

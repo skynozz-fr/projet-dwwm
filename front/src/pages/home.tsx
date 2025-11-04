@@ -1,107 +1,51 @@
 import { Button } from "@/components/Button"
-import { Calendar, MapPin, Trophy, Users, Zap, Clock, Target } from "lucide-react"
+import { Calendar, MapPin, Trophy, Clock, Target, User } from "lucide-react"
 import { useNavigate } from "react-router-dom"
-import { truncateText, getUpcomingItems, getLatestItems } from "@/lib/utils"
+import { useState, useEffect } from "react"
+import { getUpcomingItems, formatDate } from "@/lib/utils"
+import { getAllMatches } from "@/services/match.service"
+import { getAllNews } from "@/services/news.service"
+import { getCompetitionColor } from "@/lib/match-helpers"
+import { getNewsIcon, getNewsColor, translateNewsCategory } from "@/lib/news-helpers"
+import { Loader } from "@/components/Loader"
+import { Card } from "@/components/ui/card"
+import type { Match } from "@/types/match"
+import type { News } from "@/types/news"
 
 export const Home = () => {
   const navigate = useNavigate()
+  const [matches, setMatches] = useState<Match[]>([])
+  const [news, setNews] = useState<News[]>([])
+  const [loading, setLoading] = useState(true)
 
-  // Données mockées - à remplacer par tes appels API
-  const matchsData = [
-    {
-      id: 1,
-      homeTeam: "FC Popcorn",
-      awayTeam: "AS Rivaux",
-      date: "2025-10-15",
-      dateFormatted: "15 Sept",
-      time: "15h00",
-      location: "Domicile",
-      competition: "Championnat",
-      competitionColor: "bg-primary/10 text-primary"
-    },
-    {
-      id: 2,
-      homeTeam: "FC Popcorn",
-      awayTeam: "FC Champions",
-      date: "2025-07-22",
-      dateFormatted: "22 Juil",
-      time: "17h30",
-      location: "Extérieur",
-      competition: "Coupe",
-      competitionColor: "bg-secondary/10 text-secondary"
-    },
-    {
-      id: 3,
-      homeTeam: "FC Popcorn",
-      awayTeam: "Étoiles FC",
-      date: "2025-07-29",
-      dateFormatted: "29 Juil",
-      time: "14h00",
-      location: "Domicile",
-      competition: "Amical",
-      competitionColor: "bg-tertiary/10 text-tertiary"
-    },
-    {
-      id: 4,
-      homeTeam: "FC Popcorn",
-      awayTeam: "United FC",
-      date: "2026-08-05",
-      dateFormatted: "5 Août",
-      time: "16h00",
-      location: "Extérieur",
-      competition: "Championnat",
-      competitionColor: "bg-primary/10 text-primary"
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        const [matchesData, newsData] = await Promise.all([
+          getAllMatches(),
+          getAllNews()
+        ])
+        setMatches(matchesData)
+        setNews(newsData)
+      } catch (err) {
+        console.error("Erreur lors du chargement des données:", err)
+      } finally {
+        setLoading(false)
+      }
     }
-  ]
+    fetchData()
+  }, [])
 
-  const actualitesData = [
-    {
-      id: 1,
-      title: "Victoire en finale de coupe !",
-      date: "2025-07-10",
-      dateFormatted: "10 Juillet 2025",
-      description: "Une victoire historique 3-1 face aux Aigles Dorés nous offre notre 15ème trophée. Félicitations à toute l'équipe ! Cette victoire marque un tournant dans l'histoire du club et récompense des mois de travail acharné.",
-      icon: Trophy,
-      color: "text-primary",
-      bgColor: "bg-primary/20"
-    },
-    {
-      id: 2,
-      title: "Nouveau recrutement !",
-      date: "2025-07-05",
-      dateFormatted: "5 Juillet 2025",
-      description: "Nous accueillons 3 nouveaux joueurs talentueux qui renforceront notre équipe première. Bienvenue à eux ! Ces recrues apportent de nouvelles compétences et une fraîcheur qui sera bénéfique pour l'équipe.",
-      icon: Users,
-      color: "text-secondary",
-      bgColor: "bg-secondary/20"
-    },
-    {
-      id: 3,
-      title: "Stage d'été réussi",
-      date: "2025-07-01",
-      dateFormatted: "1 Juillet 2025",
-      description: "Notre stage d'été s'est parfaitement déroulé avec une excellente préparation physique et tactique. Les joueurs sont maintenant prêts pour la nouvelle saison qui approche à grands pas.",
-      icon: Zap,
-      color: "text-tertiary",
-      bgColor: "bg-tertiary/20"
-    },
-    {
-      id: 4,
-      title: "Nouveaux équipements",
-      date: "2025-06-25",
-      dateFormatted: "25 Juin 2025",
-      description: "Le club a investi dans de nouveaux équipements d'entraînement de dernière génération. Ces outils modernes permettront d'améliorer les performances de nos joueurs et d'optimiser leur préparation.",
-      icon: Target,
-      color: "text-success",
-      bgColor: "bg-success/20"
-    }
-  ]
+  const nextMatches = getUpcomingItems(matches)
+  const latestNews = news.slice(0, 3)
 
-  const nextMatches = getUpcomingItems(matchsData)
-  const latestNews = getLatestItems(actualitesData)
+  if (loading) {
+    return <Loader message="Chargement..." />
+  }
   
   return (
-    <div className="min-h-screen bg-background">
+    <div>
       {/* Hero Section */}
       <section className="relative bg-gradient-to-r from-primary to-secondary py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -118,8 +62,8 @@ export const Home = () => {
       </section>
 
       {/* Statistiques rapides */}
-      <section className="py-16 bg-muted/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-12 bg-muted/30">
+        <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
               <div className="text-4xl font-bold text-secondary">200+</div>
@@ -142,8 +86,8 @@ export const Home = () => {
       </section>
 
       {/* Prochains matchs */}
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-12">
+        <div className="max-w-7xl mx-auto px-4">
           <h2 className="text-3xl font-bold text-foreground text-center mb-6">
             Prochains Matchs
           </h2>
@@ -156,33 +100,55 @@ export const Home = () => {
               </div>
             ) : (
               nextMatches.map((match) => (
-                <div 
+                <Card
                   key={match.id}
-                  className="bg-background border border-border rounded-lg p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                  className="p-6 hover:shadow-lg transition-all cursor-pointer hover:border-primary"
                   onClick={() => navigate(`/match/${match.id}`)}
                 >
+                  {/* En-tête */}
                   <div className="flex items-center justify-between mb-4">
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${match.competitionColor}`}>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getCompetitionColor(match.competition)}`}>
                       {match.competition}
                     </span>
                     <div className="flex items-center text-muted-foreground text-sm">
                       <Calendar className="w-4 h-4 mr-1" />
-                      {match.dateFormatted}
+                      {formatDate(match.date)}
                     </div>
                   </div>
-                  <div className="text-center">
+
+                  {/* Équipes */}
+                  <div className="text-center mb-4">
                     <div className="text-lg font-semibold text-foreground mb-2">
-                      {match.homeTeam} vs {match.awayTeam}
+                      {match.home_team}
                     </div>
-                    <div className="flex items-center justify-center text-muted-foreground text-sm mb-3">
-                      <Clock className="w-4 h-4 mr-1" />
+                    <div className="text-2xl font-bold text-primary mb-2">
+                      {match.home_score !== null && match.away_score !== null
+                        ? `${match.home_score} - ${match.away_score}`
+                        : "vs"}
+                    </div>
+                    <div className="text-lg font-semibold text-foreground">
+                      {match.away_team}
+                    </div>
+                  </div>
+
+                  {/* Informations */}
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    <div className="flex items-center">
+                      <Clock className="w-4 h-4 mr-2" />
                       {match.time}
-                      <MapPin className="w-4 h-4 ml-3 mr-1" />
+                    </div>
+                    <div className="flex items-center">
+                      <MapPin className="w-4 h-4 mr-2" />
                       {match.location}
                     </div>
-                    <Button 
-                      variant="secondary" 
+                  </div>
+
+                  {/* Bouton */}
+                  <div className="mt-4 pt-4 border-t border-border">
+                    <Button
+                      variant="secondary"
                       size="sm"
+                      className="w-full"
                       onClick={(e) => {
                         e.stopPropagation()
                         navigate(`/match/${match.id}`)
@@ -191,7 +157,7 @@ export const Home = () => {
                       Voir les détails
                     </Button>
                   </div>
-                </div>
+                </Card>
               ))
             )}
           </div>
@@ -199,8 +165,8 @@ export const Home = () => {
       </section>
 
       {/* Actualités */}
-      <section className="py-16 bg-muted/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-12 bg-muted/30">
+        <div className="max-w-7xl mx-auto px-4">
           <h2 className="text-3xl font-bold text-foreground text-center mb-6">
             Actualités du Club
           </h2>
@@ -213,29 +179,65 @@ export const Home = () => {
               </div>
             ) : (
               latestNews.map((actualite) => {
-                const IconComponent = actualite.icon
+                const Icon = getNewsIcon(actualite.category)
+                const categoryColor = getNewsColor(actualite.category)
+                const authorName = actualite.author ? `${actualite.author.firstname} ${actualite.author.lastname}` : "Auteur inconnu"
                 return (
-                  <article 
+                  <Card
                     key={actualite.id}
-                    className="bg-background border border-border rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-[400px] flex flex-col"
+                    className="overflow-hidden hover:shadow-lg transition-all cursor-pointer hover:border-primary flex flex-col h-full"
                     onClick={() => navigate(`/news/${actualite.id}`)}
                   >
-                    <div className={`h-48 ${actualite.bgColor} flex items-center justify-center`}>
-                      <IconComponent className={`w-16 h-16 ${actualite.color}`} />
+                    {/* Image placeholder avec icône */}
+                    <div className={`h-48 ${categoryColor} flex items-center justify-center flex-shrink-0`}>
+                      <Icon className="w-20 h-20" />
                     </div>
-                    <div className="p-6 flex-1 flex flex-col">
-                      <div className="flex items-center text-muted-foreground text-sm mb-2">
-                        <Calendar className="w-4 h-4 mr-1" />
-                        {actualite.dateFormatted}
+
+                    {/* Contenu */}
+                    <div className="p-6 flex flex-col flex-1">
+                      {/* Catégorie */}
+                      <div className="mb-3">
+                        <span className={`py-1 rounded-full text-sm font-medium ${categoryColor}`}>
+                          {translateNewsCategory(actualite.category)}
+                        </span>
                       </div>
-                      <h3 className="text-xl font-semibold text-foreground mb-3">
+
+                      {/* Titre */}
+                      <h3 className="text-xl font-bold text-foreground mb-3 line-clamp-2">
                         {actualite.title}
                       </h3>
-                      <p className="text-muted-foreground flex-1 leading-relaxed">
-                        {truncateText(actualite.description, 120)}
+
+                      {/* Métadonnées */}
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          {formatDate(actualite.created_at)}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <User className="w-4 h-4" />
+                          {authorName}
+                        </div>
+                      </div>
+
+                      {/* Extrait */}
+                      <p className="text-muted-foreground mb-4 line-clamp-3 flex-1">
+                        {actualite.excerpt}
                       </p>
+
+                      {/* Bouton */}
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="w-full"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          navigate(`/news/${actualite.id}`)
+                        }}
+                      >
+                        Lire la suite
+                      </Button>
                     </div>
-                  </article>
+                  </Card>
                 )
               })
             )}
@@ -244,8 +246,8 @@ export const Home = () => {
       </section>
 
       {/* Call to Action */}
-      <section className="py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <section className="py-12">
+        <div className="max-w-4xl mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold text-foreground mb-6">
             Prêt à rejoindre l'aventure FC Popcorn ?
           </h2>

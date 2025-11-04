@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Home, Plane } from "lucide-react"
 import { Button } from "@/components/Button"
 import { Input } from "@/components/Input"
 import { RequiredInput } from "@/components/ui/required-input"
@@ -8,30 +8,36 @@ import { Select } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Card } from "@/components/ui/card"
 import { Alert } from "@/components/ui/alert"
-import type { Match } from "@/types/match"
+import { RadioGroup, Radio } from "@/components/ui/radio-group"
+import type { MatchCompetition, MatchStatus } from "@/types/match"
 import { useToast } from "@/hooks/useToast"
+import { ErrorPage } from "@/pages/errors/ErrorPage"
+import { Loader } from "@/components/Loader"
+import { getMatchById, createMatch, updateMatch } from "@/services/match.service"
+import { competitionOptions, statusOptions, weatherOptions } from "@/lib/match-helpers"
+import { Label } from "@/components/ui/label"
 
 export const MatchForm = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const isEditing = !!id
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [saveAlertOpen, setSaveAlertOpen] = useState(false)
   const { toast } = useToast()
   const [formData, setFormData] = useState({
-    homeTeam: "",
-    awayTeam: "",
+    home_team: "",
+    away_team: "",
+    is_home: true,
     date: "",
     time: "",
     venue: "",
     location: "",
-    competition: "",
-    status: "À venir",
-    homeScore: "",
-    awayScore: "",
+    competition: "" as MatchCompetition | "",
+    status: "SCHEDULED" as MatchStatus,
+    home_score: "",
+    away_score: "",
     description: "",
-    homeFormation: "",
-    awayFormation: "",
     referee: "",
     weather: "",
   })
@@ -44,45 +50,34 @@ export const MatchForm = () => {
 
   const loadMatch = async (matchId: number) => {
     setLoading(true)
+    setError(null)
     try {
-      const mockMatch: Match = {
-        id: matchId,
-        homeTeam: "FC Local",
-        awayTeam: "AS Visiteur",
-        date: "2025-07-15",
-        time: "15:00",
-        venue: "Stade Municipal",
-        location: "Ville, France",
-        competition: "Championnat",
-        status: "À venir",
-        homeScore: null,
-        awayScore: null,
-        description: "Match important du championnat",
-        homeFormation: "4-4-2",
-        awayFormation: "4-3-3",
-        referee: "M. Arbitre",
-        weather: "Ensoleillé",
-      }
-
+      const data = await getMatchById(matchId)
       setFormData({
-        homeTeam: mockMatch.homeTeam,
-        awayTeam: mockMatch.awayTeam,
-        date: mockMatch.date,
-        time: mockMatch.time,
-        venue: mockMatch.venue,
-        location: mockMatch.location,
-        competition: mockMatch.competition,
-        status: mockMatch.status,
-        homeScore: mockMatch.homeScore?.toString() || "",
-        awayScore: mockMatch.awayScore?.toString() || "",
-        description: mockMatch.description,
-        homeFormation: mockMatch.homeFormation,
-        awayFormation: mockMatch.awayFormation,
-        referee: mockMatch.referee,
-        weather: mockMatch.weather,
+        home_team: data.home_team,
+        away_team: data.away_team,
+        is_home: data.is_home,
+        date: data.date.split('T')[0], // Extraire seulement YYYY-MM-DD
+        time: data.time,
+        venue: data.venue,
+        location: data.location,
+        competition: data.competition,
+        status: data.status,
+        home_score: data.home_score?.toString() || "",
+        away_score: data.away_score?.toString() || "",
+        description: data.description || "",
+        referee: data.referee || "",
+        weather: data.weather || "",
       })
-    } catch (error) {
-      console.error("Erreur lors du chargement:", error)
+    } catch (err: unknown) {
+      console.error("Erreur lors du chargement:", err)
+      type HttpErr = { response?: { status?: number } }
+      const status = (err as HttpErr).response?.status
+      if (status === 404) {
+        setError("Match introuvable")
+      } else {
+        setError("Impossible de charger le match")
+      }
     } finally {
       setLoading(false)
     }
@@ -96,11 +91,35 @@ export const MatchForm = () => {
   const confirmSave = async () => {
     setLoading(true)
     try {
-      console.log("Données à sauvegarder:", formData)
-      toast.success(
-        isEditing ? "Match modifié !" : "Match créé !",
-        isEditing ? "Les modifications ont été enregistrées." : "Le nouveau match a été créé."
-      )
+      if (!formData.home_team || !formData.away_team || !formData.date || !formData.time || !formData.venue || !formData.location || !formData.competition) {
+        toast.error("Champs requis", "Merci de remplir toutes les informations obligatoires")
+        return
+      }
+
+      const payload = {
+        home_team: formData.home_team,
+        away_team: formData.away_team,
+        is_home: formData.is_home,
+        date: formData.date,
+        time: formData.time,
+        venue: formData.venue,
+        location: formData.location,
+        competition: formData.competition as MatchCompetition,
+        status: formData.status as MatchStatus,
+        home_score: formData.home_score !== "" ? Number(formData.home_score) : null,
+        away_score: formData.away_score !== "" ? Number(formData.away_score) : null,
+        description: formData.description.trim() || null,
+        referee: formData.referee.trim() || null,
+        weather: formData.weather || null,
+      }
+
+      if (isEditing && id) {
+        await updateMatch(parseInt(id), payload)
+        toast.success("Match modifié !", "Les modifications ont été enregistrées.")
+      } else {
+        await createMatch(payload)
+        toast.success("Match créé !", "Le nouveau match a été créé.")
+      }
       navigate("/admin/matchs")
     } catch (error) {
       toast.error("Erreur lors de la sauvegarde", "Impossible d'enregistrer le match.")
@@ -111,15 +130,22 @@ export const MatchForm = () => {
     }
   }
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: keyof typeof formData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
   if (loading && isEditing) {
+    return <Loader />
+  }
+
+  if (error) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-lg">Chargement...</div>
-      </div>
+      <ErrorPage
+        title="Erreur de chargement"
+        message={error}
+        onRetry={() => id && loadMatch(parseInt(id))}
+        onGoBack={() => navigate("/admin/matchs")}
+      />
     )
   }
 
@@ -144,16 +170,42 @@ export const MatchForm = () => {
               <RequiredInput
                 label="Équipe domicile"
                 placeholder="Nom de l'équipe domicile"
-                value={formData.homeTeam}
-                onChange={(e) => handleInputChange("homeTeam", e.target.value)}
+                value={formData.home_team}
+                onChange={(e) => handleInputChange("home_team", e.target.value)}
               />
 
               <RequiredInput
                 label="Équipe visiteur"
                 placeholder="Nom de l'équipe visiteur"
-                value={formData.awayTeam}
-                onChange={(e) => handleInputChange("awayTeam", e.target.value)}
+                value={formData.away_team}
+                onChange={(e) => handleInputChange("away_team", e.target.value)}
               />
+
+              <div className="md:col-span-2">
+                <Label className="mb-3 inline-block">
+                  Lieu du match <span className="text-error">*</span>
+                </Label>
+                <RadioGroup
+                  value={formData.is_home ? "home" : "away"}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, is_home: value === "home" }))}
+                  className="flex-row gap-6"
+                >
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <Radio value="home" />
+                    <span className="flex items-center gap-2 text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                      <Home className="w-4 h-4" />
+                      Domicile
+                    </span>
+                  </label>
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <Radio value="away" />
+                    <span className="flex items-center gap-2 text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                      <Plane className="w-4 h-4" />
+                      Extérieur
+                    </span>
+                  </label>
+                </RadioGroup>
+              </div>
 
               <RequiredInput
                 label="Date"
@@ -189,12 +241,7 @@ export const MatchForm = () => {
                 onChange={(value) => handleInputChange("competition", value)}
                 placeholder="Sélectionner une compétition"
                 required
-                options={[
-                  { value: "Championnat", label: "Championnat" },
-                  { value: "Coupe", label: "Coupe" },
-                  { value: "Amical", label: "Match amical" },
-                  { value: "Tournoi", label: "Tournoi" },
-                ]}
+                options={competitionOptions}
               />
 
               <Select
@@ -202,35 +249,31 @@ export const MatchForm = () => {
                 value={formData.status}
                 onChange={(value) => handleInputChange("status", value)}
                 required
-                options={[
-                  { value: "À venir", label: "À venir" },
-                  { value: "En cours", label: "En cours" },
-                  { value: "Terminé", label: "Terminé" },
-                  { value: "Annulé", label: "Annulé" },
-                  { value: "Reporté", label: "Reporté" },
-                ]}
+                options={statusOptions}
               />
             </div>
           </div>
 
-          {formData.status === "Terminé" && (
+          {formData.status === "COMPLETED" && (
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Score final</h3>
               <div className="grid grid-cols-2 gap-6 max-w-md">
                 <Input
                   label="Score domicile"
                   type="number"
-                  value={formData.homeScore}
-                  onChange={(value) => handleInputChange("homeScore", value)}
+                  value={formData.home_score}
+                  onChange={(value) => handleInputChange("home_score", value)}
                   placeholder="0"
+                  min="0"
                 />
 
                 <Input
                   label="Score visiteur"
                   type="number"
-                  value={formData.awayScore}
-                  onChange={(value) => handleInputChange("awayScore", value)}
+                  value={formData.away_score}
+                  onChange={(value) => handleInputChange("away_score", value)}
                   placeholder="0"
+                  min="0"
                 />
               </div>
             </div>
@@ -260,13 +303,7 @@ export const MatchForm = () => {
                 value={formData.weather}
                 onChange={(value) => handleInputChange("weather", value)}
                 placeholder="Sélectionner"
-                options={[
-                  { value: "Ensoleillé", label: "Ensoleillé" },
-                  { value: "Nuageux", label: "Nuageux" },
-                  { value: "Pluvieux", label: "Pluvieux" },
-                  { value: "Orageux", label: "Orageux" },
-                  { value: "Neigeux", label: "Neigeux" },
-                ]}
+                options={weatherOptions}
               />
             </div>
           </div>

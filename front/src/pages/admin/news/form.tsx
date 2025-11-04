@@ -7,8 +7,12 @@ import { Select } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Card } from "@/components/ui/card"
 import { Alert } from "@/components/ui/alert"
-import type { News } from "@/types/news"
+import { ErrorPage } from "@/pages/errors/ErrorPage"
+import { Loader } from "@/components/Loader"
 import { RequiredInput } from "@/components/ui/required-input"
+import { getNewsById, createNews, updateNews } from "@/services/news.service"
+import type { NewsCategory } from "@/types/news"
+import { categoryOptions } from "@/lib/news-helpers"
 
 export const NewsForm = () => {
   const { id } = useParams<{ id: string }>()
@@ -16,13 +20,12 @@ export const NewsForm = () => {
   const isEditing = !!id
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     title: "",
-    author: "",
-    category: "",
+    category: "" as NewsCategory | "",
     excerpt: "",
     content: "",
-    date: new Date().toISOString().split('T')[0], // Date du jour par défaut
   })
   const [saveAlertOpen, setSaveAlertOpen] = useState(false)
 
@@ -34,28 +37,24 @@ export const NewsForm = () => {
 
   const loadActualite = async (actualiteId: number) => {
     setLoading(true)
+    setError(null)
     try {
-      // Simulation - remplace par ton appel API
-      const mockActualite: News = {
-        id: actualiteId,
-        title: "Victoire en finale de coupe !",
-        date: "2025-07-10",
-        author: "Équipe Communication",
-        category: "Match",
-        excerpt: "Une victoire historique 3-1 face aux Aigles Dorés.",
-        content: "Quelle soirée magique ! Nos joueurs ont livré une performance exceptionnelle...",
-      }
-      
+      const data = await getNewsById(actualiteId)
       setFormData({
-        title: mockActualite.title,
-        author: mockActualite.author,
-        category: mockActualite.category,
-        excerpt: mockActualite.excerpt,
-        content: mockActualite.content,
-        date: mockActualite.date,
+        title: data.title,
+        category: data.category,
+        excerpt: data.excerpt,
+        content: data.content,
       })
-    } catch (error) {
-      console.error("Erreur lors du chargement:", error)
+    } catch (err: unknown) {
+      console.error("Erreur lors du chargement:", err)
+      type HttpErr = { response?: { status?: number } }
+      const status = (err as HttpErr).response?.status
+      if (status === 404) {
+        setError("Actualité introuvable")
+      } else {
+        setError("Impossible de charger l'actualité")
+      }
     } finally {
       setLoading(false)
     }
@@ -69,31 +68,51 @@ export const NewsForm = () => {
   const confirmSave = async () => {
     setLoading(true)
     try {
-      console.log("Données à sauvegarder:", formData)
-      // Appel API réel ici
-      toast.success(
-        isEditing ? "Actualité modifiée !" : "Actualité créée !",
-        isEditing ? "Les modifications ont été enregistrées." : "La nouvelle actualité a été créée."
-      )
+      if (!formData.category || !formData.title || !formData.excerpt || !formData.content) {
+        toast.error("Champs requis", "Merci de remplir toutes les informations obligatoires")
+        return
+      }
+
+      const payload = {
+        title: formData.title,
+        category: formData.category as NewsCategory,
+        excerpt: formData.excerpt,
+        content: formData.content,
+      }
+
+      if (isEditing && id) {
+        await updateNews(parseInt(id), payload)
+        toast.success("Actualité modifiée !", "Les modifications ont été enregistrées.")
+      } else {
+        await createNews(payload)
+        toast.success("Actualité créée !", "La nouvelle actualité a été créée.")
+      }
       navigate("/admin/news")
-    } catch (error) {
+    } catch (err) {
+      console.error("Erreur lors de la sauvegarde:", err)
       toast.error("Erreur lors de la sauvegarde", "Impossible d'enregistrer l'actualité.")
-      console.error("Erreur lors de la sauvegarde:", error)
     } finally {
       setLoading(false)
       setSaveAlertOpen(false)
     }
   }
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: keyof typeof formData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
   if (loading && isEditing) {
+    return <Loader />
+  }
+
+  if (error) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-lg">Chargement...</div>
-      </div>
+      <ErrorPage
+        title="Erreur de chargement"
+        message={error}
+        onRetry={() => id && loadActualite(parseInt(id))}
+        onGoBack={() => navigate("/admin/news")}
+      />
     )
   }
 
@@ -121,32 +140,12 @@ export const NewsForm = () => {
               placeholder="Titre de l'actualité"
             />
 
-            <RequiredInput
-              label="Auteur"
-              value={formData.author}
-              onChange={(e) => handleInputChange("author", e.target.value)}
-              placeholder="Nom de l'auteur"
-            />
-
             <Select
               label="Catégorie"
-              options={[
-                { value: "Match", label: "Match" },
-                { value: "Transfert", label: "Transfert" },
-                { value: "Entraînement", label: "Entraînement" },
-                { value: "Club", label: "Club" },
-                { value: "Annonce", label: "Annonce" }
-              ]}
+              options={categoryOptions}
               value={formData.category}
               onChange={(value) => handleInputChange("category", value)}
               required
-            />
-
-            <RequiredInput
-              label="Date"
-              type="date"
-              value={formData.date}
-              onChange={(e) => handleInputChange("date", e.target.value)}
             />
           </div>
 

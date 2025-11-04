@@ -13,14 +13,17 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/Button'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '@/hooks/useAuth';
 
 export const About = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+
   return (
-    <div className="min-h-screen bg-background">
+    <div>
       {/* Hero Section */}
-      <div className="relative py-16">
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div className="bg-gradient-to-r from-primary to-secondary py-12">
+        <div className="max-w-7xl mx-auto px-4 text-center">
           <div className="flex items-center justify-center mb-4">
             <Target className="w-6 h-6 text-background mr-2" />
             <span className="text-background font-medium text-sm uppercase tracking-wider">
@@ -39,7 +42,7 @@ export const About = () => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         
         {/* Histoire du Club */}
         <section className="mb-16">
@@ -226,11 +229,13 @@ export const About = () => {
             Que vous soyez joueur débutant ou confirmé, supporter passionné ou bénévole motivé, 
             il y a une place pour vous dans notre club. Venez partager votre passion du football avec nous !
           </p>
+          
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               variant="primary"
               size="lg"
               onClick={() => navigate('/register')}
+              disabled={!!user}
             >
               Nous rejoindre
             </Button>

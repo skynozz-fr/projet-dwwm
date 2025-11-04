@@ -40,7 +40,7 @@ export const AdminLayout = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="flex">
       {/* Overlay pour mobile */}
       {sidebarOpen && (
         <div 
