@@ -1,18 +1,22 @@
+export type MatchCompetition = "FRIENDLY" | "LEAGUE" | "CUP" | "TOURNAMENT" | "OTHER"
+export type MatchStatus = "SCHEDULED" | "ONGOING" | "COMPLETED" | "POSTPONED" | "CANCELLED"
+
 export type Match = {
   id: number
-  homeTeam: string
-  awayTeam: string
+  home_team: string
+  away_team: string
+  is_home: boolean
   date: string
   time: string
   venue: string
   location: string
-  competition: string
-  status: string
-  homeScore: number | null
-  awayScore: number | null
-  description: string
-  homeFormation: string
-  awayFormation: string
-  referee: string
-  weather: string
+  competition: MatchCompetition
+  status: MatchStatus
+  home_score?: number | null
+  away_score?: number | null
+  description?: string
+  referee?: string
+  weather?: string
+  created_at: string
+  updated_at?: string
 }

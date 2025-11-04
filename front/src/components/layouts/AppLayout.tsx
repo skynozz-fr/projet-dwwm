@@ -2,7 +2,6 @@ import { Outlet } from "react-router-dom"
 import { ThemeToggle } from "../ThemeToggle"
 import { Navbar } from "../Navbar"
 import { ScrollToTop } from "../ScrollToTop"
-import { ToastContainer } from "../ui/toast"
 
 export const AppLayout = () => {
   return (
@@ -13,7 +12,6 @@ export const AppLayout = () => {
         <ThemeToggle />
       </div>
       <Outlet />
-      <ToastContainer />
     </div>
   )
 }

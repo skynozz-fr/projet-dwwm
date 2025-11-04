@@ -8,7 +8,6 @@ import { useNavigate } from "react-router-dom"
 import {
   Avatar,
   AvatarFallback,
-  AvatarImage,
 } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -19,21 +18,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "../Button"
+import { useAuth } from "@/hooks/useAuth"
 
 export default function UserMenu() {
   const navigate = useNavigate()
-  
-  // TODO: Remplacez par votre logique d'authentification réelle
-  const isLoggedIn = false // ou useAuth(), useUser(), etc.
-  const user = {
-    name: "Keith Kennedy",
-    email: "k.kennedy@originui.com",
-    avatar: "./avatar.jpg"
-  }
+  const { user, logout } = useAuth()
 
   const handleLogout = () => {
-    // Ici vous pouvez ajouter votre logique de déconnexion
-    // Par exemple : localStorage.removeItem('token')
+    logout()
     navigate('/login')
   }
 
@@ -46,7 +38,7 @@ export default function UserMenu() {
   }
 
   // Si l'utilisateur n'est pas connecté
-  if (!isLoggedIn) {
+  if (!user) {
     return (
       <div className="flex items-center gap-2">
         <Button 
@@ -69,22 +61,23 @@ export default function UserMenu() {
     )
   }
 
-  // Si l'utilisateur est connecté
+  const initials = `${user.firstname?.[0] || ''}${user.lastname?.[0] || ''}`.toUpperCase()
+  const fullName = `${user.firstname} ${user.lastname}`
+
   return (
     <div className="relative">
       <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-auto p-0 hover:bg-transparent">
+        <Button variant="ghost" className="h-auto p-0 text-default">
           <Avatar>
-            <AvatarImage src={user.avatar} alt="Profile image" />
-            <AvatarFallback>{user.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+            <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="max-w-64 bg-background backdrop-blur-sm" align="end">
         <DropdownMenuLabel className="flex min-w-0 flex-col">
           <span className="text-foreground truncate text-sm font-medium">
-            {user.name}
+            {fullName}
           </span>
           <span className="text-muted-foreground truncate text-xs font-normal">
             {user.email}

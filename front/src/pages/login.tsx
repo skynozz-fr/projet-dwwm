@@ -4,11 +4,12 @@ import { LogIn, User, Mail } from "lucide-react"
 import { RequiredInput } from "@/components/ui/required-input"
 import { SimplePasswordInput } from "@/components/ui/simple-password-input"
 import { useToast } from "@/hooks/useToast"
-import { ToastContainer } from "@/components/ui/toast"
 import { Button } from "@/components/Button"
+import { useAuth } from "@/hooks/useAuth"
 
 export const Login = () => {
   const navigate = useNavigate()
+  const { login } = useAuth()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -17,32 +18,30 @@ export const Login = () => {
   // Vérifier si le formulaire est valide (email et mot de passe non vides)
   const isFormValid = email.trim() !== "" && password.trim() !== ""
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    
+   const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isFormValid) return;
+
+    setIsLoading(true);
     try {
-      // Simulation d'une requête de connexion
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      // Simulation d'une vérification d'authentification
-      // Remplacez cette logique par votre vraie authentification
-      if (email === "admin@example.com" && password === "password123") {
-        toast.success("Connexion réussie", "Bienvenue !")
-        // Rediriger vers la page d'accueil ou tableau de bord
-        navigate("/home")
-      } else {
-        toast.error("Erreur de connexion", "Email ou mot de passe incorrect")
-      }
-    } catch {
-      toast.error("Erreur de connexion", "Une erreur s'est produite lors de la connexion")
+      await login(email, password);
+      toast.success("Connexion réussie", "Bienvenue !");
+      navigate("/");
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string }; status?: number } };
+      const msg =
+        error?.response?.data?.error ||
+        (error?.response?.status === 401
+          ? "Email ou mot de passe incorrect"
+          : "Impossible de se connecter");
+      toast.error("Erreur de connexion", msg);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+  <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-md space-y-8">
         {/* En-tête */}
         <div className="text-center space-y-2">
@@ -135,7 +134,6 @@ export const Login = () => {
           </p>
         </div>
       </div>
-      <ToastContainer />
     </div>
   )
 }

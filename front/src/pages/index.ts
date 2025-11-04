@@ -2,8 +2,10 @@
 export { About } from "./about"
 export { Home } from "./home"
 export { Calendar } from "./calendar"
-export { MatchDetail } from "./match-detail"
-export { NewsDetail } from "./news-detail"
+export { MatchDetail } from "./id/match-detail"
+export { NewsDetail } from "./id/news-detail"
+export { Matches } from "./matches"
+export { News } from "./news"
 
 export { Login } from "./login"
 export { Register } from "./register"

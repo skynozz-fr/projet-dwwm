@@ -10,6 +10,15 @@ export function truncateText(text: string, maxLength: number) {
   return text.substring(0, maxLength).trim() + "...";
 }
 
+export function formatDate(dateString: string) {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('fr-FR', { 
+    day: 'numeric', 
+    month: 'short', 
+    year: 'numeric' 
+  })
+}
+
 export async function copyToClipboardWithToast(
   text: string,
   toast: { success: (title: string, description?: string) => void; error: (title: string, description?: string) => void },

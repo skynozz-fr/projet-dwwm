@@ -15,10 +15,20 @@ import {
 import { navigationRoutes } from "@/routes"
 import { Link, useLocation } from "react-router-dom"
 import { useEffect, useState } from "react"
+import { useAuth } from "@/hooks/useAuth"
 
 export const Navbar = () => {
   const location = useLocation()
   const [open, setOpen] = useState(false)
+  const { user } = useAuth()
+  
+  // Filtrer les routes selon le rôle de l'utilisateur
+  const filteredRoutes = navigationRoutes.filter(route => {
+    if (route.requiredRole) {
+      return user?.role === route.requiredRole
+    }
+    return true
+  })
   
   const isActiveRoute = (routePath: string) => {
     if (routePath === "/admin") {
@@ -78,7 +88,7 @@ export const Navbar = () => {
             >
               <NavigationMenu className="max-w-none *:w-full">
                 <NavigationMenuList className="flex-col items-start gap-0 md:gap-2">
-                  {navigationRoutes.map((link, index) => (
+                  {filteredRoutes.map((link, index) => (
                     <NavigationMenuItem key={index} className="w-full">
                       <NavigationMenuLink asChild className="py-1.5">
                         <Link to={link.path}>
@@ -99,7 +109,7 @@ export const Navbar = () => {
             {/* Navigation menu */}
             <NavigationMenu className="max-md:hidden">
               <NavigationMenuList className="gap-2">
-                {navigationRoutes.map((link, index) => (
+                {filteredRoutes.map((link, index) => (
                   <NavigationMenuItem key={index}>
                     <NavigationMenuLink 
                       asChild

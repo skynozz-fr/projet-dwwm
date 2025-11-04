@@ -1,13 +1,15 @@
 import React, { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { UserPlus, User, ArrowLeft, CheckIcon, XIcon, Mail } from "lucide-react"
 import { RequiredInput } from "@/components/ui/required-input"
 import { PasswordStrengthInput } from "@/components/ui/password-strength-input"
 import { useToast } from "@/hooks/useToast"
-import { ToastContainer } from "@/components/ui/toast"
 import { Button } from "@/components/Button"
+import { useAuth } from "@/hooks/useAuth"
 
 export const Register = () => {
+  const navigate = useNavigate();
+  const { register } = useAuth();
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
   const [email, setEmail] = useState("")
@@ -29,34 +31,35 @@ export const Register = () => {
     e.preventDefault()
     setIsLoading(true)
     
-    try {
-      // Vérifier si les mots de passe correspondent
-      if (password !== confirmPassword) {
-        toast.error("Erreur", "Les mots de passe ne correspondent pas")
-        return
-      }
-
-      // Simulation d'une requête d'inscription
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      // Simulation d'une vérification d'inscription
-      // Remplacez cette logique par votre vraie API d'inscription
-      if (email === "existing@example.com") {
-        toast.error("Erreur d'inscription", "Cette adresse email est déjà utilisée")
-      } else {
-        toast.success("Inscription réussie", "Bienvenue ! Votre compte a été créé avec succès.")
-        // Rediriger vers la page de connexion ou tableau de bord
-        // navigate("/login")
-      }
-    } catch {
-      toast.error("Erreur d'inscription", "Une erreur s'est produite lors de l'inscription")
-    } finally {
-      setIsLoading(false)
+    if (password !== confirmPassword) {
+      toast.error("Erreur", "Les mots de passe ne correspondent pas");
+      setIsLoading(false);
+      return;
     }
-  }
+
+    try {
+      await register({
+        firstname: firstName,
+        lastname: lastName,
+        email,
+        password,
+      });
+      // register() stocke déjà le token + setUser() dans le contexte
+      toast.success("Inscription réussie", "Bienvenue !");
+      navigate("/"); // connecté directement
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string }; status?: number } };
+      const msg =
+        error?.response?.data?.error ||
+        (error?.response?.status === 409 ? "Email déjà utilisé" : "Impossible de contacter le serveur");
+      toast.error("Erreur d'inscription", msg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md space-y-8">
         {/* Lien retour */}
         <div className="flex items-center">
@@ -200,7 +203,6 @@ export const Register = () => {
           </p>
         </div>
       </div>
-      <ToastContainer />
     </div>
   )
 }

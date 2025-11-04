@@ -177,6 +177,11 @@
 
   /* Ring */
   .ring { --tw-ring-color: var(--ring); }
+  .ring-primary { --tw-ring-color: var(--primary); }
+  .ring-offset-background { --tw-ring-offset-color: var(--background); }
+
+  /* Hover Borders */
+  .hover\:border-primary:hover { border-color: var(--primary); }
 
   /* Radius */
   .rounded-sm { border-radius: calc(var(--radius) - 2px); }

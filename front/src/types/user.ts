@@ -1,10 +1,11 @@
+export type Role = "USER" | "ADMIN"
+
 export type User = {
   id: number
-  nom: string
+  firstname: string
+  lastname: string
   email: string
-  role: string
+  password: string
+  role: Role
+  created_at: string
 }
-
-// modified: delete nom and add firstname and lastname
-// firstname: string
-// lastname: string

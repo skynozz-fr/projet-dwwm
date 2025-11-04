@@ -10,6 +10,7 @@ type InputProps = {
   placeholder?: string
   type?: string
   className?: string
+  min?: string
 }
 
 export const Input = ({ 
@@ -18,7 +19,8 @@ export const Input = ({
   onChange, 
   placeholder = "",
   type = "text",
-  className = ""
+  className = "",
+  min
 }: InputProps) => {
   const id = useId()
   
@@ -31,6 +33,7 @@ export const Input = ({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
+        min={min}
       />
     </div>
   )
