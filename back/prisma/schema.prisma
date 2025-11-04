@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum NewsCategory {
+  TRANSFER
+  MATCH
+  OTHER
+}
+
+enum MatchCompetition {
+  FRIENDLY
+  LEAGUE
+  CUP
+  TOURNAMENT
+  OTHER
+}
+
+enum StatusCategory {
+  SCHEDULED
+  ONGOING
+  COMPLETED
+  POSTPONED
+  CANCELLED
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  firstname  String
+  lastname   String
+  email      String   @unique
+  password   String
+  role       Role     @default(USER)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  news       News[]   @relation("UserNews")
+}
+
+model News {
+  id            Int           @id @default(autoincrement())
+  title         String
+  excerpt       String
+  content       String         @db.Text
+  author_id     Int?
+  author        User?          @relation("UserNews", fields: [author_id], references: [id], onDelete: SetNull)
+  category      NewsCategory   @default(OTHER)
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @updatedAt
+}
+
+model Match {
+  id            Int            @id @default(autoincrement())
+  home_team     String
+  away_team     String
+  is_home       Boolean        @default(true)
+  date          DateTime
+  time          String
+  venue         String
+  location      String
+  competition   MatchCompetition @default(LEAGUE)
+  status        StatusCategory @default(SCHEDULED)
+  home_score    Int?
+  away_score    Int?
+  description   String?        @db.Text
+  referee       String?
+  weather       String?
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @updatedAt
+}
