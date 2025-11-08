@@ -9,7 +9,7 @@ type SelectOption = {
 }
 
 type SelectProps = {
-  label: string
+  label?: string
   options: SelectOption[]
   value?: string
   onChange?: (value: string) => void
@@ -33,9 +33,11 @@ export const Select = ({
   
   return (
     <div className={className}>
-      <Label htmlFor={id}>
-        {label} {required && <span className="text-error">*</span>}
-      </Label>
+      {label && (
+        <Label htmlFor={id}>
+          {label} {required && <span className="text-error">*</span>}
+        </Label>
+      )}
       <SelectNative 
         id={id} 
         value={value ?? ""} 

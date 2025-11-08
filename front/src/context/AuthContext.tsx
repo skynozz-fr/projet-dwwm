@@ -8,10 +8,15 @@ export type RegisterPayload = {
   password: string;
 };
 
+export type LoginPayload = {
+  email: string;
+  password: string;
+};
+
 export const AuthContext = createContext<{
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (payload: LoginPayload) => Promise<void>;
   register: (payload: RegisterPayload) => Promise<void>;
   logout: () => void;
 }>({

@@ -1,34 +1,37 @@
-import React, { useState, useMemo, useEffect, useCallback } from "react"
-import { Calendar, MapPin, Globe, Trophy } from "lucide-react"
-import { usePagination } from "@/hooks/usePagination"
-import { Pagination } from "@/components/Pagination"
+import React, { useMemo, useCallback, useState } from "react"
+
 import { useNavigate, useSearchParams } from "react-router-dom"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { Calendar, Globe, MapPin, Trophy } from "lucide-react"
+
 import { Button } from "@/components/Button"
-import { Input } from "@/components/Input"
-import { Select } from "@/components/ui/select"
 import { Card } from "@/components/ui/card"
-import type { Match } from "@/types/match"
+import { Input } from "@/components/Input"
+import { Pagination } from "@/components/Pagination"
+import { Select } from "@/components/ui/select"
 import { Alert } from "@/components/ui/alert"
-import { useToast } from "@/hooks/useToast"
-import { filterItems, formatDate } from "@/lib/utils"
-import { getAllMatches, deleteMatch } from "@/services/match.service"
 import { Loader } from "@/components/Loader"
 import { ErrorPage } from "@/pages/errors/ErrorPage"
-import { competitionFilterOptions, translateMatchStatus, translateCompetition, getStatusColor } from "@/lib/match-helpers"
+
+import { useToast } from "@/hooks/useToast"
+import { usePagination } from "@/hooks/usePagination"
+
+import { filterItems, formatDate } from "@/lib/utils"
+import { competitionFilterOptions, getStatusColor, translateCompetition, translateMatchStatus } from "@/lib/match-helpers"
+
+import { deleteMatch, getAllMatches } from "@/services/match.service"
+
+import type { Match as MatchType } from "@/types/match"
 
 export const MatchsAdmin = () => {
-  const [matchs, setMatchs] = useState<Match[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [searchParams, setSearchParams] = useSearchParams()
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
   const { toast } = useToast()
+  const queryClient = useQueryClient()
 
-  // URL filter
   const selectedCompetition = searchParams.get("competition") || "all"
 
-  // Alerts state
   const [deleteAlertOpen, setDeleteAlertOpen] = useState(false)
   const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null)
   const [addAlertOpen, setAddAlertOpen] = useState(false)
@@ -44,28 +47,19 @@ export const MatchsAdmin = () => {
     setSearchParams(next, { replace: true })
   }, [searchParams, setSearchParams])
 
-  // Fetch
-  const fetchMatches = useCallback(async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const competition =
-        selectedCompetition !== "all" ? (selectedCompetition as Match["competition"]) : undefined
-      const data = await getAllMatches(competition)
-      setMatchs(data)
-    } catch (err) {
-      console.error("Erreur lors du chargement des matchs:", err)
-      setError("Impossible de charger les matchs")
-    } finally {
-      setLoading(false)
-    }
-  }, [selectedCompetition])
+  const competition =
+    selectedCompetition !== "all" ? (selectedCompetition as MatchType["competition"]) : undefined
 
-  useEffect(() => {
-    fetchMatches()
-  }, [fetchMatches])
+  const { 
+    data: matchs = [], 
+    isPending, 
+    isError, 
+    refetch 
+  } = useQuery<MatchType[]>({
+    queryKey: ["matches", competition ?? "all"],
+    queryFn: () => getAllMatches(competition),
+  })
 
-  // Filtrage optimisé avec useMemo
   const filteredMatchs = useMemo(() => {
     return filterItems(
       matchs, 
@@ -74,7 +68,7 @@ export const MatchsAdmin = () => {
     )
   }, [matchs, searchTerm])
 
-  // Pagination (10 items/page)
+  // Pagination
   const {
     currentPage,
     totalPages,
@@ -82,43 +76,46 @@ export const MatchsAdmin = () => {
     totalItems,
     goToPage,
     resetPagination
-  } = usePagination<Match>({ data: filteredMatchs, itemsPerPage: 10 })
+  } = usePagination<MatchType>({ data: filteredMatchs, itemsPerPage: 10 })
 
-  // Reset pagination quand recherche/filtre change
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  React.useEffect(() => { resetPagination() }, [searchTerm, selectedCompetition])
+  React.useEffect(() => { resetPagination() }, [searchTerm, selectedCompetition]) // eslint-disable-line
 
   const requestDelete = (id: number) => {
     setDeleteTargetId(id)
     setDeleteAlertOpen(true)
   }
 
-  const confirmDelete = async () => {
+  // Delete mutation
+  const { mutate: deleteMutate, isPending: isDeleting } = useMutation({
+    mutationKey: ["matches", "delete"],
+    mutationFn: (id: number) => deleteMatch(id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["matches"] })
+      toast.success("Match supprimé !", "Le match a bien été supprimé.")
+    },
+    onError: () => {
+      toast.error("Erreur", "Impossible de supprimer le match.")
+    },
+  })
+
+  const confirmDelete = () => {
     if (deleteTargetId !== null) {
-      try {
-        await deleteMatch(deleteTargetId)
-        setMatchs(prev => prev.filter(m => m.id !== deleteTargetId))
-        toast.success("Match supprimé !", "Le match a bien été supprimé.")
-      } catch (err) {
-        console.error("Erreur lors de la suppression:", err)
-        toast.error("Erreur", "Impossible de supprimer le match.")
-      }
+      deleteMutate(deleteTargetId)
     }
     setDeleteTargetId(null)
     setDeleteAlertOpen(false)
   }
 
-  // Loading / Error
-  if (loading) {
+  if (isPending) {
     return <Loader message="Chargement des matchs..." />
   }
 
-  if (error) {
+  if (isError) {
     return (
       <ErrorPage
         title="Erreur de chargement"
-        message={error}
-        onRetry={fetchMatches}
+        message="Impossible de charger les matchs"
+        onRetry={() => refetch()}
         onGoBack={() => navigate('/admin')}
       />
     )
@@ -126,7 +123,6 @@ export const MatchsAdmin = () => {
 
   return (
     <div className="space-y-8 px-2 md:px-6 py-8 max-w-full mx-auto">
-      {/* Header + bouton */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-2">
         <h2 className="text-2xl font-bold text-foreground">Matchs</h2>
         <Button className="w-full sm:w-auto" onClick={() => setAddAlertOpen(true)}>
@@ -134,17 +130,14 @@ export const MatchsAdmin = () => {
         </Button>
       </div>
 
-      {/* Filtres et recherche */}
       <div className="flex flex-col md:flex-row gap-4 md:items-end bg-muted/40 rounded-lg px-4 py-4 border border-border mb-4">
         <Input
-          label=""
           placeholder="Rechercher un match..."
           value={searchTerm}
           onChange={setSearchTerm}
           className="flex-1"
         />
         <Select
-          label=""
           options={competitionFilterOptions}
           value={selectedCompetition}
           onChange={handleCompetitionChange}
@@ -152,7 +145,6 @@ export const MatchsAdmin = () => {
         />
       </div>
 
-      {/* Liste des matchs */}
       <div className="grid gap-6">
         {paginatedData.map((match) => (
           <Card 
@@ -162,7 +154,6 @@ export const MatchsAdmin = () => {
           >
             <div className="flex flex-col md:flex-row md:justify-between gap-4">
               <div className="flex-1 space-y-3">
-                {/* En-tête avec titre et badge */}
                 <div className="flex items-start justify-between gap-3">
                   <h3 className="text-lg md:text-xl font-bold text-foreground">
                     {match.home_team} <span className="text-muted-foreground font-normal">vs</span> {match.away_team}
@@ -172,7 +163,6 @@ export const MatchsAdmin = () => {
                   </span>
                 </div>
 
-                {/* Score si match terminé */}
                 {match.status === "COMPLETED" && match.home_score !== null && match.away_score !== null && (
                   <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-success/10 rounded-lg border border-success/20">
                     <span className="text-sm font-medium text-muted-foreground">Score:</span>
@@ -182,7 +172,6 @@ export const MatchsAdmin = () => {
                   </div>
                 )}
 
-                {/* Informations du match */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-muted-foreground" />
@@ -202,7 +191,6 @@ export const MatchsAdmin = () => {
                   </div>
                 </div>
 
-                {/* Description */}
                 {match.description && (
                   <p className="text-sm text-muted-foreground line-clamp-2 pt-1 border-t border-border/50">
                     {match.description}
@@ -210,7 +198,6 @@ export const MatchsAdmin = () => {
                 )}
               </div>
 
-              {/* Actions */}
               <div className="flex gap-2 md:flex-col md:w-auto">
                 <Button 
                   variant="secondary" 
@@ -219,6 +206,7 @@ export const MatchsAdmin = () => {
                     e.stopPropagation()
                     navigate(`/admin/match/edit/${match.id}`)
                   }}
+                  disabled={isDeleting}
                 >
                   Modifier
                 </Button>
@@ -229,6 +217,7 @@ export const MatchsAdmin = () => {
                     e.stopPropagation()
                     requestDelete(match.id)
                   }}
+                  disabled={isDeleting}
                 >
                   Supprimer
                 </Button>
@@ -238,7 +227,6 @@ export const MatchsAdmin = () => {
         ))}
       </div>
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <div className="pt-6 flex justify-center">
           <Pagination
@@ -258,7 +246,6 @@ export const MatchsAdmin = () => {
         </div>
       )}
 
-      {/* Delete confirmation */}
       <Alert
         title="Supprimer ce match ?"
         description="Cette action est irréversible. La suppression ne peut pas être annulée."
@@ -269,7 +256,6 @@ export const MatchsAdmin = () => {
         onConfirm={confirmDelete}
       />
 
-      {/* Add confirmation */}
       <Alert
         title="Créer un nouveau match ?"
         description="Vous allez être redirigé vers le formulaire de création."

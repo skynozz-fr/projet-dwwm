@@ -1,4 +1,3 @@
-// Pages publiques
 export { About } from "./about"
 export { Home } from "./home"
 export { Calendar } from "./calendar"

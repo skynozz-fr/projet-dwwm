@@ -1,72 +1,61 @@
-import { useState, useEffect } from "react"
-import { Button } from "@/components/Button"
 import { useParams, useNavigate } from "react-router-dom"
+import { useQuery } from "@tanstack/react-query"
+
+import { Button } from "@/components/Button"
+import { Loader } from "@/components/Loader"
+import { ErrorPage } from "../errors/ErrorPage"
+import { NotFound } from "../errors/NotFound"
+
 import { Calendar, ArrowLeft, BookOpen, User } from "lucide-react"
+
 import { copyToClipboardWithToast, formatDate } from "@/lib/utils"
 import { getNewsIcon, getNewsColor, translateNewsCategory } from "@/lib/news-helpers"
 import { useToast } from "@/hooks/useToast"
-import { ErrorPage } from "../errors/ErrorPage"
-import { Loader } from "@/components/Loader"
 import { getNewsById } from "@/services/news.service"
-import type { News } from "@/types/news"
-import { NotFound } from "../errors/NotFound"
+
+import type { News as NewsType } from "@/types/news"
 
 export const NewsDetail = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { toast } = useToast()
-  const [news, setNews] = useState<News | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
-  // Récupérer l'actualité depuis l'API
-  useEffect(() => {
-    const fetchNews = async () => {
-      if (!id) return
+  const newsId = Number(id)
+  const isValidId = Number.isFinite(newsId) && newsId > 0
 
-      try {
-        setLoading(true)
-        setError(null)
-        const data = await getNewsById(parseInt(id))
-        setNews(data)
-      } catch (err: unknown) {
-        console.error("Erreur lors du chargement de l'actualité:", err)
-        // Si ce n'est pas une 404, afficher une erreur générique
-        type HttpErr = { response?: { status?: number } }
-        const status = (err as HttpErr).response?.status
-        if (status !== 404) {
-          setError("Impossible de charger l'actualité")
-        }
-      } finally {
-        setLoading(false)
-      }
-    }
+  const { 
+    data: news, 
+    isPending, 
+    isError, 
+    refetch 
+  } = useQuery<NewsType>({
+    queryKey: ["news", newsId],
+    queryFn: () => getNewsById(newsId),
+    enabled: isValidId,
+  })
 
-    fetchNews()
-  }, [id])
-
-  // État de chargement
-  if (loading) {
-    return <Loader message="Chargement de l'actualité..." />
-  }
-
-  // État d'erreur (problème serveur, réseau, 404, etc.)
-  if (error) {
+  if (!isValidId)
     return (
       <ErrorPage
         title="Erreur de chargement"
-        message="Une erreur est survenue lors du chargement de l'actualité. Veuillez réessayer."
-        onRetry={() => window.location.reload()}
-        onGoBack={() => navigate('/news')}
+        message="Identifiant d'actualité invalide"
+        onGoBack={() => navigate("/news")}
       />
     )
-  }
 
-  if (!news) {
+  if (isPending) return <Loader message="Chargement de l'actualité..." />
+
+  if (isError)
     return (
-      <NotFound />  
+      <ErrorPage
+        title="Erreur de chargement"
+        message="Impossible de charger l'actualité"
+        onRetry={() => refetch()}
+        onGoBack={() => navigate("/news")}
+      />
     )
-  }
+
+  if (!news) return <NotFound />
 
   const IconComponent = getNewsIcon(news.category)
   const iconColor = getNewsColor(news.category)
@@ -74,7 +63,6 @@ export const NewsDetail = () => {
 
   return (
     <div>
-      {/* Header */}
       <div className="bg-gradient-to-r from-primary to-secondary py-8">
         <div className="max-w-4xl mx-auto px-4">
           <Button 
@@ -110,7 +98,6 @@ export const NewsDetail = () => {
         </div>
       </div>
 
-      {/* Hero Image */}
       <div className="py-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="rounded-lg flex items-center justify-center mb-8">
@@ -119,16 +106,13 @@ export const NewsDetail = () => {
         </div>
       </div>
 
-      {/* Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         <div className="bg-muted border border-border rounded-lg p-8">
           
-          {/* Excerpt */}
           <div className="text-xl text-muted-foreground mb-8 p-4 bg-background rounded-lg border-l-4 border-primary">
             {news.excerpt}
           </div>
 
-          {/* Article content */}
           <div 
             className="prose prose-lg max-w-none text-foreground"
             style={{
@@ -144,7 +128,6 @@ export const NewsDetail = () => {
           </div>
 
           <div className="mt-8 pt-8 border-t border-border">
-            {/* Share buttons */}
             <div className="flex items-center gap-4">
               <Button 
                 variant="secondary"

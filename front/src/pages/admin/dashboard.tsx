@@ -5,7 +5,6 @@ import { Card } from "@/components/ui/card"
 export const AdminDashboard = () => {
   const navigate = useNavigate()
 
-  // Actions rapides
   const quickActions = [
     {
       title: "Actualités",
@@ -29,9 +28,6 @@ export const AdminDashboard = () => {
 
   return (
     <div className="space-y-8 px-2 md:px-6 py-8 max-w-full mx-auto">
-
-
-      {/* Actions rapides */}
       <div>
         <h2 className="text-xl font-bold mb-4 text-foreground">Actions rapides</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
