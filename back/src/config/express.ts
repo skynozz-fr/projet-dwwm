@@ -18,11 +18,8 @@ export const configureApp = (app: Application): void => {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
-  // Routes d'authentification (publiques)
+  // Routes d'authentification
   app.use("/auth", authRoutes);
-  
-  // Route /me (profil utilisateur)
-  app.use("/", authRoutes);
 
   // Routes User
   app.use("/user", userRoutes);
