@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label"
 import { Input as InputBase } from "@/components/ui/input"
 
 type InputProps = {
-  label: string
+  label?: string
   value?: string
   onChange?: (value: string) => void
   placeholder?: string
@@ -26,7 +26,7 @@ export const Input = ({
   
   return (
     <div className={className}>
-      <Label htmlFor={id}>{label}</Label>
+      {label && <Label htmlFor={id}>{label}</Label>}
       <InputBase
         id={id} 
         type={type}

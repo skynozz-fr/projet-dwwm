@@ -1,67 +1,64 @@
-import React, { useState } from "react"
+import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { UserPlus, User, ArrowLeft, CheckIcon, XIcon, Mail } from "lucide-react"
+
+import { useMutation } from "@tanstack/react-query"
+import type { AxiosError } from "axios"
+
+import { ArrowLeft, CheckIcon, Mail, User, UserPlus, XIcon } from "lucide-react"
+
+import { Button } from "@/components/Button"
 import { RequiredInput } from "@/components/ui/required-input"
 import { PasswordStrengthInput } from "@/components/ui/password-strength-input"
-import { useToast } from "@/hooks/useToast"
-import { Button } from "@/components/Button"
+
 import { useAuth } from "@/hooks/useAuth"
+import { useToast } from "@/hooks/useToast"
+
+import type { RegisterPayload } from "@/context/AuthContext"
 
 export const Register = () => {
-  const navigate = useNavigate();
-  const { register } = useAuth();
+  const navigate = useNavigate()
+  const { register } = useAuth()
+  const { toast } = useToast()
+
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
   const [isPasswordValid, setIsPasswordValid] = useState(false)
-  const { toast } = useToast()
 
-  // Vérifier si le formulaire est valide
-  const isFormValid = 
-    firstName.trim() !== "" && 
-    lastName.trim() !== "" && 
-    email.trim() !== "" && 
-    isPasswordValid && 
+  const isFormValid =
+    firstName.trim() !== "" &&
+    lastName.trim() !== "" &&
+    email.trim() !== "" &&
+    isPasswordValid &&
     password === confirmPassword
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    
-    if (password !== confirmPassword) {
-      toast.error("Erreur", "Les mots de passe ne correspondent pas");
-      setIsLoading(false);
-      return;
-    }
+  const { mutate, isPending } = useMutation<void, AxiosError<{ error?: string }>, RegisterPayload>({
+    mutationKey: ["auth", "register"],
+    mutationFn: (payload: RegisterPayload) => register(payload),
+    onSuccess: () => {
+      toast.success("Inscription réussie", "Bienvenue !")
+      navigate("/")
+    },
+    onError: (error) => {
+      const status = error.response?.status
+      const apiMessage = error.response?.data?.error
+      const message = apiMessage || (status === 409 ? "Email déjà utilisé" : "Une erreur est survenue")
+      toast.error("Erreur d'inscription", message)
+    },
+  })
 
-    try {
-      await register({
-        firstname: firstName,
-        lastname: lastName,
-        email,
-        password,
-      });
-      // register() stocke déjà le token + setUser() dans le contexte
-      toast.success("Inscription réussie", "Bienvenue !");
-      navigate("/"); // connecté directement
-    } catch (err: unknown) {
-      const error = err as { response?: { data?: { error?: string }; status?: number } };
-      const msg =
-        error?.response?.data?.error ||
-        (error?.response?.status === 409 ? "Email déjà utilisé" : "Impossible de contacter le serveur");
-      toast.error("Erreur d'inscription", msg);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!isFormValid || isPending) return
+
+    mutate({ firstname: firstName, lastname: lastName, email, password })
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md space-y-8">
-        {/* Lien retour */}
         <div className="flex items-center">
           <Link
             to="/login"
@@ -72,25 +69,18 @@ export const Register = () => {
           </Link>
         </div>
 
-        {/* En-tête */}
         <div className="text-center space-y-2">
           <div className="flex justify-center">
             <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center">
               <UserPlus className="w-8 h-8 text-secondary-foreground" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-foreground">
-            Créer un compte
-          </h1>
-          <p className="text-muted-foreground">
-            Rejoignez-nous dès aujourd'hui
-          </p>
+          <h1 className="text-2xl font-bold text-foreground">Créer un compte</h1>
+          <p className="text-muted-foreground">Rejoignez-nous dès aujourd'hui</p>
         </div>
 
-        {/* Formulaire */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
-            {/* Nom et prénom */}
             <div className="grid grid-cols-2 gap-4">
               <RequiredInput
                 label="Prénom"
@@ -110,7 +100,6 @@ export const Register = () => {
               />
             </div>
 
-            {/* Email */}
             <RequiredInput
               label="Adresse email"
               type="email"
@@ -119,8 +108,7 @@ export const Register = () => {
               onChange={(e) => setEmail(e.target.value)}
               icon={<Mail className="h-4 w-4" />}
             />
-            
-            {/* Mot de passe avec indicateur de force */}
+
             <PasswordStrengthInput
               label="Mot de passe"
               placeholder="Créez un mot de passe fort"
@@ -130,7 +118,6 @@ export const Register = () => {
               onValidationChange={setIsPasswordValid}
             />
 
-            {/* Confirmation du mot de passe */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">
                 Confirmer le mot de passe <span className="text-error">*</span>
@@ -142,10 +129,10 @@ export const Register = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className={`flex h-9 w-full rounded border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 ${
-                    confirmPassword && password !== confirmPassword 
-                      ? "border-error" 
-                      : confirmPassword && password === confirmPassword 
-                      ? "border-success" 
+                    confirmPassword && password !== confirmPassword
+                      ? "border-error"
+                      : confirmPassword && password === confirmPassword
+                      ? "border-success"
                       : ""
                   }`}
                   required
@@ -174,9 +161,9 @@ export const Register = () => {
             variant="secondary"
             size="lg"
             className="w-full"
-            disabled={isLoading || !isFormValid}
+            disabled={isPending || !isFormValid}
           >
-            {isLoading ? (
+            {isPending ? (
               <>
                 <div className="w-4 h-4 mr-2 border-2 border-secondary-foreground border-t-transparent rounded-full animate-spin" />
                 Création du compte...
@@ -190,7 +177,6 @@ export const Register = () => {
           </Button>
         </form>
 
-        {/* Lien vers connexion */}
         <div className="text-center">
           <p className="text-sm text-muted-foreground">
             Déjà un compte ?{" "}

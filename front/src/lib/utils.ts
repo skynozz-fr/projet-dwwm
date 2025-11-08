@@ -27,7 +27,7 @@ export async function copyToClipboardWithToast(
 ) {
   try {
     await navigator.clipboard.writeText(text)
-    toast.success(successMessage, 'Le lien a été copié dans le presse-papiers')
+    toast.success(successMessage, 'Le lien a été copié avec succès.')
   } catch {
     toast.error('Erreur', errorMessage)
   }
@@ -43,9 +43,9 @@ export function getUpcomingItems<T extends { date: string }>(items: T[], limit =
 }
 
 // Récupère les derniers items (plus récents) triés par date
-export function getLatestItems<T extends { date: string }>(items: T[], limit = 3) {
+export function getLatestItems<T extends { created_at: string }>(items: T[], limit = 3) {
   return items
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, limit)
 }
 

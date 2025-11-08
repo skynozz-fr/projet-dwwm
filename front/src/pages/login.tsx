@@ -1,64 +1,65 @@
-import React, { useState } from "react"
+import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
+
+import { useMutation } from "@tanstack/react-query"
+import type { AxiosError } from "axios"
+
 import { LogIn, User, Mail } from "lucide-react"
+
+import { Button } from "@/components/Button"
 import { RequiredInput } from "@/components/ui/required-input"
 import { SimplePasswordInput } from "@/components/ui/simple-password-input"
-import { useToast } from "@/hooks/useToast"
-import { Button } from "@/components/Button"
+
 import { useAuth } from "@/hooks/useAuth"
+import { useToast } from "@/hooks/useToast"
+
+import type { LoginPayload } from "@/context/AuthContext"
 
 export const Login = () => {
   const navigate = useNavigate()
   const { login } = useAuth()
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
 
-  // Vérifier si le formulaire est valide (email et mot de passe non vides)
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+
   const isFormValid = email.trim() !== "" && password.trim() !== ""
 
-   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!isFormValid) return;
+  const { mutate, isPending } = useMutation<void, AxiosError<{ error?: string }>, LoginPayload>({
+    mutationKey: ["auth", "login"],
+    mutationFn: (payload: LoginPayload) => login(payload),
+    onSuccess: () => {
+      toast.success("Connexion réussie", "Bienvenue !")
+      navigate("/")
+    },
+    onError: (error) => {
+      const status = error.response?.status
+      const apiMessage = error.response?.data?.error
+      const message = apiMessage || (status === 401 ? "Email ou mot de passe incorrect" : "Impossible de se connecter")
+      toast.error("Erreur de connexion", message)
+    },
+  })
 
-    setIsLoading(true);
-    try {
-      await login(email, password);
-      toast.success("Connexion réussie", "Bienvenue !");
-      navigate("/");
-    } catch (err: unknown) {
-      const error = err as { response?: { data?: { error?: string }; status?: number } };
-      const msg =
-        error?.response?.data?.error ||
-        (error?.response?.status === 401
-          ? "Email ou mot de passe incorrect"
-          : "Impossible de se connecter");
-      toast.error("Erreur de connexion", msg);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!isFormValid || isPending) return
+    
+    mutate({ email, password })
+  }
 
   return (
-  <div className="min-h-screen flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-md space-y-8">
-        {/* En-tête */}
         <div className="text-center space-y-2">
           <div className="flex justify-center">
             <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center">
               <LogIn className="w-8 h-8 text-primary-foreground" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-foreground">
-            Connexion
-          </h1>
-          <p className="text-muted-foreground">
-            Connectez-vous à votre compte
-          </p>
+          <h1 className="text-2xl font-bold text-foreground">Connexion</h1>
+          <p className="text-muted-foreground">Connectez-vous à votre compte</p>
         </div>
 
-        {/* Formulaire */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
             <RequiredInput
@@ -68,23 +69,21 @@ export const Login = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               icon={<Mail className="h-4 w-4" />}
+              aria-label="Adresse email"
             />
-            
+
             <SimplePasswordInput
               label="Mot de passe"
               placeholder="Votre mot de passe"
               value={password}
               onChange={setPassword}
-              required={true}
+              required
+              aria-label="Mot de passe"
             />
           </div>
 
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isLoading || !isFormValid}
-          >
-            {isLoading ? (
+          <Button type="submit" className="w-full" disabled={isPending || !isFormValid}>
+            {isPending ? (
               <>
                 <div className="w-4 h-4 border-2 mr-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
                 Connexion...
@@ -98,7 +97,6 @@ export const Login = () => {
           </Button>
         </form>
 
-        {/* Lien invité */}
         <div className="text-center">
           <Link
             to="/home"
@@ -109,26 +107,19 @@ export const Login = () => {
           </Link>
         </div>
 
-        {/* Divider */}
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-border" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">
-              Ou
-            </span>
+            <span className="bg-background px-2 text-muted-foreground">Ou</span>
           </div>
         </div>
 
-        {/* Liens supplémentaires */}
         <div className="text-center space-y-2">
           <p className="text-sm text-muted-foreground">
             Pas encore de compte ?{" "}
-            <Link 
-            to="/register"
-            className="hover:text-primary font-medium underline underline-offset-4"
-            >
+            <Link to="/register" className="hover:text-primary font-medium underline underline-offset-4">
               Créer un compte
             </Link>
           </p>

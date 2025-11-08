@@ -1,28 +1,32 @@
-import React, { useState, useMemo, useEffect, useCallback } from "react"
-import { useToast } from "@/hooks/useToast"
-import { usePagination } from "@/hooks/usePagination"
-import { Pagination } from "@/components/Pagination"
+import React, { useState, useMemo, useCallback } from "react"
+
 import { useNavigate, useSearchParams } from "react-router-dom"
+
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+
 import { Button } from "@/components/Button"
 import { Input } from "@/components/Input"
 import { Select } from "@/components/ui/select"
 import { Card } from "@/components/ui/card"
 import { Alert } from "@/components/ui/alert"
+import { Pagination } from "@/components/Pagination"
 import { ErrorPage } from "@/pages/errors/ErrorPage"
 import { Loader } from "@/components/Loader"
-import type { News } from "@/types/news"
+
+import { useToast } from "@/hooks/useToast"
+import { usePagination } from "@/hooks/usePagination"
 import { filterItems, formatDate } from "@/lib/utils"
-import { getAllNews, deleteNews } from "@/services/news.service"
 import { getNewsColor, translateNewsCategory, categoryFilterOptions } from "@/lib/news-helpers"
+import { getAllNews, deleteNews } from "@/services/news.service"
+
+import type { News as NewsType } from "@/types/news"
 
 export const NewsAdmin = () => {
-  const [news, setNews] = useState<News[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [searchParams, setSearchParams] = useSearchParams()
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
   const { toast } = useToast()
+  const queryClient = useQueryClient()
 
   // Récupérer la catégorie depuis l'URL
   const selectedCategory = searchParams.get("category") || "all"
@@ -38,31 +42,21 @@ export const NewsAdmin = () => {
     setSearchParams(next, { replace: true })
   }, [searchParams, setSearchParams])
 
-  // Alerts state
   const [deleteAlertOpen, setDeleteAlertOpen] = useState(false)
   const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null)
   const [addAlertOpen, setAddAlertOpen] = useState(false)
 
-  const fetchNews = useCallback(async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      // Utiliser la route spéciale si une catégorie est sélectionnée
-      const category = selectedCategory !== "all" ? selectedCategory as News["category"] : undefined
-      const data = await getAllNews(category)
-      setNews(data)
-    } catch (err) {
-      console.error("Erreur lors du chargement des actualités:", err)
-      setError("Impossible de charger les actualités")
-    } finally {
-      setLoading(false)
-    }
-  }, [selectedCategory])
-
-  // Charger les actualités depuis l'API
-  useEffect(() => {
-    fetchNews()
-  }, [fetchNews])
+  // Data fetching with React Query
+  const category = selectedCategory !== "all" ? (selectedCategory as NewsType["category"]) : undefined
+  const {
+    data: news = [],
+    isPending,
+    isError,
+    refetch,
+  } = useQuery<NewsType[]>({
+    queryKey: ["news", category ?? "all"],
+    queryFn: () => getAllNews(category),
+  })
 
   // Filtrage optimisé avec useMemo
   const filteredNews = useMemo(() => {
@@ -73,7 +67,7 @@ export const NewsAdmin = () => {
     )
   }, [news, searchTerm])
 
-  // Pagination (10 items par page)
+  // Pagination
   const {
     currentPage,
     totalPages,
@@ -81,44 +75,46 @@ export const NewsAdmin = () => {
     totalItems,
     goToPage,
     resetPagination
-  } = usePagination<News>({ data: filteredNews, itemsPerPage: 10 })
+  } = usePagination<NewsType>({ data: filteredNews, itemsPerPage: 10 })
 
-  // Reset pagination when filters/search change
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  React.useEffect(() => { resetPagination() }, [searchTerm, selectedCategory])
+  React.useEffect(() => { resetPagination() }, [searchTerm, selectedCategory]) // eslint-disable-line
 
   const requestDelete = (id: number) => {
     setDeleteTargetId(id)
     setDeleteAlertOpen(true)
   }
 
-  const confirmDelete = async () => {
+  // Delete mutation
+  const { mutate: deleteMutate, isPending: isDeleting } = useMutation({
+    mutationKey: ["news", "delete"],
+    mutationFn: (id: number) => deleteNews(id),
+    onSuccess: () => {
+      toast.success("Actualité supprimée !", "L'actualité a bien été supprimée.")
+      queryClient.invalidateQueries({ queryKey: ["news"] })
+    },
+    onError: () => {
+      toast.error("Erreur", "Impossible de supprimer l'actualité.")
+    },
+  })
+
+  const confirmDelete = () => {
     if (deleteTargetId !== null) {
-      try {
-        await deleteNews(deleteTargetId)
-        setNews(prev => prev.filter(n => n.id !== deleteTargetId))
-        toast.success("Actualité supprimée !", "L'actualité a bien été supprimée.")
-      } catch (err) {
-        console.error("Erreur lors de la suppression:", err)
-        toast.error("Erreur", "Impossible de supprimer l'actualité.")
-      }
+      deleteMutate(deleteTargetId)
     }
     setDeleteTargetId(null)
     setDeleteAlertOpen(false)
   }
 
-  // État de chargement
-  if (loading) {
+  if (isPending) {
     return <Loader message="Chargement des actualités..." />
   }
 
-  // État d'erreur
-  if (error) {
+  if (isError) {
     return (
       <ErrorPage
         title="Erreur de chargement"
         message="Une erreur est survenue lors du chargement des actualités. Veuillez réessayer."
-        onRetry={fetchNews}
+        onRetry={() => refetch()}
         onGoBack={() => navigate('/admin')}
       />
     )
@@ -126,7 +122,6 @@ export const NewsAdmin = () => {
 
   return (
   <div className="space-y-8 px-2 md:px-6 py-8 max-w-full mx-auto">
-      {/* Header + bouton */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-2">
         <h2 className="text-2xl font-bold text-foreground">Actualités</h2>
         <Button className="w-full sm:w-auto" onClick={() => setAddAlertOpen(true)}>
@@ -134,17 +129,14 @@ export const NewsAdmin = () => {
         </Button>
       </div>
 
-      {/* Filtres et recherche */}
       <div className="flex flex-col md:flex-row gap-4 md:items-end bg-muted/40 rounded-lg px-4 py-4 border border-border mb-4">
         <Input
-          label=""
           placeholder="Rechercher une actualité..."
           value={searchTerm}
           onChange={setSearchTerm}
           className="flex-1"
         />
         <Select
-          label=""
           options={categoryFilterOptions}
           value={selectedCategory}
           onChange={handleCategoryChange}
@@ -152,7 +144,6 @@ export const NewsAdmin = () => {
         />
       </div>
 
-      {/* Liste des news */}
       <div className="grid gap-6">
         {paginatedData.map((newsItem) => (
           <Card 
@@ -191,6 +182,7 @@ export const NewsAdmin = () => {
                     e.stopPropagation()
                     requestDelete(newsItem.id)
                   }}
+                  disabled={isDeleting}
                 >
                   Supprimer
                 </Button>
@@ -200,7 +192,6 @@ export const NewsAdmin = () => {
         ))}
       </div>
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <div className="pt-6 flex justify-center">
           <Pagination
@@ -220,7 +211,6 @@ export const NewsAdmin = () => {
         </div>
       )}
 
-      {/* Delete confirmation */}
       <Alert
         title="Supprimer cette actualité ?"
         description="Cette action est irréversible. La suppression ne peut pas être annulée."
@@ -231,7 +221,6 @@ export const NewsAdmin = () => {
         onConfirm={confirmDelete}
       />
 
-      {/* Add confirmation */}
       <Alert
         title="Créer une nouvelle actualité ?"
         description="Vous allez être redirigé vers le formulaire de création."

@@ -1,33 +1,37 @@
-import { useState, useMemo, useEffect, useCallback } from "react"
-import { usePagination } from "@/hooks/usePagination"
-import { Pagination } from "@/components/Pagination"
+import { useState, useMemo, useCallback, useEffect } from "react"
+
 import { useNavigate, useSearchParams } from "react-router-dom"
+
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+
+import { Pagination } from "@/components/Pagination"
 import { Input } from "@/components/Input"
 import { Select } from "@/components/ui/select"
 import { Card } from "@/components/ui/card"
 import { Alert } from "@/components/ui/alert"
-import { useToast } from "@/hooks/useToast"
 import { Loader } from "@/components/Loader"
 import { ErrorPage } from "@/pages/errors/ErrorPage"
+
+import { usePagination } from "@/hooks/usePagination"
+import { useToast } from "@/hooks/useToast"
 import { filterItems } from "@/lib/utils"
-import { getAllUsers, patchUserRole } from "@/services/user.service"
 import { translateRole, roleFilterOptions } from "@/lib/user-helpers"
-import type { User, Role } from "@/types/user"
+import { getAllUsers, patchUserRole } from "@/services/user.service"
+
 import { Shield } from "lucide-react"
+import type { User as UserType, Role as RoleType } from "@/types/user"
 
 export const UsersAdmin = () => {
-  const [users, setUsers] = useState<User[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [searchParams, setSearchParams] = useSearchParams()
   const [roleAlertOpen, setRoleAlertOpen] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
   const { toast } = useToast()
+  const queryClient = useQueryClient()
 
   const [pendingRoleChange, setPendingRoleChange] = useState<{
-    user: User
-    newRole: Role
+    user: UserType
+    newRole: RoleType
   } | null>(null)
 
   // Récupérer le rôle depuis l’URL
@@ -41,25 +45,17 @@ export const UsersAdmin = () => {
     setSearchParams(next, { replace: true })
   }, [searchParams, setSearchParams])
 
-  // Fetch
-  const fetchUsers = useCallback(async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const role = selectedRole !== "all" ? selectedRole as Role : undefined
-      const data = await getAllUsers(role)
-      setUsers(data)
-    } catch (err) {
-      console.error("Erreur lors du chargement des utilisateurs:", err)
-      setError("Impossible de charger les utilisateurs")
-    } finally {
-      setLoading(false)
-    }
-  }, [selectedRole])
-
-  useEffect(() => {
-    fetchUsers()
-  }, [fetchUsers])
+  // Data fetching with React Query
+  const roleFilter: RoleType | undefined = selectedRole !== "all" ? (selectedRole as RoleType) : undefined
+  const {
+    data: users = [],
+    isPending,
+    isError,
+    refetch,
+  } = useQuery<UserType[]>({
+    queryKey: ["users", roleFilter ?? "all"],
+    queryFn: () => getAllUsers(roleFilter),
+  })
 
   // Filtrage optimisé
   const filteredUsers = useMemo(() => {
@@ -70,7 +66,6 @@ export const UsersAdmin = () => {
     )
   }, [users, searchTerm])
 
-  // Pagination
   const {
     currentPage,
     totalPages,
@@ -78,47 +73,49 @@ export const UsersAdmin = () => {
     totalItems,
     goToPage,
     resetPagination
-  } = usePagination<User>({ data: filteredUsers, itemsPerPage: 10 })
+  } = usePagination<UserType>({ data: filteredUsers, itemsPerPage: 10 })
 
   useEffect(() => { resetPagination() }, [searchTerm, selectedRole]) // eslint-disable-line
 
-  const requestRoleChange = (userId: number, newRole: Role) => {
+  const requestRoleChange = (userId: number, newRole: RoleType) => {
     const user = users.find(u => u.id === userId)
     if (!user || user.role === newRole) return
     setPendingRoleChange({ user, newRole })
     setRoleAlertOpen(true)
   }
 
-  const confirmRoleChange = async () => {
+  // Mutation to change role
+  const { mutate: changeRole, isPending: isRoleChanging } = useMutation({
+    mutationKey: ["users", "change-role"],
+    mutationFn: ({ user, newRole }: { user: UserType; newRole: RoleType }) => patchUserRole(user.id, newRole),
+    onSuccess: (_data, { user, newRole }) => {
+      toast.success(
+        "Rôle modifié !",
+        `${user.firstname} ${user.lastname} est maintenant ${translateRole(newRole)}.`
+      )
+      queryClient.invalidateQueries({ queryKey: ["users"] })
+    },
+    onError: () => {
+      toast.error("Erreur", "Impossible de modifier le rôle.")
+    },
+  })
+
+  const confirmRoleChange = () => {
     if (pendingRoleChange) {
-      const { user, newRole } = pendingRoleChange
-      try {
-        await patchUserRole(user.id, newRole)
-        setUsers(prev => prev.map(u =>
-          u.id === user.id ? { ...u, role: newRole } : u
-        ))
-        toast.success(
-          "Rôle modifié !",
-          `${user.firstname} ${user.lastname} est maintenant ${translateRole(newRole)}.`
-        )
-      } catch (err) {
-        console.error("Erreur lors du changement de rôle:", err)
-        toast.error("Erreur", "Impossible de modifier le rôle.")
-      }
+      changeRole({ user: pendingRoleChange.user, newRole: pendingRoleChange.newRole })
     }
     setPendingRoleChange(null)
     setRoleAlertOpen(false)
   }
 
-  // UI States
-  if (loading) return <Loader message="Chargement des utilisateurs..." />
+  if (isPending) return <Loader message="Chargement des utilisateurs..." />
 
-  if (error) {
+  if (isError) {
     return (
       <ErrorPage
         title="Erreur de chargement"
         message="Une erreur est survenue lors du chargement des utilisateurs. Veuillez réessayer."
-        onRetry={fetchUsers}
+        onRetry={() => refetch()}
         onGoBack={() => navigate('/admin')}
       />
     )
@@ -130,7 +127,6 @@ export const UsersAdmin = () => {
         <h2 className="text-2xl font-bold text-foreground">Utilisateurs</h2>
       </div>
 
-      {/* Filtres */}
       <div className="flex flex-col md:flex-row gap-4 md:items-end bg-muted/40 rounded-lg px-4 py-4 border border-border mb-4">
         <Input
           label=""
@@ -148,7 +144,6 @@ export const UsersAdmin = () => {
         />
       </div>
 
-      {/* Statistiques */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="p-4 text-center">
           <div className="text-2xl font-bold text-accent">{users.length}</div>
@@ -168,7 +163,6 @@ export const UsersAdmin = () => {
         </Card>
       </div>
 
-      {/* Liste */}
       <div className="grid gap-4">
         {paginatedData.map((user) => (
           <Card key={user.id} className="p-4 md:p-5 hover:shadow-md transition-shadow">
@@ -188,7 +182,6 @@ export const UsersAdmin = () => {
                 </div>
               </div>
 
-              {/* Action role */}
               <div className="flex gap-2 sm:ml-4">
                 <button
                   type="button"
@@ -198,6 +191,7 @@ export const UsersAdmin = () => {
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary"
                   }`}
+                  disabled={isRoleChanging}
                 >
                   Admin
                 </button>
@@ -209,6 +203,7 @@ export const UsersAdmin = () => {
                       ? "bg-secondary text-secondary-foreground"
                       : "bg-muted text-muted-foreground hover:bg-secondary/10 hover:text-secondary"
                   }`}
+                  disabled={isRoleChanging}
                 >
                   User
                 </button>
@@ -237,7 +232,6 @@ export const UsersAdmin = () => {
         </div>
       )}
 
-      {/* Pop-up Confirmation */}
       <Alert
         title="Changer le rôle de l'utilisateur ?"
         description={

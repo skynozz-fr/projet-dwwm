@@ -1,30 +1,38 @@
 import { useState, useEffect } from "react"
+
 import { useParams, useNavigate } from "react-router-dom"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { ArrowLeft, Home, Plane } from "lucide-react"
+
 import { Button } from "@/components/Button"
+import { Card } from "@/components/ui/card"
 import { Input } from "@/components/Input"
 import { RequiredInput } from "@/components/ui/required-input"
 import { Select } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { Card } from "@/components/ui/card"
 import { Alert } from "@/components/ui/alert"
+import { Label } from "@/components/ui/label"
 import { RadioGroup, Radio } from "@/components/ui/radio-group"
-import type { MatchCompetition, MatchStatus } from "@/types/match"
-import { useToast } from "@/hooks/useToast"
 import { ErrorPage } from "@/pages/errors/ErrorPage"
 import { Loader } from "@/components/Loader"
-import { getMatchById, createMatch, updateMatch } from "@/services/match.service"
+
+import { useToast } from "@/hooks/useToast"
+
 import { competitionOptions, statusOptions, weatherOptions } from "@/lib/match-helpers"
-import { Label } from "@/components/ui/label"
+
+import { createMatch, getMatchById, updateMatch } from "@/services/match.service"
+
+import type { MatchCompetition, MatchStatus } from "@/types/match"
 
 export const MatchForm = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const isEditing = !!id
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [saveAlertOpen, setSaveAlertOpen] = useState(false)
   const { toast } = useToast()
+  const queryClient = useQueryClient()
+  
+  const isEditing = !!id
+  const [saveAlertOpen, setSaveAlertOpen] = useState(false)
+  
   const [formData, setFormData] = useState({
     home_team: "",
     away_team: "",
@@ -42,108 +50,123 @@ export const MatchForm = () => {
     weather: "",
   })
 
-  useEffect(() => {
-    if (isEditing && id) {
-      loadMatch(parseInt(id))
-    }
-  }, [id, isEditing])
+  // Load match data in edit mode
+  const {
+    data: match,
+    isPending,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: ["match", id],
+    queryFn: () => getMatchById(parseInt(id!)),
+    enabled: isEditing && !!id,
+  })
 
-  const loadMatch = async (matchId: number) => {
-    setLoading(true)
-    setError(null)
-    try {
-      const data = await getMatchById(matchId)
+  // Populate form when match data loads
+  useEffect(() => {
+    if (match) {
       setFormData({
-        home_team: data.home_team,
-        away_team: data.away_team,
-        is_home: data.is_home,
-        date: data.date.split('T')[0], // Extraire seulement YYYY-MM-DD
-        time: data.time,
-        venue: data.venue,
-        location: data.location,
-        competition: data.competition,
-        status: data.status,
-        home_score: data.home_score?.toString() || "",
-        away_score: data.away_score?.toString() || "",
-        description: data.description || "",
-        referee: data.referee || "",
-        weather: data.weather || "",
+        home_team: match.home_team,
+        away_team: match.away_team,
+        is_home: match.is_home,
+        date: match.date.split('T')[0],
+        time: match.time,
+        venue: match.venue,
+        location: match.location,
+        competition: match.competition,
+        status: match.status,
+        home_score: match.home_score?.toString() || "",
+        away_score: match.away_score?.toString() || "",
+        description: match.description || "",
+        referee: match.referee || "",
+        weather: match.weather || "",
       })
-    } catch (err: unknown) {
-      console.error("Erreur lors du chargement:", err)
-      type HttpErr = { response?: { status?: number } }
-      const status = (err as HttpErr).response?.status
-      if (status === 404) {
-        setError("Match introuvable")
-      } else {
-        setError("Impossible de charger le match")
-      }
-    } finally {
-      setLoading(false)
     }
-  }
+  }, [match])
+
+  // Create mutation
+  const { mutate: createMutation, isPending: isCreating } = useMutation({
+    mutationKey: ["matches", "create"],
+    mutationFn: createMatch,
+    onSuccess: () => {
+      toast.success("Match créé !", "Le nouveau match a été créé.")
+      queryClient.invalidateQueries({ queryKey: ["matches"] })
+      navigate("/admin/matchs")
+    },
+    onError: () => {
+      toast.error("Erreur lors de la sauvegarde", "Impossible d'enregistrer le match.")
+    },
+  })
+
+  // Update mutation
+  const { mutate: updateMutation, isPending: isUpdating } = useMutation({
+    mutationKey: ["matches", "update"],
+    mutationFn: ({ id, payload }: { id: number; payload: Parameters<typeof updateMatch>[1] }) =>
+      updateMatch(id, payload),
+    onSuccess: () => {
+      toast.success("Match modifié !", "Les modifications ont été enregistrées.")
+      queryClient.invalidateQueries({ queryKey: ["matches"] })
+      navigate("/admin/matchs")
+    },
+    onError: () => {
+      toast.error("Erreur lors de la sauvegarde", "Impossible d'enregistrer le match.")
+    },
+  })
+
+  const isSaving = isCreating || isUpdating
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setSaveAlertOpen(true)
   }
 
-  const confirmSave = async () => {
-    setLoading(true)
-    try {
-      if (!formData.home_team || !formData.away_team || !formData.date || !formData.time || !formData.venue || !formData.location || !formData.competition) {
-        toast.error("Champs requis", "Merci de remplir toutes les informations obligatoires")
-        return
-      }
-
-      const payload = {
-        home_team: formData.home_team,
-        away_team: formData.away_team,
-        is_home: formData.is_home,
-        date: formData.date,
-        time: formData.time,
-        venue: formData.venue,
-        location: formData.location,
-        competition: formData.competition as MatchCompetition,
-        status: formData.status as MatchStatus,
-        home_score: formData.home_score !== "" ? Number(formData.home_score) : null,
-        away_score: formData.away_score !== "" ? Number(formData.away_score) : null,
-        description: formData.description.trim() || null,
-        referee: formData.referee.trim() || null,
-        weather: formData.weather || null,
-      }
-
-      if (isEditing && id) {
-        await updateMatch(parseInt(id), payload)
-        toast.success("Match modifié !", "Les modifications ont été enregistrées.")
-      } else {
-        await createMatch(payload)
-        toast.success("Match créé !", "Le nouveau match a été créé.")
-      }
-      navigate("/admin/matchs")
-    } catch (error) {
-      toast.error("Erreur lors de la sauvegarde", "Impossible d'enregistrer le match.")
-      console.error("Erreur lors de la sauvegarde:", error)
-    } finally {
-      setLoading(false)
+  const confirmSave = () => {
+    if (!formData.home_team || !formData.away_team || !formData.date || !formData.time || !formData.venue || !formData.location || !formData.competition) {
+      toast.error("Champs requis", "Merci de remplir toutes les informations obligatoires")
       setSaveAlertOpen(false)
+      return
     }
+
+    const payload = {
+      home_team: formData.home_team,
+      away_team: formData.away_team,
+      is_home: formData.is_home,
+      date: formData.date,
+      time: formData.time,
+      venue: formData.venue,
+      location: formData.location,
+      competition: formData.competition as MatchCompetition,
+      status: formData.status as MatchStatus,
+      home_score: formData.home_score !== "" ? Number(formData.home_score) : null,
+      away_score: formData.away_score !== "" ? Number(formData.away_score) : null,
+      description: formData.description.trim() || null,
+      referee: formData.referee.trim() || null,
+      weather: formData.weather || null,
+    }
+
+    if (isEditing && id) {
+      updateMutation({ id: parseInt(id), payload })
+    } else {
+      createMutation(payload)
+    }
+    
+    setSaveAlertOpen(false)
   }
 
   const handleInputChange = (field: keyof typeof formData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
-  if (loading && isEditing) {
-    return <Loader />
+  if (isPending && isEditing) {
+    return <Loader message="Chargement du match..." />
   }
 
-  if (error) {
+  if (isError) {
     return (
       <ErrorPage
         title="Erreur de chargement"
-        message={error}
-        onRetry={() => id && loadMatch(parseInt(id))}
+        message="Impossible de charger le match"
+        onRetry={() => refetch()}
         onGoBack={() => navigate("/admin/matchs")}
       />
     )
@@ -311,13 +334,14 @@ export const MatchForm = () => {
       </Card>
 
       <div className="flex justify-end gap-4">
-        <Button type="submit" form="form-match" disabled={loading}>
-          {loading ? "Sauvegarde..." : isEditing ? "Mettre à jour" : "Créer"}
+        <Button type="submit" form="form-match" disabled={isSaving}>
+          {isSaving ? "Sauvegarde..." : isEditing ? "Mettre à jour" : "Créer"}
         </Button>
         <Button 
           type="button" 
           variant="secondary" 
           onClick={() => navigate("/admin/matchs")}
+          disabled={isSaving}
         >
           Annuler
         </Button>

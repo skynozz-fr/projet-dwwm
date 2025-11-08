@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react"
-import { useToast } from "@/hooks/useToast"
 import { useParams, useNavigate } from "react-router-dom"
-import { ArrowLeft } from "lucide-react"
+
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+
 import { Button } from "@/components/Button"
 import { Select } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
@@ -10,17 +11,21 @@ import { Alert } from "@/components/ui/alert"
 import { ErrorPage } from "@/pages/errors/ErrorPage"
 import { Loader } from "@/components/Loader"
 import { RequiredInput } from "@/components/ui/required-input"
-import { getNewsById, createNews, updateNews } from "@/services/news.service"
-import type { NewsCategory } from "@/types/news"
+
+import { useToast } from "@/hooks/useToast"
 import { categoryOptions } from "@/lib/news-helpers"
+import { getNewsById, createNews, updateNews } from "@/services/news.service"
+
+import { ArrowLeft } from "lucide-react"
+import type { NewsCategory, News as NewsType } from "@/types/news"
 
 export const NewsForm = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const isEditing = !!id
   const { toast } = useToast()
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const queryClient = useQueryClient()
+  const numericId = isEditing ? Number(id) : null
   const [formData, setFormData] = useState({
     title: "",
     category: "" as NewsCategory | "",
@@ -29,88 +34,98 @@ export const NewsForm = () => {
   })
   const [saveAlertOpen, setSaveAlertOpen] = useState(false)
 
-  useEffect(() => {
-    if (isEditing && id) {
-      loadActualite(parseInt(id))
-    }
-  }, [id, isEditing])
+  const {
+    data: existingNews,
+    isPending: isFetching,
+    isError,
+    refetch,
+  } = useQuery<NewsType>({
+    queryKey: ["news", numericId],
+    queryFn: () => getNewsById(numericId as number),
+    enabled: isEditing && numericId !== null && !Number.isNaN(numericId),
+  })
 
-  const loadActualite = async (actualiteId: number) => {
-    setLoading(true)
-    setError(null)
-    try {
-      const data = await getNewsById(actualiteId)
+  useEffect(() => {
+    if (existingNews) {
       setFormData({
-        title: data.title,
-        category: data.category,
-        excerpt: data.excerpt,
-        content: data.content,
+        title: existingNews.title,
+        category: existingNews.category,
+        excerpt: existingNews.excerpt,
+        content: existingNews.content,
       })
-    } catch (err: unknown) {
-      console.error("Erreur lors du chargement:", err)
-      type HttpErr = { response?: { status?: number } }
-      const status = (err as HttpErr).response?.status
-      if (status === 404) {
-        setError("Actualité introuvable")
-      } else {
-        setError("Impossible de charger l'actualité")
-      }
-    } finally {
-      setLoading(false)
     }
-  }
+  }, [existingNews])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setSaveAlertOpen(true)
   }
 
-  const confirmSave = async () => {
-    setLoading(true)
-    try {
-      if (!formData.category || !formData.title || !formData.excerpt || !formData.content) {
-        toast.error("Champs requis", "Merci de remplir toutes les informations obligatoires")
-        return
-      }
+  // Mutations
+  type NewsPayload = {
+    title: string
+    category: NewsCategory
+    excerpt: string
+    content: string
+  }
 
-      const payload = {
-        title: formData.title,
-        category: formData.category as NewsCategory,
-        excerpt: formData.excerpt,
-        content: formData.content,
-      }
-
-      if (isEditing && id) {
-        await updateNews(parseInt(id), payload)
-        toast.success("Actualité modifiée !", "Les modifications ont été enregistrées.")
-      } else {
-        await createNews(payload)
-        toast.success("Actualité créée !", "La nouvelle actualité a été créée.")
-      }
+  const { mutate: createMutation, isPending: isCreating } = useMutation({
+    mutationKey: ["news", "create"],
+    mutationFn: (payload: NewsPayload) => createNews(payload),
+    onSuccess: () => {
+      toast.success("Actualité créée !", "La nouvelle actualité a été créée.")
+      queryClient.invalidateQueries({ queryKey: ["news"] })
       navigate("/admin/news")
-    } catch (err) {
-      console.error("Erreur lors de la sauvegarde:", err)
+    },
+    onError: () => {
       toast.error("Erreur lors de la sauvegarde", "Impossible d'enregistrer l'actualité.")
-    } finally {
-      setLoading(false)
-      setSaveAlertOpen(false)
+    },
+  })
+
+  const { mutate: updateMutation, isPending: isUpdating } = useMutation({
+    mutationKey: ["news", "update"],
+    mutationFn: ({ id, payload }: { id: number; payload: NewsPayload }) => updateNews(id, payload),
+    onSuccess: () => {
+      toast.success("Actualité modifiée !", "Les modifications ont été enregistrées.")
+      queryClient.invalidateQueries({ queryKey: ["news"] })
+      navigate("/admin/news")
+    },
+    onError: () => {
+      toast.error("Erreur lors de la sauvegarde", "Impossible d'enregistrer l'actualité.")
+    },
+  })
+
+  const confirmSave = () => {
+    if (!formData.category || !formData.title || !formData.excerpt || !formData.content) {
+      toast.error("Champs requis", "Merci de remplir toutes les informations obligatoires")
+      return
     }
+
+    const payload: NewsPayload = {
+      title: formData.title,
+      category: formData.category as NewsCategory,
+      excerpt: formData.excerpt,
+      content: formData.content,
+    }
+
+    if (isEditing && numericId) updateMutation({ id: numericId, payload })
+    else createMutation(payload)
+
+    setSaveAlertOpen(false)
   }
 
   const handleInputChange = (field: keyof typeof formData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
-  if (loading && isEditing) {
-    return <Loader />
-  }
+  if (isFetching && isEditing) return <Loader message="Chargement de l'actualité..." />
 
-  if (error) {
+  if (isError && isEditing) {
     return (
       <ErrorPage
         title="Erreur de chargement"
-        message={error}
-        onRetry={() => id && loadActualite(parseInt(id))}
+        message="Impossible de charger l'actualité"
+        onRetry={() => refetch()}
         onGoBack={() => navigate("/admin/news")}
       />
     )
@@ -118,7 +133,6 @@ export const NewsForm = () => {
 
   return (
     <div className="space-y-8 px-2 md:px-6 py-8 max-w-full mx-auto">
-      {/* Header moderne */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-2">
         <div className="flex items-center gap-4">
           <Button variant="ghost" onClick={() => navigate("/admin/news")}> 
@@ -169,10 +183,13 @@ export const NewsForm = () => {
         </form>
       </Card>
 
-      {/* Boutons sous la card, alignés à droite */}
       <div className="flex justify-end gap-4">
-        <Button type="submit" form="form-actualite" disabled={loading}>
-          {loading ? "Sauvegarde..." : isEditing ? "Mettre à jour" : "Créer"}
+        <Button
+          type="submit"
+          form="form-actualite"
+          disabled={isCreating || isUpdating}
+        >
+          {isCreating || isUpdating ? "Sauvegarde..." : isEditing ? "Mettre à jour" : "Créer"}
         </Button>
         <Button 
           type="button" 
@@ -183,7 +200,6 @@ export const NewsForm = () => {
         </Button>
       </div>
 
-      {/* Save confirmation */}
       <Alert
         title={isEditing ? "Mettre à jour cette actualité ?" : "Créer cette actualité ?"}
         description={isEditing ? "Les modifications seront enregistrées." : "Une nouvelle actualité sera créée."}
