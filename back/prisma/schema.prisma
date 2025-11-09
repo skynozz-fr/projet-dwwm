@@ -32,7 +32,7 @@ enum MatchCompetition {
   OTHER
 }
 
-enum StatusCategory {
+enum MatchStatus {
   SCHEDULED
   ONGOING
   COMPLETED
@@ -74,7 +74,7 @@ model Match {
   venue         String
   location      String
   competition   MatchCompetition @default(LEAGUE)
-  status        StatusCategory @default(SCHEDULED)
+  status        MatchStatus @default(SCHEDULED)
   home_score    Int?
   away_score    Int?
   description   String?        @db.Text

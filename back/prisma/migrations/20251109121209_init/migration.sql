@@ -8,7 +8,7 @@ CREATE TYPE "NewsCategory" AS ENUM ('TRANSFER', 'MATCH', 'OTHER');
 CREATE TYPE "MatchCompetition" AS ENUM ('FRIENDLY', 'LEAGUE', 'CUP', 'TOURNAMENT', 'OTHER');
 
 -- CreateEnum
-CREATE TYPE "StatusCategory" AS ENUM ('SCHEDULED', 'ONGOING', 'COMPLETED', 'POSTPONED', 'CANCELLED');
+CREATE TYPE "MatchStatus" AS ENUM ('SCHEDULED', 'ONGOING', 'COMPLETED', 'POSTPONED', 'CANCELLED');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -49,7 +49,7 @@ CREATE TABLE "Match" (
     "venue" TEXT NOT NULL,
     "location" TEXT NOT NULL,
     "competition" "MatchCompetition" NOT NULL DEFAULT 'LEAGUE',
-    "status" "StatusCategory" NOT NULL DEFAULT 'SCHEDULED',
+    "status" "MatchStatus" NOT NULL DEFAULT 'SCHEDULED',
     "home_score" INTEGER,
     "away_score" INTEGER,
     "description" TEXT,
