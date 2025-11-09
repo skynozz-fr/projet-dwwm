@@ -17,7 +17,7 @@ import { categoryOptions } from "@/lib/news-helpers"
 import { getNewsById, createNews, updateNews } from "@/services/news.service"
 
 import { ArrowLeft } from "lucide-react"
-import type { NewsCategory, News as NewsType } from "@/types/news"
+import type { NewsCategory, News as NewsType, NewsPayload } from "@/types/news"
 
 export const NewsForm = () => {
   const { id } = useParams<{ id: string }>()
@@ -59,14 +59,6 @@ export const NewsForm = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setSaveAlertOpen(true)
-  }
-
-  // Mutations
-  type NewsPayload = {
-    title: string
-    category: NewsCategory
-    excerpt: string
-    content: string
   }
 
   const { mutate: createMutation, isPending: isCreating } = useMutation({

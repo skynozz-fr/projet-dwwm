@@ -1,17 +1,6 @@
 import { createContext } from "react";
 import type { User } from "@/types/user";
-
-export type RegisterPayload = {
-  firstname: string;
-  lastname: string;
-  email: string;
-  password: string;
-};
-
-export type LoginPayload = {
-  email: string;
-  password: string;
-};
+import type { LoginPayload, RegisterPayload } from "@/types/auth";
 
 export const AuthContext = createContext<{
   user: User | null;

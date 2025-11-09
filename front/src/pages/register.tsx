@@ -13,7 +13,7 @@ import { PasswordStrengthInput } from "@/components/ui/password-strength-input"
 import { useAuth } from "@/hooks/useAuth"
 import { useToast } from "@/hooks/useToast"
 
-import type { RegisterPayload } from "@/context/AuthContext"
+import type { RegisterPayload } from "@/types/auth"
 
 export const Register = () => {
   const navigate = useNavigate()

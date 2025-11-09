@@ -22,7 +22,7 @@ import { competitionOptions, statusOptions, weatherOptions } from "@/lib/match-h
 
 import { createMatch, getMatchById, updateMatch } from "@/services/match.service"
 
-import type { MatchCompetition, MatchStatus } from "@/types/match"
+import type { MatchCompetition, MatchStatus, MatchPayload } from "@/types/match"
 
 export const MatchForm = () => {
   const { id } = useParams<{ id: string }>()
@@ -31,6 +31,7 @@ export const MatchForm = () => {
   const queryClient = useQueryClient()
   
   const isEditing = !!id
+  const numericId = isEditing ? Number(id) : null
   const [saveAlertOpen, setSaveAlertOpen] = useState(false)
   
   const [formData, setFormData] = useState({
@@ -52,42 +53,43 @@ export const MatchForm = () => {
 
   // Load match data in edit mode
   const {
-    data: match,
-    isPending,
+    data: existingMatch,
+    isPending: isFetching,
     isError,
     refetch,
   } = useQuery({
-    queryKey: ["match", id],
-    queryFn: () => getMatchById(parseInt(id!)),
-    enabled: isEditing && !!id,
+    queryKey: ["match", numericId],
+    queryFn: () => getMatchById(numericId as number),
+    enabled: isEditing && numericId !== null && !Number.isNaN(numericId),
   })
 
   // Populate form when match data loads
   useEffect(() => {
-    if (match) {
+    if (existingMatch) {
+      const dateString = existingMatch.date.split('T')[0]
+
       setFormData({
-        home_team: match.home_team,
-        away_team: match.away_team,
-        is_home: match.is_home,
-        date: match.date.split('T')[0],
-        time: match.time,
-        venue: match.venue,
-        location: match.location,
-        competition: match.competition,
-        status: match.status,
-        home_score: match.home_score?.toString() || "",
-        away_score: match.away_score?.toString() || "",
-        description: match.description || "",
-        referee: match.referee || "",
-        weather: match.weather || "",
+        home_team: existingMatch.home_team,
+        away_team: existingMatch.away_team,
+        is_home: existingMatch.is_home,
+        date: dateString,
+        time: existingMatch.time,
+        venue: existingMatch.venue,
+        location: existingMatch.location,
+        competition: existingMatch.competition,
+        status: existingMatch.status,
+        home_score: existingMatch.home_score?.toString() || "",
+        away_score: existingMatch.away_score?.toString() || "",
+        description: existingMatch.description || "",
+        referee: existingMatch.referee || "",
+        weather: existingMatch.weather || "",
       })
     }
-  }, [match])
+  }, [existingMatch])
 
-  // Create mutation
   const { mutate: createMutation, isPending: isCreating } = useMutation({
     mutationKey: ["matches", "create"],
-    mutationFn: createMatch,
+    mutationFn: (payload: MatchPayload) => createMatch(payload),
     onSuccess: () => {
       toast.success("Match créé !", "Le nouveau match a été créé.")
       queryClient.invalidateQueries({ queryKey: ["matches"] })
@@ -98,11 +100,9 @@ export const MatchForm = () => {
     },
   })
 
-  // Update mutation
   const { mutate: updateMutation, isPending: isUpdating } = useMutation({
     mutationKey: ["matches", "update"],
-    mutationFn: ({ id, payload }: { id: number; payload: Parameters<typeof updateMatch>[1] }) =>
-      updateMatch(id, payload),
+    mutationFn: ({ id, payload }: { id: number; payload: MatchPayload }) => updateMatch(id, payload),
     onSuccess: () => {
       toast.success("Match modifié !", "Les modifications ont été enregistrées.")
       queryClient.invalidateQueries({ queryKey: ["matches"] })
@@ -127,7 +127,7 @@ export const MatchForm = () => {
       return
     }
 
-    const payload = {
+    const payload: MatchPayload = {
       home_team: formData.home_team,
       away_team: formData.away_team,
       is_home: formData.is_home,
@@ -144,11 +144,8 @@ export const MatchForm = () => {
       weather: formData.weather || null,
     }
 
-    if (isEditing && id) {
-      updateMutation({ id: parseInt(id), payload })
-    } else {
-      createMutation(payload)
-    }
+  if (isEditing && numericId) updateMutation({ id: numericId, payload })
+    else createMutation(payload)
     
     setSaveAlertOpen(false)
   }
@@ -157,7 +154,7 @@ export const MatchForm = () => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
-  if (isPending && isEditing) {
+  if (isFetching && isEditing) {
     return <Loader message="Chargement du match..." />
   }
 

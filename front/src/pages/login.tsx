@@ -13,7 +13,7 @@ import { SimplePasswordInput } from "@/components/ui/simple-password-input"
 import { useAuth } from "@/hooks/useAuth"
 import { useToast } from "@/hooks/useToast"
 
-import type { LoginPayload } from "@/context/AuthContext"
+import type { LoginPayload } from "@/types/auth"
 
 export const Login = () => {
   const navigate = useNavigate()

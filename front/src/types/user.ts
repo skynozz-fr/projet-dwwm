@@ -9,3 +9,7 @@ export type User = {
   role: Role
   created_at: string
 }
+
+export type UserRolePayload = {
+  role: Role
+}

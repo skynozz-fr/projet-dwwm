@@ -19,7 +19,7 @@ import { translateRole, roleFilterOptions } from "@/lib/user-helpers"
 import { getAllUsers, patchUserRole } from "@/services/user.service"
 
 import { Shield } from "lucide-react"
-import type { User as UserType, Role as RoleType } from "@/types/user"
+import type { User as UserType, Role as RoleType, UserRolePayload } from "@/types/user"
 
 export const UsersAdmin = () => {
   const [searchTerm, setSearchTerm] = useState("")
@@ -87,11 +87,11 @@ export const UsersAdmin = () => {
   // Mutation to change role
   const { mutate: changeRole, isPending: isRoleChanging } = useMutation({
     mutationKey: ["users", "change-role"],
-    mutationFn: ({ user, newRole }: { user: UserType; newRole: RoleType }) => patchUserRole(user.id, newRole),
-    onSuccess: (_data, { user, newRole }) => {
+    mutationFn: ({ id, payload }: { id: number; payload: UserRolePayload }) => patchUserRole(id, payload),
+    onSuccess: (updatedUser) => {
       toast.success(
         "Rôle modifié !",
-        `${user.firstname} ${user.lastname} est maintenant ${translateRole(newRole)}.`
+        `${updatedUser.firstname} ${updatedUser.lastname} est maintenant ${translateRole(updatedUser.role)}.`
       )
       queryClient.invalidateQueries({ queryKey: ["users"] })
     },
@@ -102,7 +102,7 @@ export const UsersAdmin = () => {
 
   const confirmRoleChange = () => {
     if (pendingRoleChange) {
-      changeRole({ user: pendingRoleChange.user, newRole: pendingRoleChange.newRole })
+      changeRole({ id: pendingRoleChange.user.id, payload: { role: pendingRoleChange.newRole } })
     }
     setPendingRoleChange(null)
     setRoleAlertOpen(false)

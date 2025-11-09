@@ -1,5 +1,5 @@
 import { api } from "@/lib/api";
-import type { User, Role } from "@/types/user";
+import type { User, Role, UserRolePayload } from "@/types/user";
 
 export const getAllUsers = async (role?: Role): Promise<User[]> => {
   const url = role ? `/user/role/${role}` : "/user";
@@ -12,8 +12,8 @@ export const getUser = async (id: number) => {
   return data;
 };
 
-export const patchUserRole = async (id: number, role: Role) => {
-  const { data } = await api.patch<User>(`/user/${id}/role`, { role });
+export const patchUserRole = async (id: number, payload: UserRolePayload) => {
+  const { data } = await api.patch<User>(`/user/${id}/role`, payload);
   return data;
 };
 
