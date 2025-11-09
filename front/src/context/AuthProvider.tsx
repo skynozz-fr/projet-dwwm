@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import * as auth from "@/services/auth.service";
 import type { User } from "@/types/user";
-import { AuthContext, type RegisterPayload } from "./AuthContext";
+import { AuthContext, type RegisterPayload, type LoginPayload } from "./AuthContext";
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -23,8 +23,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     })();
   }, []);
 
-  const login = async (email: string, password: string) => {
-    const u = await auth.login({ email, password });
+  const login = async (payload: LoginPayload) => {
+    const u = await auth.login(payload);
     setUser(u);
   };
 
