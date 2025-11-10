@@ -2,7 +2,7 @@ import jwt, { SignOptions } from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
 const JWT_SECRET = process.env.JWT_SECRET || "change-me";
-const JWT_EXPIRES = (process.env.JWT_EXPIRES || "7d") as string;
+const JWT_EXPIRES = process.env.JWT_EXPIRES || "7d";
 
 /**
  * Hash un mot de passe avec bcrypt
