@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express"
 import { matchService } from "../services/match.service"
 import { AuthedRequest } from "../middlewares/auth.middleware"
-import { MatchCompetition, StatusCategory } from "@prisma/client"
+import { MatchCompetition, MatchStatus } from "@prisma/client"
 
 export class MatchController {
   /**
@@ -109,7 +109,7 @@ export class MatchController {
         venue,
         location,
         competition: competition.toUpperCase() as MatchCompetition,
-        status: status?.toUpperCase() as StatusCategory,
+        status: status?.toUpperCase() as MatchStatus,
         home_score: home_score !== undefined ? parseInt(home_score) : null,
         away_score: away_score !== undefined ? parseInt(away_score) : null,
         description,
@@ -179,7 +179,7 @@ export class MatchController {
       if (venue) updateData.venue = venue
       if (location) updateData.location = location
       if (competition) updateData.competition = competition.toUpperCase() as MatchCompetition
-      if (status) updateData.status = status.toUpperCase() as StatusCategory
+      if (status) updateData.status = status.toUpperCase() as MatchStatus
       if (home_score !== undefined) updateData.home_score = home_score !== null ? parseInt(home_score) : null
       if (away_score !== undefined) updateData.away_score = away_score !== null ? parseInt(away_score) : null
       if (description !== undefined) updateData.description = description

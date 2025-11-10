@@ -1,5 +1,5 @@
 import { prisma } from "../config/database"
-import { MatchCompetition, StatusCategory } from "@prisma/client"
+import { MatchCompetition, MatchStatus } from "@prisma/client"
 
 export class MatchService {
   /**
@@ -46,7 +46,7 @@ export class MatchService {
     venue: string
     location: string
     competition: MatchCompetition
-    status?: StatusCategory
+    status?: MatchStatus
     home_score?: number | null
     away_score?: number | null
     description?: string | null
@@ -87,7 +87,7 @@ export class MatchService {
       venue?: string
       location?: string
       competition?: MatchCompetition
-      status?: StatusCategory
+      status?: MatchStatus
       home_score?: number | null
       away_score?: number | null
       description?: string | null
