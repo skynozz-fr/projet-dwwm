@@ -1,5 +1,5 @@
-import { useState, useMemo, useEffect, useCallback, useDeferredValue } from "react"
-import { useNavigate, useSearchParams } from "react-router-dom"
+import { useState, useMemo, useEffect, useDeferredValue } from "react"
+import { useNavigate } from "react-router-dom"
 import { Zap, Calendar, User } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 
@@ -11,6 +11,7 @@ import { Pagination } from "@/components/Pagination"
 import { Loader } from "@/components/Loader"
 
 import { usePagination } from "@/hooks/usePagination"
+import { useUrlFilter } from "@/hooks/useUrlFilter"
 import { filterItems, formatDate } from "@/lib/utils"
 import {
   getNewsIcon,
@@ -25,23 +26,11 @@ import type { News as NewsType } from "@/types/news"
 
 export const News = () => {
   const navigate = useNavigate()
-  const [searchParams, setSearchParams] = useSearchParams()
-
   const [searchTerm, setSearchTerm] = useState("")
-
-  // filters
-  const categoryFilter = searchParams.get("category") || "all"
   const deferredSearch = useDeferredValue(searchTerm)
 
-  const handleCategoryChange = useCallback(
-    (category: string) => {
-      const next = new URLSearchParams(searchParams)
-      if (category === "all") next.delete("category")
-      else next.set("category", category)
-      setSearchParams(next, { replace: true })
-    },
-    [searchParams, setSearchParams]
-  )
+  const { filterValue: categoryFilter, setFilter: setCategoryFilter } = 
+    useUrlFilter({ paramName: "category" })
 
   const category =
     categoryFilter !== "all" ? (categoryFilter as NewsType["category"]) : undefined
@@ -118,7 +107,7 @@ export const News = () => {
             <Select
               options={categoryFilterOptions}
               value={categoryFilter}
-              onChange={handleCategoryChange}
+              onChange={setCategoryFilter}
               className="md:max-w-xs"
             />
           </div>

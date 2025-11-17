@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useCallback } from "react"
+import React, { useState, useMemo } from "react"
 
-import { useNavigate, useSearchParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 
@@ -15,6 +15,7 @@ import { Loader } from "@/components/Loader"
 
 import { useToast } from "@/hooks/useToast"
 import { usePagination } from "@/hooks/usePagination"
+import { useUrlFilter } from "@/hooks/useUrlFilter"
 import { filterItems, formatDate } from "@/lib/utils"
 import { getNewsColor, translateNewsCategory, categoryFilterOptions } from "@/lib/news-helpers"
 import { getAllNews, deleteNews } from "@/services/news.service"
@@ -23,24 +24,12 @@ import type { News as NewsType } from "@/types/news"
 
 export const NewsAdmin = () => {
   const [searchTerm, setSearchTerm] = useState("")
-  const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
-  // Récupérer la catégorie depuis l'URL
-  const selectedCategory = searchParams.get("category") || "all"
-
-  // Fonction pour changer la catégorie et mettre à jour l'URL
-  const handleCategoryChange = useCallback((category: string) => {
-    const next = new URLSearchParams(searchParams)
-    if (category === "all") {
-      next.delete("category")
-    } else {
-      next.set("category", category)
-    }
-    setSearchParams(next, { replace: true })
-  }, [searchParams, setSearchParams])
+  const { filterValue: selectedCategory, setFilter: handleCategoryChange } = 
+    useUrlFilter({ paramName: "category" })
 
   const [deleteAlertOpen, setDeleteAlertOpen] = useState(false)
   const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null)

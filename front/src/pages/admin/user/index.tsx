@@ -1,6 +1,6 @@
-import { useState, useMemo, useCallback, useEffect } from "react"
+import { useState, useMemo, useEffect } from "react"
 
-import { useNavigate, useSearchParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 
@@ -13,6 +13,7 @@ import { Loader } from "@/components/Loader"
 import { ErrorPage } from "@/pages/errors/ErrorPage"
 
 import { usePagination } from "@/hooks/usePagination"
+import { useUrlFilter } from "@/hooks/useUrlFilter"
 import { useToast } from "@/hooks/useToast"
 import { filterItems } from "@/lib/utils"
 import { translateRole, roleFilterOptions } from "@/lib/user-helpers"
@@ -23,7 +24,6 @@ import type { User as UserType, Role as RoleType, UserRolePayload } from "@/type
 
 export const UsersAdmin = () => {
   const [searchTerm, setSearchTerm] = useState("")
-  const [searchParams, setSearchParams] = useSearchParams()
   const [roleAlertOpen, setRoleAlertOpen] = useState(false)
   const navigate = useNavigate()
   const { toast } = useToast()
@@ -34,16 +34,8 @@ export const UsersAdmin = () => {
     newRole: RoleType
   } | null>(null)
 
-  // Récupérer le rôle depuis l’URL
-  const selectedRole = searchParams.get("role") || "all"
-
-  // Fonction pour changer le rôle et mettre à jour l’URL
-  const handleRoleChange = useCallback((role: string) => {
-    const next = new URLSearchParams(searchParams)
-    if (role === "all") next.delete("role")
-    else next.set("role", role)
-    setSearchParams(next, { replace: true })
-  }, [searchParams, setSearchParams])
+  const { filterValue: selectedRole, setFilter: handleRoleChange } = 
+    useUrlFilter({ paramName: "role" })
 
   // Data fetching with React Query
   const roleFilter: RoleType | undefined = selectedRole !== "all" ? (selectedRole as RoleType) : undefined

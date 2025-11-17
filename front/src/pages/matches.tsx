@@ -1,5 +1,5 @@
-import { useState, useMemo, useEffect, useCallback, useDeferredValue } from "react"
-import { useNavigate, useSearchParams } from "react-router-dom"
+import { useState, useMemo, useEffect, useDeferredValue } from "react"
+import { useNavigate } from "react-router-dom"
 import { Calendar, MapPin, Clock, Trophy } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 
@@ -12,6 +12,7 @@ import { Loader } from "@/components/Loader"
 import { ErrorPage } from "./errors/ErrorPage"
 
 import { usePagination } from "@/hooks/usePagination"
+import { useUrlFilter } from "@/hooks/useUrlFilter"
 import { filterItems, formatDate } from "@/lib/utils"
 import {
   competitionFilterOptions,
@@ -25,22 +26,11 @@ import type { Match as MatchType } from "@/types/match"
 
 export const Matches = () => {
   const navigate = useNavigate()
-  const [searchParams, setSearchParams] = useSearchParams()
-
   const [searchTerm, setSearchTerm] = useState("")
-
-  const competitionFilter = searchParams.get("competition") || "all"
   const deferredSearch = useDeferredValue(searchTerm)
 
-  const handleCompetitionChange = useCallback(
-    (competition: string) => {
-      const next = new URLSearchParams(searchParams)
-      if (competition === "all") next.delete("competition")
-      else next.set("competition", competition)
-      setSearchParams(next, { replace: true })
-    },
-    [searchParams, setSearchParams]
-  )
+  const { filterValue: competitionFilter, setFilter: setCompetitionFilter } = 
+    useUrlFilter({ paramName: "competition" })
 
   const competition =
     competitionFilter !== "all" ? (competitionFilter as MatchType["competition"]) : undefined
@@ -120,7 +110,7 @@ export const Matches = () => {
             <Select
               options={competitionFilterOptions}
               value={competitionFilter}
-              onChange={handleCompetitionChange}
+              onChange={setCompetitionFilter}
               className="md:max-w-xs"
             />
           </div>

@@ -1,6 +1,6 @@
-import React, { useMemo, useCallback, useState } from "react"
+import React, { useMemo, useState } from "react"
 
-import { useNavigate, useSearchParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Calendar, Globe, MapPin, Trophy } from "lucide-react"
 
@@ -15,6 +15,7 @@ import { ErrorPage } from "@/pages/errors/ErrorPage"
 
 import { useToast } from "@/hooks/useToast"
 import { usePagination } from "@/hooks/usePagination"
+import { useUrlFilter } from "@/hooks/useUrlFilter"
 
 import { filterItems, formatDate } from "@/lib/utils"
 import { competitionFilterOptions, getStatusColor, translateCompetition, translateMatchStatus } from "@/lib/match-helpers"
@@ -25,27 +26,16 @@ import type { Match as MatchType } from "@/types/match"
 
 export const MatchsAdmin = () => {
   const [searchTerm, setSearchTerm] = useState("")
-  const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
-  const selectedCompetition = searchParams.get("competition") || "all"
+  const { filterValue: selectedCompetition, setFilter: handleCompetitionChange } = 
+    useUrlFilter({ paramName: "competition" })
 
   const [deleteAlertOpen, setDeleteAlertOpen] = useState(false)
   const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null)
   const [addAlertOpen, setAddAlertOpen] = useState(false)
-
-  // Changer la compétition via l'URL
-  const handleCompetitionChange = useCallback((competition: string) => {
-    const next = new URLSearchParams(searchParams)
-    if (competition === "all") {
-      next.delete("competition")
-    } else {
-      next.set("competition", competition)
-    }
-    setSearchParams(next, { replace: true })
-  }, [searchParams, setSearchParams])
 
   const competition =
     selectedCompetition !== "all" ? (selectedCompetition as MatchType["competition"]) : undefined
