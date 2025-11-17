@@ -1,6 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import type { Role } from "@/types/user";
+import { Loader } from "./Loader";
 
 type ProtectedRouteProps = {
   children: React.ReactNode;
@@ -12,11 +13,7 @@ export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) 
 
   // Attendre le chargement de l'utilisateur
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <Loader />;
   }
 
   // Si pas connecté, rediriger vers login
