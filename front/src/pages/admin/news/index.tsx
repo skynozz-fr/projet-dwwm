@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react"
+import React, { useState, useMemo, useDeferredValue } from "react"
 
 import { useNavigate } from "react-router-dom"
 
@@ -16,7 +16,7 @@ import { Loader } from "@/components/Loader"
 import { useToast } from "@/hooks/useToast"
 import { usePagination } from "@/hooks/usePagination"
 import { useUrlFilter } from "@/hooks/useUrlFilter"
-import { filterItems, formatDate } from "@/lib/utils"
+import { searchItems, formatDate } from "@/lib/utils"
 import { getNewsColor, translateNewsCategory, categoryFilterOptions } from "@/lib/news-helpers"
 import { getAllNews, deleteNews } from "@/services/news.service"
 
@@ -24,6 +24,7 @@ import type { News as NewsType } from "@/types/news"
 
 export const NewsAdmin = () => {
   const [searchTerm, setSearchTerm] = useState("")
+  const deferredSearch = useDeferredValue(searchTerm)
   const navigate = useNavigate()
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -49,12 +50,12 @@ export const NewsAdmin = () => {
 
   // Filtrage optimisé avec useMemo
   const filteredNews = useMemo(() => {
-    return filterItems(
+    return searchItems(
       news, 
-      searchTerm, 
+      deferredSearch, 
       ["title", "excerpt"]
     )
-  }, [news, searchTerm])
+  }, [news, deferredSearch])
 
   // Pagination
   const {
@@ -66,7 +67,7 @@ export const NewsAdmin = () => {
     resetPagination
   } = usePagination<NewsType>({ data: filteredNews, itemsPerPage: 10 })
 
-  React.useEffect(() => { resetPagination() }, [searchTerm, selectedCategory]) // eslint-disable-line
+  React.useEffect(() => { resetPagination() }, [deferredSearch, selectedCategory]) // eslint-disable-line
 
   const requestDelete = (id: number) => {
     setDeleteTargetId(id)

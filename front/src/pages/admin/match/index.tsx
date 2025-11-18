@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react"
+import React, { useMemo, useState, useDeferredValue } from "react"
 
 import { useNavigate } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
@@ -17,7 +17,7 @@ import { useToast } from "@/hooks/useToast"
 import { usePagination } from "@/hooks/usePagination"
 import { useUrlFilter } from "@/hooks/useUrlFilter"
 
-import { filterItems, formatDate } from "@/lib/utils"
+import { searchItems, formatDate } from "@/lib/utils"
 import { competitionFilterOptions, getStatusColor, translateCompetition, translateMatchStatus } from "@/lib/match-helpers"
 
 import { deleteMatch, getAllMatches } from "@/services/match.service"
@@ -26,6 +26,7 @@ import type { Match as MatchType } from "@/types/match"
 
 export const MatchsAdmin = () => {
   const [searchTerm, setSearchTerm] = useState("")
+  const deferredSearch = useDeferredValue(searchTerm)
   const navigate = useNavigate()
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -51,12 +52,12 @@ export const MatchsAdmin = () => {
   })
 
   const filteredMatchs = useMemo(() => {
-    return filterItems(
+    return searchItems(
       matchs, 
-      searchTerm, 
+      deferredSearch, 
       ["home_team", "away_team", "venue", "location"]
     )
-  }, [matchs, searchTerm])
+  }, [matchs, deferredSearch])
 
   // Pagination
   const {
@@ -68,7 +69,7 @@ export const MatchsAdmin = () => {
     resetPagination
   } = usePagination<MatchType>({ data: filteredMatchs, itemsPerPage: 10 })
 
-  React.useEffect(() => { resetPagination() }, [searchTerm, selectedCompetition]) // eslint-disable-line
+  React.useEffect(() => { resetPagination() }, [deferredSearch, selectedCompetition]) // eslint-disable-line
 
   const requestDelete = (id: number) => {
     setDeleteTargetId(id)

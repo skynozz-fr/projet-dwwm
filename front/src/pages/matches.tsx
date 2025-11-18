@@ -13,7 +13,7 @@ import { ErrorPage } from "./errors/ErrorPage"
 
 import { usePagination } from "@/hooks/usePagination"
 import { useUrlFilter } from "@/hooks/useUrlFilter"
-import { filterItems, formatDate } from "@/lib/utils"
+import { searchItems, formatDate } from "@/lib/utils"
 import {
   competitionFilterOptions,
   getCompetitionColor,
@@ -47,7 +47,7 @@ export const Matches = () => {
 
   const filteredMatches = useMemo(
     () =>
-      filterItems(allMatches, deferredSearch, [
+      searchItems(allMatches, deferredSearch, [
         "home_team",
         "away_team",
         "venue",

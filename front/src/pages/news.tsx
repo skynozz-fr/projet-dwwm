@@ -12,7 +12,7 @@ import { Loader } from "@/components/Loader"
 
 import { usePagination } from "@/hooks/usePagination"
 import { useUrlFilter } from "@/hooks/useUrlFilter"
-import { filterItems, formatDate } from "@/lib/utils"
+import { searchItems, formatDate } from "@/lib/utils"
 import {
   getNewsIcon,
   getNewsColor,
@@ -46,7 +46,7 @@ export const News = () => {
   })
 
   const filteredNews = useMemo(
-    () => filterItems(allNews, deferredSearch, ["title", "excerpt", "category"]),
+    () => searchItems(allNews, deferredSearch, ["title", "excerpt", "category"]),
     [deferredSearch, allNews]
   )
 

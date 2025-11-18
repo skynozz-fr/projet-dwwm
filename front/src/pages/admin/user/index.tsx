@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo, useEffect, useDeferredValue } from "react"
 
 import { useNavigate } from "react-router-dom"
 
@@ -15,7 +15,7 @@ import { ErrorPage } from "@/pages/errors/ErrorPage"
 import { usePagination } from "@/hooks/usePagination"
 import { useUrlFilter } from "@/hooks/useUrlFilter"
 import { useToast } from "@/hooks/useToast"
-import { filterItems } from "@/lib/utils"
+import { searchItems } from "@/lib/utils"
 import { translateRole, roleFilterOptions } from "@/lib/user-helpers"
 import { getAllUsers, patchUserRole } from "@/services/user.service"
 
@@ -24,6 +24,7 @@ import type { User as UserType, Role as RoleType, UserRolePayload } from "@/type
 
 export const UsersAdmin = () => {
   const [searchTerm, setSearchTerm] = useState("")
+  const deferredSearch = useDeferredValue(searchTerm)
   const [roleAlertOpen, setRoleAlertOpen] = useState(false)
   const navigate = useNavigate()
   const { toast } = useToast()
@@ -51,12 +52,12 @@ export const UsersAdmin = () => {
 
   // Filtrage optimisé
   const filteredUsers = useMemo(() => {
-    return filterItems(
+    return searchItems(
       users,
-      searchTerm,
+      deferredSearch,
       ["firstname", "lastname", "email"]
     )
-  }, [users, searchTerm])
+  }, [users, deferredSearch])
 
   const {
     currentPage,
@@ -67,7 +68,7 @@ export const UsersAdmin = () => {
     resetPagination
   } = usePagination<UserType>({ data: filteredUsers, itemsPerPage: 10 })
 
-  useEffect(() => { resetPagination() }, [searchTerm, selectedRole]) // eslint-disable-line
+  useEffect(() => { resetPagination() }, [deferredSearch, selectedRole]) // eslint-disable-line
 
   const requestRoleChange = (userId: number, newRole: RoleType) => {
     const user = users.find(u => u.id === userId)

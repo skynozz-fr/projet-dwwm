@@ -55,30 +55,19 @@ export const getLatestItems = <T extends { created_at: string }>(items: T[], lim
     .slice(0, limit)
 }
 
-// Filtre générique pour les listes avec recherche textuelle et filtrage par catégorie
-export const filterItems = <T>(
+// Recherche textuelle sur plusieurs champs d'un objet
+export const searchItems = <T>(
   items: T[],
   searchTerm: string,
-  searchFields: (keyof T)[],
-  categoryFilter?: {
-    field: keyof T
-    value: string
-    allValue?: string
-  }
+  searchFields: (keyof T)[]
 ): T[] => {
-  const normalizedSearchTerm = searchTerm.trim().toLowerCase()
+  const normalizedSearch = searchTerm.trim().toLowerCase()
+  
+  if (!normalizedSearch) return items
 
-  return items.filter(item => {
-    // Vérifier la recherche textuelle sur les champs spécifiés
-    const passesTextFilter = searchFields.some(field => 
-      String(item[field]).toLowerCase().includes(normalizedSearchTerm)
+  return items.filter(item => 
+    searchFields.some(field => 
+      String(item[field]).toLowerCase().includes(normalizedSearch)
     )
-    
-    // Vérifier le filtre de catégorie si présent
-    const passesFieldFilter = !categoryFilter || 
-      categoryFilter.value === (categoryFilter.allValue || "all") || 
-      item[categoryFilter.field] === categoryFilter.value
-    
-    return passesTextFilter && passesFieldFilter
-  })
+  )
 }
