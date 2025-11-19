@@ -2,8 +2,10 @@ import {
   LogOutIcon,
   UserIcon,
   UserPlusIcon,
+  Trash2,
 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import { useState } from "react"
 
 import {
   Avatar,
@@ -17,12 +19,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Alert } from "@/components/ui/alert"
 import { Button } from "../Button"
 import { useAuth } from "@/hooks/useAuth"
+import { useToast } from "@/hooks/useToast"
+import { deleteUser } from "@/services/user.service"
+import { useMutation } from "@tanstack/react-query"
 
 export default function UserMenu() {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
+  const { toast } = useToast()
+  const [deleteAlertOpen, setDeleteAlertOpen] = useState(false)
 
   const handleLogout = () => {
     logout()
@@ -35,6 +43,31 @@ export default function UserMenu() {
 
   const handleRegister = () => {
     navigate('/register')
+  }
+
+  const requestDeleteAccount = () => {
+    setDeleteAlertOpen(true)
+  }
+
+  // Delete account mutation
+  const { mutate: deleteAccount, isPending: isDeleting } = useMutation({
+    mutationKey: ["users", "delete-account"],
+    mutationFn: () => deleteUser(user!.id),
+    onSuccess: () => {
+      toast.success("Compte supprimé !", "Votre compte a été supprimé avec succès.")
+      setTimeout(() => {
+        logout()
+        navigate("/")
+      }, 2000)
+    },
+    onError: () => {
+      toast.error("Erreur", "Impossible de supprimer votre compte.")
+    },
+  })
+
+  const confirmDelete = () => {
+    deleteAccount()
+    setDeleteAlertOpen(false)
   }
 
   // Si l'utilisateur n'est pas connecté
@@ -85,6 +118,14 @@ export default function UserMenu() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem 
+          onClick={requestDeleteAccount}
+          className="cursor-pointer text-error hover:bg-error hover:text-error-foreground focus:bg-error focus:text-error-foreground transition-colors"
+          disabled={isDeleting}
+        >
+          <Trash2 size={16} className="opacity-60" aria-hidden="true" />
+          <span>Supprimer mon compte</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem 
           onClick={handleLogout}
           className="cursor-pointer text-error hover:bg-error hover:text-error-foreground focus:bg-error focus:text-error-foreground transition-colors"
         >
@@ -93,6 +134,16 @@ export default function UserMenu() {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+
+    <Alert
+      title="Supprimer votre compte ?"
+      description="Cette action est irréversible. Toutes vos données seront définitivement supprimées."
+      confirmText="Supprimer mon compte"
+      cancelText="Annuler"
+      open={deleteAlertOpen}
+      onOpenChange={setDeleteAlertOpen}
+      onConfirm={confirmDelete}
+    />
     </div>
   )
 }
