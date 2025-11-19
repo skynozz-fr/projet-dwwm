@@ -18,9 +18,9 @@ import { useToast } from "@/hooks/useToast"
 import { useAuth } from "@/hooks/useAuth"
 import { searchItems } from "@/lib/utils"
 import { translateRole, roleFilterOptions } from "@/lib/user-helpers"
-import { getAllUsers, patchUserRole } from "@/services/user.service"
+import { getAllUsers, patchUserRole, deleteUser } from "@/services/user.service"
 
-import { Shield } from "lucide-react"
+import { Shield, Trash2 } from "lucide-react"
 import type { User as UserType, Role as RoleType, UserRolePayload } from "@/types/user"
 
 export const UsersAdmin = () => {
@@ -36,6 +36,9 @@ export const UsersAdmin = () => {
     user: UserType
     newRole: RoleType
   } | null>(null)
+
+  const [deleteAlertOpen, setDeleteAlertOpen] = useState(false)
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
 
   const { filterValue: selectedRole, setFilter: handleRoleChange } = 
     useUrlFilter({ paramName: "role" })
@@ -115,6 +118,45 @@ export const UsersAdmin = () => {
     setRoleAlertOpen(false)
   }
 
+  const requestDelete = (userId: string) => {
+    setDeleteTargetId(userId)
+    setDeleteAlertOpen(true)
+  }
+
+  // Delete mutation
+  const { mutate: deleteMutate, isPending: isDeleting } = useMutation({
+    mutationKey: ["users", "delete"],
+    mutationFn: (id: string) => deleteUser(id),
+    onSuccess: () => {
+      toast.success("Utilisateur supprimé !", "L'utilisateur a bien été supprimé.")
+      queryClient.invalidateQueries({ queryKey: ["users"] })
+    },
+    onError: () => {
+      toast.error("Erreur", "Impossible de supprimer l'utilisateur.")
+    },
+  })
+
+  const confirmDelete = () => {
+    if (deleteTargetId) {
+      // Vérifier si l'utilisateur essaie de se supprimer lui-même
+      if (currentUser && deleteTargetId === currentUser.id) {
+        toast.warning(
+          "Déconnexion",
+          "Vous venez de supprimer votre propre compte. Vous allez être déconnecté."
+        )
+        deleteMutate(deleteTargetId)
+        setTimeout(() => {
+          logout()
+          navigate("/login")
+        }, 2000)
+      } else {
+        deleteMutate(deleteTargetId)
+      }
+    }
+    setDeleteTargetId(null)
+    setDeleteAlertOpen(false)
+  }
+
   if (isPending) return <Loader message="Chargement des utilisateurs..." />
 
   if (isError) {
@@ -172,7 +214,7 @@ export const UsersAdmin = () => {
 
       <div className="grid gap-4">
         {paginatedData.map((user) => (
-          <Card key={user.id} className="p-4 md:p-5 hover:shadow-md transition-shadow">
+          <Card key={user.id} className="p-4 md:p-5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white ${
@@ -198,7 +240,7 @@ export const UsersAdmin = () => {
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary"
                   }`}
-                  disabled={isRoleChanging}
+                  disabled={isRoleChanging || isDeleting}
                 >
                   Admin
                 </button>
@@ -210,9 +252,18 @@ export const UsersAdmin = () => {
                       ? "bg-secondary text-secondary-foreground"
                       : "bg-muted text-muted-foreground hover:bg-secondary/10 hover:text-secondary"
                   }`}
-                  disabled={isRoleChanging}
+                  disabled={isRoleChanging || isDeleting}
                 >
                   User
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); requestDelete(user.id) }}
+                  className="p-2 rounded-lg transition-all bg-error text-error-foreground hover:bg-error"
+                  disabled={isRoleChanging || isDeleting}
+                  title="Supprimer l'utilisateur"
+                >
+                  <Trash2 className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -251,6 +302,16 @@ export const UsersAdmin = () => {
         open={roleAlertOpen}
         onOpenChange={setRoleAlertOpen}
         onConfirm={confirmRoleChange}
+      />
+
+      <Alert
+        title="Supprimer cet utilisateur ?"
+        description="Cette action est irréversible. La suppression ne peut pas être annulée."
+        confirmText="Supprimer"
+        cancelText="Annuler"
+        open={deleteAlertOpen}
+        onOpenChange={setDeleteAlertOpen}
+        onConfirm={confirmDelete}
       />
     </div>
   )
