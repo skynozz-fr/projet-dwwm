@@ -20,21 +20,18 @@ export const NewsDetail = () => {
   const navigate = useNavigate()
   const { toast } = useToast()
 
-  const newsId = Number(id)
-  const isValidId = Number.isFinite(newsId) && newsId > 0
-
   const { 
     data: news, 
     isPending, 
     isError, 
     refetch 
   } = useQuery<NewsType>({
-    queryKey: ["news", newsId],
-    queryFn: () => getNewsById(newsId),
-    enabled: isValidId,
+    queryKey: ["news", id],
+    queryFn: () => getNewsById(id as string),
+    enabled: !!id,
   })
 
-  if (!isValidId)
+  if (!id)
     return (
       <ErrorPage
         title="Erreur de chargement"

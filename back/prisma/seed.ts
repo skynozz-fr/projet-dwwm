@@ -44,10 +44,8 @@ async function main() {
   });
 
   // Create 2 matches
-  const match1 = await prisma.match.upsert({
-    where: { id: 1 },
-    update: {},
-    create: {
+  const match1 = await prisma.match.create({
+    data: {
       home_team: "FC Popcorn",
       away_team: "SC Butter",
       is_home: true,
@@ -61,10 +59,8 @@ async function main() {
     },
   });
 
-  const match2 = await prisma.match.upsert({
-    where: { id: 2 },
-    update: {},
-    create: {
+  const match2 = await prisma.match.create({
+    data: {
       home_team: "AS Caramel",
       away_team: "FC Popcorn",
       is_home: false,
@@ -83,10 +79,8 @@ async function main() {
   });
 
   // Create 2 news (authored by admin)
-  const news1 = await prisma.news.upsert({
-    where: { id: 1 },
-    update: {},
-    create: {
+  const news1 = await prisma.news.create({
+    data: {
       title: "Victoire éclatante en coupe : 3-1 contre AS Caramel",
       excerpt:
         "Le FC Popcorn a brillé hier soir en s'imposant 3-1 face à AS Caramel en quart de finale de coupe.",
@@ -97,10 +91,8 @@ async function main() {
     },
   });
 
-  const news2 = await prisma.news.upsert({
-    where: { id: 2 },
-    update: {},
-    create: {
+  const news2 = await prisma.news.create({
+    data: {
       title: "Match décisif ce samedi face à SC Butter",
       excerpt:
         "Rendez-vous au Stade du Maïs pour soutenir le FC Popcorn dans ce choc au sommet du championnat.",

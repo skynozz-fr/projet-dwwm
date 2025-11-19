@@ -16,7 +16,7 @@ export class MatchService {
   /**
    * Récupère un match par son ID
    */
-  async getMatchById(id: number) {
+  async getMatchById(id: string) {
     return await prisma.match.findUnique({
       where: { id },
     })
@@ -77,7 +77,7 @@ export class MatchService {
    * Met à jour un match
    */
   async updateMatch(
-    id: number,
+    id: string,
     data: {
       home_team?: string
       away_team?: string
@@ -111,7 +111,7 @@ export class MatchService {
   /**
    * Supprime un match
    */
-  async deleteMatch(id: number) {
+  async deleteMatch(id: string) {
     return await prisma.match.delete({
       where: { id },
     })
@@ -120,7 +120,7 @@ export class MatchService {
   /**
    * Vérifie si un match existe
    */
-  async matchExists(id: number): Promise<boolean> {
+  async matchExists(id: string): Promise<boolean> {
     const count = await prisma.match.count({
       where: { id },
     })

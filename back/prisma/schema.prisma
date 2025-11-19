@@ -41,7 +41,7 @@ enum MatchStatus {
 }
 
 model User {
-  id         Int      @id @default(autoincrement())
+  id         String   @id @default(uuid())
   firstname  String
   lastname   String
   email      String   @unique
@@ -53,11 +53,11 @@ model User {
 }
 
 model News {
-  id            Int           @id @default(autoincrement())
+  id            String        @id @default(uuid())
   title         String
   excerpt       String
   content       String         @db.Text
-  author_id     Int?
+  author_id     String?
   author        User?          @relation("UserNews", fields: [author_id], references: [id], onDelete: SetNull)
   category      NewsCategory   @default(OTHER)
   created_at    DateTime       @default(now())
@@ -65,7 +65,7 @@ model News {
 }
 
 model Match {
-  id            Int            @id @default(autoincrement())
+  id            String         @id @default(uuid())
   home_team     String
   away_team     String
   is_home       Boolean        @default(true)

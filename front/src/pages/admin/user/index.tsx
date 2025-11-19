@@ -15,6 +15,7 @@ import { ErrorPage } from "@/pages/errors/ErrorPage"
 import { usePagination } from "@/hooks/usePagination"
 import { useUrlFilter } from "@/hooks/useUrlFilter"
 import { useToast } from "@/hooks/useToast"
+import { useAuth } from "@/hooks/useAuth"
 import { searchItems } from "@/lib/utils"
 import { translateRole, roleFilterOptions } from "@/lib/user-helpers"
 import { getAllUsers, patchUserRole } from "@/services/user.service"
@@ -28,6 +29,7 @@ export const UsersAdmin = () => {
   const [roleAlertOpen, setRoleAlertOpen] = useState(false)
   const navigate = useNavigate()
   const { toast } = useToast()
+  const { user: currentUser, logout } = useAuth()
   const queryClient = useQueryClient()
 
   const [pendingRoleChange, setPendingRoleChange] = useState<{
@@ -70,7 +72,7 @@ export const UsersAdmin = () => {
 
   useEffect(() => { resetPagination() }, [deferredSearch, selectedRole]) // eslint-disable-line
 
-  const requestRoleChange = (userId: number, newRole: RoleType) => {
+  const requestRoleChange = (userId: string, newRole: RoleType) => {
     const user = users.find(u => u.id === userId)
     if (!user || user.role === newRole) return
     setPendingRoleChange({ user, newRole })
@@ -80,13 +82,25 @@ export const UsersAdmin = () => {
   // Mutation to change role
   const { mutate: changeRole, isPending: isRoleChanging } = useMutation({
     mutationKey: ["users", "change-role"],
-    mutationFn: ({ id, payload }: { id: number; payload: UserRolePayload }) => patchUserRole(id, payload),
+    mutationFn: ({ id, payload }: { id: string; payload: UserRolePayload }) => patchUserRole(id, payload),
     onSuccess: (updatedUser) => {
       toast.success(
         "Rôle modifié !",
         `${updatedUser.firstname} ${updatedUser.lastname} est maintenant ${translateRole(updatedUser.role)}.`
       )
       queryClient.invalidateQueries({ queryKey: ["users"] })
+      
+      // Si l'utilisateur modifié est l'utilisateur connecté et qu'il n'est plus admin
+      if (currentUser && updatedUser.id === currentUser.id && updatedUser.role !== "ADMIN") {
+        toast.warning(
+          "Déconnexion",
+          "Vos droits administrateur ont été révoqués. Vous allez être déconnecté."
+        )
+        setTimeout(() => {
+          logout()
+          navigate("/login")
+        }, 2000)
+      }
     },
     onError: () => {
       toast.error("Erreur", "Impossible de modifier le rôle.")

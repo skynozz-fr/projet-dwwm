@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { verifyToken } from "../utils/auth";
 
 export interface AuthedRequest extends Request {
-  user?: { id: number; email: string; role: "USER" | "ADMIN" };
+  user?: { id: string; email: string; role: "USER" | "ADMIN" };
 }
 
 /**

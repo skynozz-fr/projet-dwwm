@@ -35,7 +35,7 @@ export const MatchsAdmin = () => {
     useUrlFilter({ paramName: "competition" })
 
   const [deleteAlertOpen, setDeleteAlertOpen] = useState(false)
-  const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null)
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
   const [addAlertOpen, setAddAlertOpen] = useState(false)
 
   const competition =
@@ -71,7 +71,7 @@ export const MatchsAdmin = () => {
 
   React.useEffect(() => { resetPagination() }, [deferredSearch, selectedCompetition]) // eslint-disable-line
 
-  const requestDelete = (id: number) => {
+  const requestDelete = (id: string) => {
     setDeleteTargetId(id)
     setDeleteAlertOpen(true)
   }
@@ -79,7 +79,7 @@ export const MatchsAdmin = () => {
   // Delete mutation
   const { mutate: deleteMutate, isPending: isDeleting } = useMutation({
     mutationKey: ["matches", "delete"],
-    mutationFn: (id: number) => deleteMatch(id),
+    mutationFn: (id: string) => deleteMatch(id),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["matches"] })
       toast.success("Match supprimé !", "Le match a bien été supprimé.")

@@ -19,11 +19,7 @@ export class UserController {
    */
   async getUserById(req: Request, res: Response, next: NextFunction) {
     try {
-      const id = Number(req.params.id);
-      
-      if (isNaN(id)) {
-        return res.status(400).json({ error: "ID invalide" });
-      }
+      const id = req.params.id;
 
       const user = await userService.getUserById(id);
       
@@ -42,12 +38,8 @@ export class UserController {
    */
   async updateUserRole(req: Request, res: Response, next: NextFunction) {
     try {
-      const id = Number(req.params.id);
+      const id = req.params.id;
       const { role } = req.body;
-
-      if (isNaN(id)) {
-        return res.status(400).json({ error: "ID invalide" });
-      }
 
       const allowedRoles = ["USER", "ADMIN"] as const;
       if (!allowedRoles.includes(role)) {
@@ -89,11 +81,7 @@ export class UserController {
    */
   async deleteUser(req: Request, res: Response, next: NextFunction) {
     try {
-      const id = Number(req.params.id);
-
-      if (isNaN(id)) {
-        return res.status(400).json({ error: "ID invalide" });
-      }
+      const id = req.params.id;
 
       await userService.deleteUser(id);
       res.status(204).send();

@@ -7,7 +7,7 @@ export class UserService {
    */
   async getAllUsers() {
     return await prisma.user.findMany({ 
-      orderBy: { id: "asc" },
+      orderBy: { created_at: "desc" },
       select: {
         id: true,
         firstname: true,
@@ -22,7 +22,7 @@ export class UserService {
   /**
    * Récupère un utilisateur par son ID
    */
-  async getUserById(id: number) {
+  async getUserById(id: string) {
     return await prisma.user.findUnique({ 
       where: { id },
       select: {
@@ -42,7 +42,7 @@ export class UserService {
   async getUsersByRole(role: Role) {
     return await prisma.user.findMany({ 
       where: { role },
-      orderBy: { id: "asc" },
+      orderBy: { created_at: "desc" },
       select: {
         id: true,
         firstname: true,
@@ -94,7 +94,7 @@ export class UserService {
   /**
    * Met à jour le rôle d'un utilisateur
    */
-  async updateUserRole(id: number, role: Role) {
+  async updateUserRole(id: string, role: Role) {
     return await prisma.user.update({
       where: { id },
       data: { role },
@@ -112,7 +112,7 @@ export class UserService {
   /**
    * Supprime un utilisateur
    */
-  async deleteUser(id: number) {
+  async deleteUser(id: string) {
     return await prisma.user.delete({ where: { id } });
   }
 

@@ -26,7 +26,7 @@ export class NewsService {
   /**
    * Récupère une actualité par son ID
    */
-  async getNewsById(id: number) {
+  async getNewsById(id: string) {
     return await prisma.news.findUnique({
       where: { id },
       include: {
@@ -69,7 +69,7 @@ export class NewsService {
    */
   async createNews(data: {
     title: string;
-    author_id: number;
+    author_id: string;
     category: NewsCategory;
     excerpt: string;
     content: string;
@@ -93,7 +93,7 @@ export class NewsService {
    * Met à jour une actualité
    */
   async updateNews(
-    id: number,
+    id: string,
     data: {
       title?: string;
       category?: NewsCategory;
@@ -120,7 +120,7 @@ export class NewsService {
   /**
    * Supprime une actualité
    */
-  async deleteNews(id: number) {
+  async deleteNews(id: string) {
     return await prisma.news.delete({
       where: { id },
     });
@@ -129,7 +129,7 @@ export class NewsService {
   /**
    * Vérifie si une actualité existe
    */
-  async newsExists(id: number): Promise<boolean> {
+  async newsExists(id: string): Promise<boolean> {
     const count = await prisma.news.count({
       where: { id },
     });

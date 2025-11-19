@@ -7,16 +7,16 @@ export const getAllUsers = async (role?: Role): Promise<User[]> => {
   return data;
 };
 
-export const getUser = async (id: number) => {
+export const getUser = async (id: string) => {
   const { data } = await api.get<User>(`/user/${id}`);
   return data;
 };
 
-export const patchUserRole = async (id: number, payload: UserRolePayload) => {
+export const patchUserRole = async (id: string, payload: UserRolePayload) => {
   const { data } = await api.patch<User>(`/user/${id}/role`, payload);
   return data;
 };
 
-export const deleteUser = async (id: number) => {
+export const deleteUser = async (id: string) => {
   await api.delete(`/user/${id}`);
 };

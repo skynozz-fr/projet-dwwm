@@ -33,7 +33,7 @@ export const NewsAdmin = () => {
     useUrlFilter({ paramName: "category" })
 
   const [deleteAlertOpen, setDeleteAlertOpen] = useState(false)
-  const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null)
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
   const [addAlertOpen, setAddAlertOpen] = useState(false)
 
   // Data fetching with React Query
@@ -69,7 +69,7 @@ export const NewsAdmin = () => {
 
   React.useEffect(() => { resetPagination() }, [deferredSearch, selectedCategory]) // eslint-disable-line
 
-  const requestDelete = (id: number) => {
+  const requestDelete = (id: string) => {
     setDeleteTargetId(id)
     setDeleteAlertOpen(true)
   }
@@ -77,7 +77,7 @@ export const NewsAdmin = () => {
   // Delete mutation
   const { mutate: deleteMutate, isPending: isDeleting } = useMutation({
     mutationKey: ["news", "delete"],
-    mutationFn: (id: number) => deleteNews(id),
+    mutationFn: (id: string) => deleteNews(id),
     onSuccess: () => {
       toast.success("Actualité supprimée !", "L'actualité a bien été supprimée.")
       queryClient.invalidateQueries({ queryKey: ["news"] })

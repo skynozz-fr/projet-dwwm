@@ -68,7 +68,7 @@ export class AuthService {
   /**
    * Récupère le profil de l'utilisateur authentifié
    */
-  async getProfile(userId: number) {
+  async getProfile(userId: string) {
     const user = await userService.getUserById(userId);
     
     if (!user) {

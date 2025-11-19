@@ -7,7 +7,7 @@ export const getAllMatches = async (competition?: MatchCompetition): Promise<Mat
   return data
 }
 
-export const getMatchById = async (id: number): Promise<Match> => {
+export const getMatchById = async (id: string): Promise<Match> => {
   const { data } = await api.get<Match>(`/match/${id}`)
   return data
 }
@@ -18,13 +18,13 @@ export const createMatch = async (payload: MatchPayload): Promise<Match> => {
 }
 
 export const updateMatch = async (
-  id: number,
+  id: string,
   payload: Partial<MatchPayload>
 ): Promise<Match> => {
   const { data } = await api.patch<Match>(`/match/${id}`, payload)
   return data
 }
 
-export const deleteMatch = async (id: number): Promise<void> => {
+export const deleteMatch = async (id: string): Promise<void> => {
   await api.delete(`/match/${id}`)
 }

@@ -25,7 +25,6 @@ export const NewsForm = () => {
   const isEditing = !!id
   const { toast } = useToast()
   const queryClient = useQueryClient()
-  const numericId = isEditing ? Number(id) : null
   const [formData, setFormData] = useState({
     title: "",
     category: "" as NewsCategory | "",
@@ -40,9 +39,9 @@ export const NewsForm = () => {
     isError,
     refetch,
   } = useQuery<NewsType>({
-    queryKey: ["news", numericId],
-    queryFn: () => getNewsById(numericId as number),
-    enabled: isEditing && numericId !== null && !Number.isNaN(numericId),
+    queryKey: ["news", id],
+    queryFn: () => getNewsById(id as string),
+    enabled: isEditing && !!id,
   })
 
   useEffect(() => {
@@ -76,7 +75,7 @@ export const NewsForm = () => {
 
   const { mutate: updateMutation, isPending: isUpdating } = useMutation({
     mutationKey: ["news", "update"],
-    mutationFn: ({ id, payload }: { id: number; payload: NewsPayload }) => updateNews(id, payload),
+    mutationFn: ({ id, payload }: { id: string; payload: NewsPayload }) => updateNews(id, payload),
     onSuccess: () => {
       toast.success("Actualité modifiée !", "Les modifications ont été enregistrées.")
       queryClient.invalidateQueries({ queryKey: ["news"] })
@@ -100,7 +99,7 @@ export const NewsForm = () => {
       content: formData.content,
     }
 
-    if (isEditing && numericId) updateMutation({ id: numericId, payload })
+    if (isEditing && id) updateMutation({ id, payload })
     else createMutation(payload)
 
     setSaveAlertOpen(false)

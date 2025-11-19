@@ -19,21 +19,18 @@ export const MatchDetail = () => {
   const navigate = useNavigate()
   const { toast } = useToast()
 
-  const matchId = Number(id)
-  const isValidId = !Number.isNaN(matchId)
-
   const {
     data: match,
     isPending,
     isError,
     refetch,
   } = useQuery<MatchType>({
-    queryKey: ["match", matchId],
-    queryFn: () => getMatchById(matchId),
-    enabled: isValidId,
+    queryKey: ["match", id],
+    queryFn: () => getMatchById(id as string),
+    enabled: !!id,
   })
 
-  if (!isValidId) {
+  if (!id) {
     return (
       <ErrorPage
         title="Erreur de chargement"

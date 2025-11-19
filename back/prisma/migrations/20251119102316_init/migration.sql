@@ -12,7 +12,7 @@ CREATE TYPE "MatchStatus" AS ENUM ('SCHEDULED', 'ONGOING', 'COMPLETED', 'POSTPON
 
 -- CreateTable
 CREATE TABLE "User" (
-    "id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "firstname" TEXT NOT NULL,
     "lastname" TEXT NOT NULL,
     "email" TEXT NOT NULL,
@@ -26,11 +26,11 @@ CREATE TABLE "User" (
 
 -- CreateTable
 CREATE TABLE "News" (
-    "id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "excerpt" TEXT NOT NULL,
     "content" TEXT NOT NULL,
-    "author_id" INTEGER,
+    "author_id" TEXT,
     "category" "NewsCategory" NOT NULL DEFAULT 'OTHER',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
@@ -40,7 +40,7 @@ CREATE TABLE "News" (
 
 -- CreateTable
 CREATE TABLE "Match" (
-    "id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "home_team" TEXT NOT NULL,
     "away_team" TEXT NOT NULL,
     "is_home" BOOLEAN NOT NULL DEFAULT true,

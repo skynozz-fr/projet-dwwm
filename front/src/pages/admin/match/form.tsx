@@ -31,7 +31,6 @@ export const MatchForm = () => {
   const queryClient = useQueryClient()
   
   const isEditing = !!id
-  const numericId = isEditing ? Number(id) : null
   const [saveAlertOpen, setSaveAlertOpen] = useState(false)
   
   const [formData, setFormData] = useState({
@@ -58,9 +57,9 @@ export const MatchForm = () => {
     isError,
     refetch,
   } = useQuery({
-    queryKey: ["match", numericId],
-    queryFn: () => getMatchById(numericId as number),
-    enabled: isEditing && numericId !== null && !Number.isNaN(numericId),
+    queryKey: ["match", id],
+    queryFn: () => getMatchById(id as string),
+    enabled: isEditing && !!id,
   })
 
   // Populate form when match data loads
@@ -102,7 +101,7 @@ export const MatchForm = () => {
 
   const { mutate: updateMutation, isPending: isUpdating } = useMutation({
     mutationKey: ["matches", "update"],
-    mutationFn: ({ id, payload }: { id: number; payload: MatchPayload }) => updateMatch(id, payload),
+    mutationFn: ({ id, payload }: { id: string; payload: MatchPayload }) => updateMatch(id, payload),
     onSuccess: () => {
       toast.success("Match modifié !", "Les modifications ont été enregistrées.")
       queryClient.invalidateQueries({ queryKey: ["matches"] })
@@ -144,7 +143,7 @@ export const MatchForm = () => {
       weather: formData.weather || null,
     }
 
-  if (isEditing && numericId) updateMutation({ id: numericId, payload })
+  if (isEditing && id) updateMutation({ id, payload })
     else createMutation(payload)
     
     setSaveAlertOpen(false)

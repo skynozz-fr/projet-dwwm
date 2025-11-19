@@ -21,11 +21,7 @@ export class MatchController {
    */
   async getMatchById(req: Request, res: Response, next: NextFunction) {
     try {
-      const id = parseInt(req.params.id)
-
-      if (isNaN(id)) {
-        return res.status(400).json({ error: "ID invalide" })
-      }
+      const id = req.params.id
 
       const match = await matchService.getMatchById(id)
 
@@ -132,11 +128,7 @@ export class MatchController {
         return res.status(401).json({ error: "Non authentifié" })
       }
 
-      const id = parseInt(req.params.id)
-
-      if (isNaN(id)) {
-        return res.status(400).json({ error: "ID invalide" })
-      }
+      const id = req.params.id
 
       const exists = await matchService.matchExists(id)
       if (!exists) {
@@ -203,11 +195,7 @@ export class MatchController {
         return res.status(401).json({ error: "Non authentifié" })
       }
 
-      const id = parseInt(req.params.id)
-
-      if (isNaN(id)) {
-        return res.status(400).json({ error: "ID invalide" })
-      }
+      const id = req.params.id
 
       const exists = await matchService.matchExists(id)
       if (!exists) {

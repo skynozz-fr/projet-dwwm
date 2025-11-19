@@ -19,7 +19,7 @@ export type MatchPayload = {
 }
 
 export type Match = {
-  id: number
+  id: string
   home_team: string
   away_team: string
   is_home: boolean

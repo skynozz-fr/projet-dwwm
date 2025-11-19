@@ -10,11 +10,11 @@ export type NewsPayload = {
 }
 
 export type News = {
-  id: number
+  id: string
   title: string
   excerpt: string
   content: string
-  author_id: number | null
+  author_id: string | null
   author?: User
   category: NewsCategory
   created_at: string

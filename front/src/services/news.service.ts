@@ -7,7 +7,7 @@ export const getAllNews = async (category?: NewsCategory): Promise<News[]> => {
   return data;
 };
 
-export const getNewsById = async (id: number): Promise<News> => {
+export const getNewsById = async (id: string): Promise<News> => {
   const { data } = await api.get<News>(`/news/${id}`);
   return data;
 };
@@ -18,13 +18,13 @@ export const createNews = async (payload: NewsPayload): Promise<News> => {
 };
 
 export const updateNews = async (
-  id: number,
+  id: string,
   payload: Partial<NewsPayload>
 ): Promise<News> => {
   const { data } = await api.patch<News>(`/news/${id}`, payload);
   return data;
 };
 
-export const deleteNews = async (id: number): Promise<void> => {
+export const deleteNews = async (id: string): Promise<void> => {
   await api.delete(`/news/${id}`);
 };
