@@ -1,7 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import { verifyToken } from "../lib/auth";
 
-export interface AuthedRequest extends Request {
+/** 
+ * Requête Express avec, si présent, les infos utilisateur récupérées du token
+ */
+export type AuthedRequest = Request & {
   user?: { id: string; email: string; role: "USER" | "ADMIN" };
 }
 
