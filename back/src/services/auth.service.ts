@@ -1,5 +1,5 @@
 import { userService } from "./user.service";
-import { hashPassword, comparePassword, signToken } from "../utils/auth";
+import { hashPassword, comparePassword, signToken } from "../lib/auth";
 
 export class AuthService {
   /**

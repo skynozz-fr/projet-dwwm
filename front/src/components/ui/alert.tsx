@@ -52,10 +52,10 @@ export const Alert = ({
           )}
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={handleCancel}>
+          <AlertDialogCancel onClick={handleCancel} className="cursor-pointer hover:bg-ghost transition-opacity">
             {cancelText}
           </AlertDialogCancel>
-          <AlertDialogAction onClick={handleConfirm}>
+          <AlertDialogAction onClick={handleConfirm} className="cursor-pointer hover:bg-primary transition-opacity">
             {confirmText}
           </AlertDialogAction>
         </AlertDialogFooter>

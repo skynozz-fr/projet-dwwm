@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { verifyToken } from "../utils/auth";
+import { verifyToken } from "../lib/auth";
 
 export interface AuthedRequest extends Request {
   user?: { id: string; email: string; role: "USER" | "ADMIN" };

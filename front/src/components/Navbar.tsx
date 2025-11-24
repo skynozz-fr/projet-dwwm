@@ -90,8 +90,13 @@ export const Navbar = () => {
                 <NavigationMenuList className="flex-col items-start gap-0 md:gap-2">
                   {filteredRoutes.map((link, index) => (
                     <NavigationMenuItem key={index} className="w-full">
-                      <NavigationMenuLink asChild className="py-1.5">
-                        <Link to={link.path}>
+                      <NavigationMenuLink
+                        asChild
+                        className={`w-full rounded-sm px-2 py-1.5 font-medium text-muted-foreground hover:text-primary transition-colors ${
+                          isActiveRoute(link.path) ? 'text-primary' : ''
+                        }`}
+                      >
+                        <Link to={link.path} className="w-full block">
                           {link.label}
                         </Link>
                       </NavigationMenuLink>

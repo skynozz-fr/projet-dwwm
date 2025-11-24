@@ -88,7 +88,7 @@ export const AdminLayout = () => {
                   onClick={() => handleNavigate(tab.action)}
                   className={`
                     w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left
-                    transition-all duration-200 group relative
+                    transition-all duration-200 group relative cursor-pointer
                     ${active 
                       ? 'bg-primary text-primary-foreground shadow-lg shadow-primary' 
                       : 'hover:bg-ghost text-foreground hover:shadow-md'
