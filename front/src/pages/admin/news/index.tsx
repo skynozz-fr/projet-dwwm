@@ -19,6 +19,7 @@ import { useUrlFilter } from "@/hooks/useUrlFilter"
 import { searchItems, formatDate } from "@/lib/utils"
 import { getNewsColor, translateNewsCategory, categoryFilterOptions } from "@/lib/news-helpers"
 import { getAllNews, deleteNews } from "@/services/news.service"
+import { Edit3 } from "lucide-react"
 
 import type { News as NewsType } from "@/types/news"
 
@@ -153,6 +154,12 @@ export const NewsAdmin = () => {
                 <div className="text-xs text-muted-foreground">
                   Par {news.author ? `${news.author.firstname} ${news.author.lastname}` : "Auteur inconnu"} • {formatDate(news.created_at)}
                 </div>
+                {news.updated_by && news.updated_by_id !== news.author_id && (
+                  <div className="flex items-center gap-1 text-xs text-info-foreground mt-1">
+                    <Edit3 className="w-3 h-3" />
+                    <span>Modifié par {news.updated_by.firstname} {news.updated_by.lastname}</span>
+                  </div>
+                )}
               </div>
               <div className="flex gap-2 md:ml-4 shrink-0">
                 <Button 

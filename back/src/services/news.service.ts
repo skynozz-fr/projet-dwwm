@@ -16,6 +16,14 @@ export class NewsService {
             email: true,
           },
         },
+        updated_by: {
+          select: {
+            id: true,
+            firstname: true,
+            lastname: true,
+            email: true,
+          },
+        },
       },
       orderBy: {
         created_at: "desc",
@@ -38,6 +46,14 @@ export class NewsService {
             email: true,
           },
         },
+        updated_by: {
+          select: {
+            id: true,
+            firstname: true,
+            lastname: true,
+            email: true,
+          },
+        },
       },
     });
   }
@@ -50,6 +66,14 @@ export class NewsService {
       where: { category },
       include: {
         author: {
+          select: {
+            id: true,
+            firstname: true,
+            lastname: true,
+            email: true,
+          },
+        },
+        updated_by: {
           select: {
             id: true,
             firstname: true,
@@ -85,6 +109,14 @@ export class NewsService {
             email: true,
           },
         },
+        updated_by: {
+          select: {
+            id: true,
+            firstname: true,
+            lastname: true,
+            email: true,
+          },
+        },
       },
     });
   }
@@ -99,6 +131,7 @@ export class NewsService {
       category?: NewsCategory;
       excerpt?: string;
       content?: string;
+      updated_by_id?: string;
     }
   ) {
     return await prisma.news.update({
@@ -106,6 +139,14 @@ export class NewsService {
       data,
       include: {
         author: {
+          select: {
+            id: true,
+            firstname: true,
+            lastname: true,
+            email: true,
+          },
+        },
+        updated_by: {
           select: {
             id: true,
             firstname: true,

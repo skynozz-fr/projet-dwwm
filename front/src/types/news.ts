@@ -16,6 +16,8 @@ export type News = {
   content: string
   author_id: string | null
   author?: User
+  updated_by_id?: string | null
+  updated_by?: User
   category: NewsCategory
   created_at: string
   updated_at?: string

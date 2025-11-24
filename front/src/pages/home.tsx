@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom"
-import { AlertCircle, Calendar, Clock, MapPin, Target, Trophy, User } from "lucide-react"
+import { AlertCircle, Calendar, Clock, MapPin, Target, Trophy, User, Edit3 } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 import type { AxiosError } from "axios"
 
@@ -221,6 +221,12 @@ export const Home = () => {
                           {authorName}
                         </div>
                       </div>
+                      {it.updated_by && it.updated_by_id !== it.author_id && (
+                        <div className="flex items-center gap-1 text-xs text-info-foreground mb-2">
+                          <Edit3 className="w-3 h-3" />
+                          <span>Modifié par {it.updated_by.firstname} {it.updated_by.lastname}</span>
+                        </div>
+                      )}
 
                       <p className="text-muted-foreground mb-4 line-clamp-3 flex-1">{it.excerpt}</p>
 

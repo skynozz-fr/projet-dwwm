@@ -6,7 +6,7 @@ import { Loader } from "@/components/Loader"
 import { ErrorPage } from "../errors/ErrorPage"
 import { NotFound } from "../errors/NotFound"
 
-import { Calendar, ArrowLeft, BookOpen, User } from "lucide-react"
+import { Calendar, ArrowLeft, BookOpen, User, Edit3 } from "lucide-react"
 
 import { copyToClipboardWithToast, formatDate } from "@/lib/utils"
 import { getNewsIcon, getNewsColor, translateNewsCategory } from "@/lib/news-helpers"
@@ -91,6 +91,12 @@ export const NewsDetail = () => {
                 </div>
               )}
             </div>
+            {news.updated_by && news.updated_by_id !== news.author_id && (
+              <div className="mx-auto mt-3 flex w-fit items-center justify-center gap-1.5 text-sm text-info-foreground">
+                <Edit3 className="w-4 h-4" />
+                <span>Modifié par {news.updated_by.firstname} {news.updated_by.lastname}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>

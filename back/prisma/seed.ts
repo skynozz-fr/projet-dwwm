@@ -43,19 +43,21 @@ async function main() {
     },
   });
 
-  // Create 2 matches
+  // Create 6 matches (mix of completed & scheduled)
   const match1 = await prisma.match.create({
     data: {
       home_team: "FC Popcorn",
       away_team: "SC Butter",
       is_home: true,
-      date: new Date("2025-11-15"),
+      date: new Date("2025-11-26"),
       time: "15:00",
       venue: "Stade du Maïs",
       location: "Popcorn City",
       competition: "LEAGUE",
       status: "SCHEDULED",
-      description: "Match de championnat crucial pour la première place",
+      description: "Affiche pour la 12e journée : duel pour la tête du classement",
+      referee: "J. Martin",
+      weather: "Frais, couvert",
     },
   });
 
@@ -64,28 +66,98 @@ async function main() {
       home_team: "AS Caramel",
       away_team: "FC Popcorn",
       is_home: false,
-      date: new Date("2025-11-08"),
-      time: "18:30",
+      date: new Date("2025-11-20"),
+      time: "20:45",
       venue: "Arena Sucrée",
       location: "Sweet Town",
       competition: "CUP",
       status: "COMPLETED",
       home_score: 1,
       away_score: 3,
-      description: "Victoire éclatante en quart de finale de coupe !",
+      description: "Quart de finale : qualification solide avec un jeu maîtrisé",
       referee: "M. Kernelle",
-      weather: "Ensoleillé",
+      weather: "Sec, 8°C",
     },
   });
 
-  // Create 2 news (authored by admin)
+  const match3 = await prisma.match.create({
+    data: {
+      home_team: "FC Popcorn",
+      away_team: "Grain United",
+      is_home: true,
+      date: new Date("2025-11-18"),
+      time: "18:30",
+      venue: "Stade du Maïs",
+      location: "Popcorn City",
+      competition: "LEAGUE",
+      status: "COMPLETED",
+      home_score: 2,
+      away_score: 2,
+      description: "Match accroché : égalisation dans le temps additionnel",
+      referee: "S. Lefèvre",
+      weather: "Pluie légère",
+    },
+  });
+
+  const match4 = await prisma.match.create({
+    data: {
+      home_team: "Popcorn City",
+      away_team: "FC Popcorn",
+      is_home: false,
+      date: new Date("2025-11-14"),
+      time: "14:00",
+      venue: "Centre Sportif Municipal",
+      location: "Popcorn City",
+      competition: "FRIENDLY",
+      status: "COMPLETED",
+      home_score: 0,
+      away_score: 4,
+      description: "Match amical pour faire tourner l'effectif : clean sheet",
+      referee: "A. Roche",
+      weather: "Ensoleillé, 12°C",
+    },
+  });
+
+  const match5 = await prisma.match.create({
+    data: {
+      home_team: "FC Popcorn",
+      away_team: "Maïs Athletic",
+      is_home: true,
+      date: new Date("2025-12-02"),
+      time: "21:00",
+      venue: "Stade du Maïs",
+      location: "Popcorn City",
+      competition: "LEAGUE",
+      status: "SCHEDULED",
+      description: "Rencontre importante avant la trêve : objectif victoire",
+      referee: "T. Gravier",
+      weather: "Froid attendu",
+    },
+  });
+
+  const match6 = await prisma.match.create({
+    data: {
+      home_team: "FC Popcorn",
+      away_team: "Butter Royals",
+      is_home: true,
+      date: new Date("2025-12-10"),
+      time: "19:00",
+      venue: "Stade du Maïs",
+      location: "Popcorn City",
+      competition: "TOURNAMENT",
+      status: "SCHEDULED",
+      description: "Tournoi d'hiver : entrée en lice contre un rival historique",
+      referee: "L. Perrin",
+      weather: "Froid sec",
+    },
+  });
+
+  // Create 6 news (authored by admin)
   const news1 = await prisma.news.create({
     data: {
-      title: "Victoire éclatante en coupe : 3-1 contre AS Caramel",
-      excerpt:
-        "Le FC Popcorn a brillé hier soir en s'imposant 3-1 face à AS Caramel en quart de finale de coupe.",
-      content:
-        "Une performance remarquable de nos joueurs qui ont dominé le match de bout en bout. Nos attaquants ont été particulièrement efficaces avec un triplé en seconde mi-temps. Cette victoire nous propulse en demi-finale et confirme notre excellente forme du moment. Le coach a salué l'état d'esprit combatif de l'équipe.",
+      title: "Qualification méritée en coupe face à AS Caramel",
+      excerpt: "Victoire 3-1 : solidité défensive et réalisme offensif.",
+      content: "Le FC Popcorn s'est imposé 3-1 à l'extérieur grâce à une prestation collective sérieuse. Après une entame prudente, l'équipe a accéléré au retour des vestiaires. Le coach a salué l'attitude et l'engagement de tous les joueurs.",
       category: "MATCH",
       author_id: admin.id,
     },
@@ -93,12 +165,50 @@ async function main() {
 
   const news2 = await prisma.news.create({
     data: {
-      title: "Match décisif ce samedi face à SC Butter",
-      excerpt:
-        "Rendez-vous au Stade du Maïs pour soutenir le FC Popcorn dans ce choc au sommet du championnat.",
-      content:
-        "Ce samedi 15 novembre à 15h, le FC Popcorn affrontera son rival SC Butter dans un match qui pourrait décider du leader du championnat. Nos joueurs comptent sur votre soutien massif dans les tribunes. Les billets sont disponibles à la billetterie et en ligne. Ambiance garantie pour ce derby tant attendu !",
+      title: "Match nul frustrant mais encourageant contre Grain United",
+      excerpt: "2-2 : égalisation tardive qui évite la défaite.",
+      content: "Un match intense où le FC Popcorn a montré du caractère en revenant au score dans les dernières secondes. Le staff souligne la capacité mentale du groupe à ne jamais abandonner.",
       category: "MATCH",
+      author_id: admin.id,
+    },
+  });
+
+  const news3 = await prisma.news.create({
+    data: {
+      title: "Large succès en amical : rotation réussie",
+      excerpt: "Victoire 4-0 : les remplaçants ont répondu présent.",
+      content: "Dans un match de préparation, plusieurs jeunes joueurs ont eu leur chance et ont impressionné par leur dynamique et leur discipline tactique. De bon augure pour la suite de la saison.",
+      category: "MATCH",
+      author_id: admin.id,
+    },
+  });
+
+  const news4 = await prisma.news.create({
+    data: {
+      title: "Rumeur de transfert : un milieu ciblé pour janvier",
+      excerpt: "Le club explore le marché pour renforcer l'entrejeu.",
+      content: "Selon plusieurs sources internes, le FC Popcorn étudie la possibilité d'ajouter un milieu relayeur technique pour anticiper la deuxième partie de saison. Aucune offre officielle n'a encore été formulée mais des discussions préliminaires existent.",
+      category: "TRANSFER",
+      author_id: admin.id,
+    },
+  });
+
+  const news5 = await prisma.news.create({
+    data: {
+      title: "Point santé : effectif presque au complet",
+      excerpt: "Seul un joueur en reprise individuelle cette semaine.",
+      content: "Le staff médical a confirmé que la majorité des petits pépins musculaires sont résorbés. Le groupe devrait être presque complet pour le prochain match de championnat, hormis un joueur encore en phase de réathlétisation.",
+      category: "OTHER",
+      author_id: admin.id,
+    },
+  });
+
+  const news6 = await prisma.news.create({
+    data: {
+      title: "Focus sur la formation : trois jeunes avec le groupe pro",
+      excerpt: "Intégration progressive de talents issus de l'académie.",
+      content: "Le club poursuit sa stratégie d'intégration des jeunes en invitant trois espoirs à s'entraîner régulièrement avec le groupe professionnel. Objectif : leur offrir un cadre exigeant tout en accélérant leur adaptation au niveau supérieur.",
+      category: "OTHER",
       author_id: admin.id,
     },
   });
@@ -106,14 +216,8 @@ async function main() {
   console.log("Seed complete:", {
     admin: { id: admin.id, email: admin.email, role: admin.role },
     user: { id: user.id, email: user.email, role: user.role },
-    matches: [
-      { id: match1.id, home_team: match1.home_team, away_team: match1.away_team },
-      { id: match2.id, home_team: match2.home_team, away_team: match2.away_team },
-    ],
-    news: [
-      { id: news1.id, title: news1.title },
-      { id: news2.id, title: news2.title },
-    ],
+    matches: [match1, match2, match3, match4, match5, match6].map(m => ({ id: m.id, home_team: m.home_team, away_team: m.away_team, status: m.status })),
+    news: [news1, news2, news3, news4, news5, news6].map(n => ({ id: n.id, title: n.title, category: n.category })),
   });
 }
 

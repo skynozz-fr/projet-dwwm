@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useDeferredValue } from "react"
 import { useNavigate } from "react-router-dom"
-import { Zap, Calendar, User } from "lucide-react"
+import { Zap, Calendar, User, Edit3 } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 
 import { Button } from "@/components/Button"
@@ -173,6 +173,12 @@ export const News = () => {
                             {authorName}
                           </div>
                         </div>
+                        {news.updated_by && news.updated_by_id !== news.author_id && (
+                          <div className="flex items-center gap-1 text-xs text-info-foreground mb-2">
+                            <Edit3 className="w-3 h-3" />
+                            <span>Modifié par {news.updated_by.firstname} {news.updated_by.lastname}</span>
+                          </div>
+                        )}
 
                         <p className="text-muted-foreground mb-4 line-clamp-3 flex-1">
                           {news.excerpt}

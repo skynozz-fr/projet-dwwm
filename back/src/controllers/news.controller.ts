@@ -118,6 +118,7 @@ export class NewsController {
       if (category) updateData.category = category.toUpperCase() as NewsCategory;
       if (excerpt) updateData.excerpt = excerpt;
       if (content) updateData.content = content;
+      updateData.updated_by_id = req.user.id;
 
       const news = await newsService.updateNews(id, updateData);
 
