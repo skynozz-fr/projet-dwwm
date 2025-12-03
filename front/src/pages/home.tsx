@@ -7,7 +7,7 @@ import { Button } from "@/components/Button"
 import { Card } from "@/components/ui/card"
 import { Loader } from "@/components/Loader"
 
-import { formatDate, getLatestItems, getUpcomingItems } from "@/lib/utils"
+import { formatDate, formatTime, getLatestItems, getUpcomingItems } from "@/lib/utils"
 import { getCompetitionColor } from "@/lib/match-helpers"
 import { getNewsColor, getNewsIcon, translateNewsCategory } from "@/lib/news-helpers"
 
@@ -126,7 +126,7 @@ export const Home = () => {
                     </span>
                     <div className="flex items-center text-muted-foreground text-sm">
                       <Calendar className="w-4 h-4 mr-1" />
-                      {formatDate(match.date)}
+                      {formatDate(match.datetime)}
                     </div>
                   </div>
 
@@ -143,7 +143,7 @@ export const Home = () => {
                   <div className="space-y-2 text-sm text-muted-foreground">
                     <div className="flex items-center">
                       <Clock className="w-4 h-4 mr-2" />
-                      {match.time}
+                      {formatTime(match.datetime)}
                     </div>
                     <div className="flex items-center">
                       <MapPin className="w-4 h-4 mr-2" />

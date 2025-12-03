@@ -28,6 +28,7 @@ import {
   getCompetitionDotColor,
 } from "@/lib/calendar-helpers"
 import { translateCompetition } from "@/lib/match-helpers"
+import { formatTime } from "@/lib/utils"
 
 import type { Match as MatchType } from "@/types/match"
 
@@ -113,7 +114,7 @@ export const Calendar = () => {
                     match.competition
                   )} hover:scale-150 transition-transform`}
                   title={`${match.is_home ? "Domicile" : "Extérieur"} vs ${opponent} - ${
-                    match.time
+                    formatTime(match.datetime)
                   } - ${translateCompetition(match.competition)}`}
                 />
               )
@@ -134,7 +135,7 @@ export const Calendar = () => {
                   )} shadow-sm hover:scale-[1.03] cursor-pointer`}
                   style={{ minHeight: 38 }}
                   title={`${match.is_home ? "Domicile" : "Extérieur"} vs ${opponent} - ${
-                    match.time
+                    formatTime(match.datetime)
                   }`}
                 >
                   <span className="text-xs font-bold text-foreground mb-1 truncate flex items-center gap-2 w-full justify-center">
@@ -150,7 +151,7 @@ export const Calendar = () => {
                       match.competition
                     )}`}
                   >
-                    {match.time}
+                    {formatTime(match.datetime)}
                   </span>
                 </button>
               )

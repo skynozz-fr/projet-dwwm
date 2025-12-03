@@ -7,7 +7,7 @@ import { Loader } from "@/components/Loader"
 import { ErrorPage } from "../errors/ErrorPage"
 import { NotFound } from "../errors/NotFound"
 
-import { copyToClipboardWithToast, formatDate } from "@/lib/utils"
+import { copyToClipboardWithToast, formatDateTime, formatTime } from "@/lib/utils"
 import { getCompetitionColor, translateCompetition, translateMatchStatus } from "@/lib/match-helpers"
 import { getMatchById } from "@/services/match.service"
 import { useToast } from "@/hooks/useToast"
@@ -81,7 +81,7 @@ export const MatchDetail = () => {
             </h1>
             <div className="flex items-center justify-center text-background/90 text-lg">
               <Calendar className="w-5 h-5 mr-2" />
-              {formatDate(match.date)} - {match.time}
+              {formatDateTime(match.datetime)}
             </div>
           </div>
         </div>
@@ -139,7 +139,7 @@ export const MatchDetail = () => {
                 <div className="space-y-3">
                   <div className="flex items-center">
                     <Clock className="w-5 h-5 text-primary mr-3" />
-                    <span className="text-foreground">Coup d'envoi : {match.time}</span>
+                    <span className="text-foreground">Coup d'envoi : {formatTime(match.datetime)}</span>
                   </div>
                   <div className="flex items-center">
                     <MapPin className="w-5 h-5 text-primary mr-3" />

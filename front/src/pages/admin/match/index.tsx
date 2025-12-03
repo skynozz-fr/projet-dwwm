@@ -17,7 +17,7 @@ import { useToast } from "@/hooks/useToast"
 import { usePagination } from "@/hooks/usePagination"
 import { useUrlFilter } from "@/hooks/useUrlFilter"
 
-import { searchItems, formatDate } from "@/lib/utils"
+import { searchItems, formatDateTime } from "@/lib/utils"
 import { competitionFilterOptions, getStatusColor, translateCompetition, translateMatchStatus } from "@/lib/match-helpers"
 
 import { deleteMatch, getAllMatches } from "@/services/match.service"
@@ -166,7 +166,7 @@ export const MatchsAdmin = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-foreground">{formatDate(match.date)} à {match.time}</span>
+                    <span className="text-foreground">{formatDateTime(match.datetime)}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Trophy className="w-4 h-4 text-muted-foreground" />

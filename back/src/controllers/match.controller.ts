@@ -66,8 +66,7 @@ export class MatchController {
         home_team,
         away_team,
         is_home,
-        date,
-        time,
+        datetime,
         venue,
         location,
         competition,
@@ -80,9 +79,9 @@ export class MatchController {
       } = req.body
 
       // Validation des champs requis
-      if (!home_team || !away_team || is_home === undefined || !date || !time || !venue || !location || !competition) {
+      if (!home_team || !away_team || is_home === undefined || !datetime || !venue || !location || !competition) {
         return res.status(400).json({
-          error: "home_team, away_team, is_home, date, time, venue, location, competition requis"
+          error: "home_team, away_team, is_home, datetime, venue, location, competition requis"
         })
       }
 
@@ -100,8 +99,7 @@ export class MatchController {
         home_team,
         away_team,
         is_home,
-        date: new Date(date),
-        time,
+        datetime,
         venue,
         location,
         competition: competition.toUpperCase() as MatchCompetition,
@@ -139,8 +137,7 @@ export class MatchController {
         home_team,
         away_team,
         is_home,
-        date,
-        time,
+        datetime,
         venue,
         location,
         competition,
@@ -166,8 +163,7 @@ export class MatchController {
       if (home_team) updateData.home_team = home_team
       if (away_team) updateData.away_team = away_team
       if (is_home !== undefined) updateData.is_home = is_home
-      if (date) updateData.date = new Date(date)
-      if (time) updateData.time = time
+      if (datetime) updateData.datetime = datetime
       if (venue) updateData.venue = venue
       if (location) updateData.location = location
       if (competition) updateData.competition = competition.toUpperCase() as MatchCompetition

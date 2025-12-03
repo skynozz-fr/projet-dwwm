@@ -37,8 +37,7 @@ export const MatchForm = () => {
     home_team: "",
     away_team: "",
     is_home: true,
-    date: "",
-    time: "",
+    datetime: "",
     venue: "",
     location: "",
     competition: "" as MatchCompetition | "",
@@ -65,14 +64,16 @@ export const MatchForm = () => {
   // Populate form when match data loads
   useEffect(() => {
     if (existingMatch) {
-      const dateString = existingMatch.date.split('T')[0]
+      // Convertir UTC vers heure locale pour input datetime-local
+      const date = new Date(existingMatch.datetime)
+      date.setMinutes(date.getMinutes() - date.getTimezoneOffset())
+      const datetimeLocal = date.toISOString().slice(0, 16)
 
       setFormData({
         home_team: existingMatch.home_team,
         away_team: existingMatch.away_team,
         is_home: existingMatch.is_home,
-        date: dateString,
-        time: existingMatch.time,
+        datetime: datetimeLocal,
         venue: existingMatch.venue,
         location: existingMatch.location,
         competition: existingMatch.competition,
@@ -105,6 +106,7 @@ export const MatchForm = () => {
     onSuccess: () => {
       toast.success("Match modifié !", "Les modifications ont été enregistrées.")
       queryClient.invalidateQueries({ queryKey: ["matches"] })
+      queryClient.invalidateQueries({ queryKey: ["match", id] })
       navigate("/admin/matchs")
     },
     onError: () => {
@@ -120,18 +122,20 @@ export const MatchForm = () => {
   }
 
   const confirmSave = () => {
-    if (!formData.home_team || !formData.away_team || !formData.date || !formData.time || !formData.venue || !formData.location || !formData.competition) {
+    if (!formData.home_team || !formData.away_team || !formData.datetime || !formData.venue || !formData.location || !formData.competition) {
       toast.error("Champs requis", "Merci de remplir toutes les informations obligatoires")
       setSaveAlertOpen(false)
       return
     }
 
+    // Convertir datetime-local vers ISO UTC
+    const datetimeISO = new Date(formData.datetime).toISOString()
+
     const payload: MatchPayload = {
       home_team: formData.home_team,
       away_team: formData.away_team,
       is_home: formData.is_home,
-      date: formData.date,
-      time: formData.time,
+      datetime: datetimeISO,
       venue: formData.venue,
       location: formData.location,
       competition: formData.competition as MatchCompetition,
@@ -227,17 +231,10 @@ export const MatchForm = () => {
               </div>
 
               <RequiredInput
-                label="Date"
-                type="date"
-                value={formData.date}
-                onChange={(e) => handleInputChange("date", e.target.value)}
-              />
-
-              <RequiredInput
-                label="Heure"
-                type="time"
-                value={formData.time}
-                onChange={(e) => handleInputChange("time", e.target.value)}
+                label="Date et heure"
+                type="datetime-local"
+                value={formData.datetime}
+                onChange={(e) => handleInputChange("datetime", e.target.value)}
               />
 
               <RequiredInput

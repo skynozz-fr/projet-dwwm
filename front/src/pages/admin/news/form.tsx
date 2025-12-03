@@ -79,6 +79,7 @@ export const NewsForm = () => {
     onSuccess: () => {
       toast.success("Actualité modifiée !", "Les modifications ont été enregistrées.")
       queryClient.invalidateQueries({ queryKey: ["news"] })
+      queryClient.invalidateQueries({ queryKey: ["news", id] })
       navigate("/admin/news")
     },
     onError: () => {

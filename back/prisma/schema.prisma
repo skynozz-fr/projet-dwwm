@@ -72,8 +72,7 @@ model Match {
   home_team     String
   away_team     String
   is_home       Boolean        @default(true)
-  date          DateTime
-  time          String
+  datetime      DateTime
   venue         String
   location      String
   competition   MatchCompetition @default(LEAGUE)

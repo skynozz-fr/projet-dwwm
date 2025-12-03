@@ -8,7 +8,7 @@ export class MatchService {
   async getAllMatches() {
     return await prisma.match.findMany({
       orderBy: {
-        date: "desc",
+        datetime: "desc",
       },
     })
   }
@@ -29,7 +29,7 @@ export class MatchService {
     return await prisma.match.findMany({
       where: { competition },
       orderBy: {
-        date: "desc",
+        datetime: "desc",
       },
     })
   }
@@ -41,8 +41,7 @@ export class MatchService {
     home_team: string
     away_team: string
     is_home: boolean
-    date: Date
-    time: string
+    datetime: string
     venue: string
     location: string
     competition: MatchCompetition
@@ -58,8 +57,7 @@ export class MatchService {
         home_team: data.home_team,
         away_team: data.away_team,
         is_home: data.is_home,
-        date: data.date,
-        time: data.time,
+        datetime: new Date(data.datetime),
         venue: data.venue,
         location: data.location,
         competition: data.competition,
@@ -82,8 +80,7 @@ export class MatchService {
       home_team?: string
       away_team?: string
       is_home?: boolean
-      date?: Date
-      time?: string
+      datetime?: string
       venue?: string
       location?: string
       competition?: MatchCompetition
@@ -96,10 +93,15 @@ export class MatchService {
     }
   ) {
     // Si le statut change et n'est plus COMPLETED, remettre les scores à null
-    const updateData = { ...data }
+    const updateData: any = { ...data }
     if (data.status && data.status !== "COMPLETED") {
       updateData.home_score = null
       updateData.away_score = null
+    }
+
+    // Convertir datetime string en Date si présent
+    if (data.datetime) {
+      updateData.datetime = new Date(data.datetime)
     }
 
     return await prisma.match.update({

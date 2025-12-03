@@ -19,6 +19,25 @@ export const formatDate = (dateString: string) => {
   })
 }
 
+export const formatDateTime = (dateString: string) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('fr-FR', { 
+    day: 'numeric', 
+    month: 'short', 
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+export const formatTime = (dateString: string) => {
+  const date = new Date(dateString)
+  return date.toLocaleTimeString('fr-FR', { 
+    hour: '2-digit', 
+    minute: '2-digit'
+  })
+}
+
 export const copyToClipboardWithToast = async (
   text: string,
   toast: { success: (title: string, description?: string) => void; error: (title: string, description?: string) => void },
@@ -33,18 +52,18 @@ export const copyToClipboardWithToast = async (
   }
 }
 
-// Récupère les prochains items (futurs) triés par date (inclut la journée actuelle)
-export const getUpcomingItems = <T extends { date: string }>(items: T[], limit = 3) => {
+// Récupère les prochains items (futurs) triés par datetime (inclut la journée actuelle)
+export const getUpcomingItems = <T extends { datetime: string }>(items: T[], limit = 3) => {
   const startOfToday = new Date()
   startOfToday.setHours(0, 0, 0, 0)
 
   return items
     .filter(item => {
-      const d = new Date(item.date)
+      const d = new Date(item.datetime)
       d.setHours(0, 0, 0, 0)
       return d.getTime() >= startOfToday.getTime()
     })
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .sort((a, b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime())
     .slice(0, limit)
 }
 

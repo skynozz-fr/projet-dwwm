@@ -5,8 +5,7 @@ export type MatchPayload = {
   home_team: string
   away_team: string
   is_home: boolean
-  date: string
-  time: string
+  datetime: string
   venue: string
   location: string
   competition: MatchCompetition
@@ -23,8 +22,7 @@ export type Match = {
   home_team: string
   away_team: string
   is_home: boolean
-  date: string
-  time: string
+  datetime: string
   venue: string
   location: string
   competition: MatchCompetition

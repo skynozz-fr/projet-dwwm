@@ -13,7 +13,7 @@ import { ErrorPage } from "./errors/ErrorPage"
 
 import { usePagination } from "@/hooks/usePagination"
 import { useUrlFilter } from "@/hooks/useUrlFilter"
-import { searchItems, formatDate } from "@/lib/utils"
+import { searchItems, formatDate, formatTime } from "@/lib/utils"
 import {
   competitionFilterOptions,
   getCompetitionColor,
@@ -169,11 +169,11 @@ export const Matches = () => {
                     <div className="space-y-2 text-sm text-muted-foreground">
                       <div className="flex items-center">
                         <Calendar className="w-4 h-4 mr-2" />
-                        {formatDate(match.date)}
+                        {formatDate(match.datetime)}
                       </div>
                       <div className="flex items-center">
                         <Clock className="w-4 h-4 mr-2" />
-                        {match.time}
+                        {formatTime(match.datetime)}
                       </div>
                       <div className="flex items-center">
                         <MapPin className="w-4 h-4 mr-2" />

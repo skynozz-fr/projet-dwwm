@@ -34,7 +34,7 @@ export const getDaysInPrevMonth = (date: Date): number => {
  */
 export const getMatchesForDate = (date: Date, matches: Match[]): Match[] => {
   const dateStr = date.toISOString().split('T')[0]
-  return matches.filter(match => match.date.split('T')[0] === dateStr)
+  return matches.filter(match => match.datetime.split('T')[0] === dateStr)
 }
 
 /**
