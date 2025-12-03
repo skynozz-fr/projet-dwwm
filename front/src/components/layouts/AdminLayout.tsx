@@ -51,7 +51,7 @@ export const AdminLayout = () => {
 
       {/* Sidebar */}
       <div className={`
-        fixed lg:static inset-y-0 left-0 z-50 w-72 bg-background backdrop-blur-xl border-r border-border flex flex-col shadow-xl lg:shadow-none
+        fixed lg:static inset-y-0 left-0 z-50 w-72 bg-background backdrop-blur-xl border-r border-border flex flex-col shadow-xl lg:shadow-none lg:h-[100dvh]
         transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0
         transition-all duration-300 ease-out
       `}>

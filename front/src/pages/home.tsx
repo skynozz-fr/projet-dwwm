@@ -48,7 +48,7 @@ export const Home = () => {
 
   return (
     <div>
-      <section className="relative bg-gradient-to-r from-primary to-secondary py-20">
+      <section className="relative bg-gradient-to-r from-primary to-secondary py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="flex items-center justify-center mb-6">
             <Target className="w-8 h-8 text-background mr-3" />
@@ -73,7 +73,7 @@ export const Home = () => {
         </div>
       </section>
 
-      <section className="py-12 bg-muted/30">
+      <section className="py-8 bg-muted/30">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
@@ -96,13 +96,13 @@ export const Home = () => {
         </div>
       </section>
 
-      <section className="py-12">
+      <section className="py-8">
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="text-3xl font-bold text-foreground text-center mb-6">Prochains Matchs</h2>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {matches.length === 0 ? (
-              <div className="col-span-full flex flex-col items-center justify-center py-12">
+              <div className="col-span-full flex flex-col items-center justify-center py-8">
                 <Calendar className="w-16 h-16 text-primary mb-4 animate-bounce" />
                 <h3 className="text-2xl font-bold text-foreground mb-2">Aucun match à venir</h3>
                 <p className="text-muted-foreground text-lg">
@@ -171,13 +171,13 @@ export const Home = () => {
         </div>
       </section>
 
-      <section className="py-12 bg-muted/30">
+      <section className="py-8 bg-muted/30">
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="text-3xl font-bold text-foreground text-center mb-6">Actualités du Club</h2>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {news.length === 0 ? (
-              <div className="col-span-full flex flex-col items-center justify-center py-12">
+              <div className="col-span-full flex flex-col items-center justify-center py-8">
                 <Trophy className="w-16 h-16 text-secondary mb-4 animate-bounce" />
                 <h3 className="text-2xl font-bold text-foreground mb-2">
                   Aucune actualité pour le moment
@@ -250,7 +250,7 @@ export const Home = () => {
         </div>
       </section>
 
-      <section className="py-12">
+      <section className="py-8">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold text-foreground mb-6">
             Prêt à rejoindre l&#39;aventure FC Popcorn ?

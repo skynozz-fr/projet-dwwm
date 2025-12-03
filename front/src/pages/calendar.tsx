@@ -193,7 +193,7 @@ export const Calendar = () => {
 
   return (
     <div>
-      <div className="bg-gradient-to-r from-primary to-secondary py-12">
+      <div className="bg-gradient-to-r from-primary to-secondary py-8">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <div className="flex items-center justify-center mb-6">
             <CalendarIcon className="w-8 h-8 text-background mr-3" />

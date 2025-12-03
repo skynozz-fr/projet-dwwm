@@ -22,7 +22,7 @@ import {
   AdminDashboard,
   NewsAdmin,
   NewsForm,
-  MatchsAdmin,
+  MatchesAdmin,
   MatchForm,
   UsersAdmin,
 } from "@/pages/admin/"
@@ -68,7 +68,7 @@ export const router = createBrowserRouter([
           { path: "news", element: <NewsAdmin /> },
           { path: "news/create", element: <NewsForm /> },
           { path: "news/edit/:id", element: <NewsForm /> },
-          { path: "matchs", element: <MatchsAdmin /> },
+          { path: "matches", element: <MatchesAdmin /> },
           { path: "match/create", element: <MatchForm /> },
           { path: "match/edit/:id", element: <MatchForm /> },
           { path: "users", element: <UsersAdmin /> },

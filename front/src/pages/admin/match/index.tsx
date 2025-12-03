@@ -24,7 +24,7 @@ import { deleteMatch, getAllMatches } from "@/services/match.service"
 
 import type { Match as MatchType } from "@/types/match"
 
-export const MatchsAdmin = () => {
+export const MatchesAdmin = () => {
   const [searchTerm, setSearchTerm] = useState("")
   const deferredSearch = useDeferredValue(searchTerm)
   const navigate = useNavigate()
