@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import type { AxiosError } from "axios"
 
 import { Button } from "@/components/Button"
 import { Select } from "@/components/ui/select"
@@ -60,7 +61,7 @@ export const NewsForm = () => {
     setSaveAlertOpen(true)
   }
 
-  const { mutate: createMutation, isPending: isCreating } = useMutation({
+  const { mutate: createMutation, isPending: isCreating } = useMutation<NewsType, AxiosError<{ error?: string }>, NewsPayload>({
     mutationKey: ["news", "create"],
     mutationFn: (payload: NewsPayload) => createNews(payload),
     onSuccess: () => {
@@ -68,12 +69,13 @@ export const NewsForm = () => {
       queryClient.invalidateQueries({ queryKey: ["news"] })
       navigate("/admin/news")
     },
-    onError: () => {
-      toast.error("Erreur lors de la sauvegarde", "Impossible d'enregistrer l'actualité.")
+    onError: (error) => {
+      const message = error.response?.data?.error || "Impossible d'enregistrer l'actualité."
+      toast.error("Erreur lors de la sauvegarde", message)
     },
   })
 
-  const { mutate: updateMutation, isPending: isUpdating } = useMutation({
+  const { mutate: updateMutation, isPending: isUpdating } = useMutation<NewsType, AxiosError<{ error?: string }>, { id: string; payload: NewsPayload }>({
     mutationKey: ["news", "update"],
     mutationFn: ({ id, payload }: { id: string; payload: NewsPayload }) => updateNews(id, payload),
     onSuccess: () => {
@@ -82,8 +84,9 @@ export const NewsForm = () => {
       queryClient.invalidateQueries({ queryKey: ["news", id] })
       navigate("/admin/news")
     },
-    onError: () => {
-      toast.error("Erreur lors de la sauvegarde", "Impossible d'enregistrer l'actualité.")
+    onError: (error) => {
+      const message = error.response?.data?.error || "Impossible d'enregistrer l'actualité."
+      toast.error("Erreur lors de la sauvegarde", message)
     },
   })
 

@@ -42,9 +42,7 @@ export const Register = () => {
       navigate("/")
     },
     onError: (error) => {
-      const status = error.response?.status
-      const apiMessage = error.response?.data?.error
-      const message = apiMessage || (status === 409 ? "Email déjà utilisé" : "Une erreur est survenue")
+      const message = error.response?.data?.error || "Une erreur est survenue"
       toast.error("Erreur d'inscription", message)
     },
   })

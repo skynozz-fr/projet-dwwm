@@ -33,9 +33,7 @@ export const Login = () => {
       navigate("/")
     },
     onError: (error) => {
-      const status = error.response?.status
-      const apiMessage = error.response?.data?.error
-      const message = apiMessage || (status === 401 ? "Email ou mot de passe incorrect" : "Impossible de se connecter")
+      const message = error.response?.data?.error || "Une erreur est survenue"
       toast.error("Erreur de connexion", message)
     },
   })

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 
 import { useParams, useNavigate } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import type { AxiosError } from "axios"
 import { ArrowLeft, Home, Plane } from "lucide-react"
 
 import { Button } from "@/components/Button"
@@ -22,7 +23,7 @@ import { competitionOptions, statusOptions, weatherOptions } from "@/lib/match-h
 
 import { createMatch, getMatchById, updateMatch } from "@/services/match.service"
 
-import type { MatchCompetition, MatchStatus, MatchPayload } from "@/types/match"
+import type { Match, MatchCompetition, MatchStatus, MatchPayload } from "@/types/match"
 
 export const MatchForm = () => {
   const { id } = useParams<{ id: string }>()
@@ -87,7 +88,7 @@ export const MatchForm = () => {
     }
   }, [existingMatch])
 
-  const { mutate: createMutation, isPending: isCreating } = useMutation({
+  const { mutate: createMutation, isPending: isCreating } = useMutation<Match, AxiosError<{ error?: string }>, MatchPayload>({
     mutationKey: ["matches", "create"],
     mutationFn: (payload: MatchPayload) => createMatch(payload),
     onSuccess: () => {
@@ -95,12 +96,13 @@ export const MatchForm = () => {
       queryClient.invalidateQueries({ queryKey: ["matches"] })
       navigate("/admin/matchs")
     },
-    onError: () => {
-      toast.error("Erreur lors de la sauvegarde", "Impossible d'enregistrer le match.")
+    onError: (error) => {
+      const message = error.response?.data?.error || "Impossible d'enregistrer le match."
+      toast.error("Erreur lors de la sauvegarde", message)
     },
   })
 
-  const { mutate: updateMutation, isPending: isUpdating } = useMutation({
+  const { mutate: updateMutation, isPending: isUpdating } = useMutation<Match, AxiosError<{ error?: string }>, { id: string; payload: MatchPayload }>({
     mutationKey: ["matches", "update"],
     mutationFn: ({ id, payload }: { id: string; payload: MatchPayload }) => updateMatch(id, payload),
     onSuccess: () => {
@@ -109,8 +111,9 @@ export const MatchForm = () => {
       queryClient.invalidateQueries({ queryKey: ["match", id] })
       navigate("/admin/matchs")
     },
-    onError: () => {
-      toast.error("Erreur lors de la sauvegarde", "Impossible d'enregistrer le match.")
+    onError: (error) => {
+      const message = error.response?.data?.error || "Impossible d'enregistrer le match."
+      toast.error("Erreur lors de la sauvegarde", message)
     },
   })
 

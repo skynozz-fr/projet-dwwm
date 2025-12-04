@@ -3,6 +3,7 @@ import { useState, useMemo, useEffect, useDeferredValue } from "react"
 import { useNavigate } from "react-router-dom"
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import type { AxiosError } from "axios"
 
 import { Pagination } from "@/components/Pagination"
 import { Input } from "@/components/Input"
@@ -83,7 +84,7 @@ export const UsersAdmin = () => {
   }
 
   // Mutation to change role
-  const { mutate: changeRole, isPending: isRoleChanging } = useMutation({
+  const { mutate: changeRole, isPending: isRoleChanging } = useMutation<UserType, AxiosError<{ error?: string }>, { id: string; payload: UserRolePayload }>({
     mutationKey: ["users", "change-role"],
     mutationFn: ({ id, payload }: { id: string; payload: UserRolePayload }) => patchUserRole(id, payload),
     onSuccess: (updatedUser) => {
@@ -92,6 +93,7 @@ export const UsersAdmin = () => {
         `${updatedUser.firstname} ${updatedUser.lastname} est maintenant ${translateRole(updatedUser.role)}.`
       )
       queryClient.invalidateQueries({ queryKey: ["users"] })
+      queryClient.invalidateQueries({ queryKey: ["users", updatedUser.id] })
       
       // Si l'utilisateur modifié est l'utilisateur connecté et qu'il n'est plus admin
       if (currentUser && updatedUser.id === currentUser.id && updatedUser.role !== "ADMIN") {
@@ -105,8 +107,9 @@ export const UsersAdmin = () => {
         }, 2000)
       }
     },
-    onError: () => {
-      toast.error("Erreur", "Impossible de modifier le rôle.")
+    onError: (error) => {
+      const message = error.response?.data?.error || "Impossible de modifier le rôle."
+      toast.error("Erreur", message)
     },
   })
 
@@ -124,15 +127,16 @@ export const UsersAdmin = () => {
   }
 
   // Delete mutation
-  const { mutate: deleteMutate, isPending: isDeleting } = useMutation({
+  const { mutate: deleteMutate, isPending: isDeleting } = useMutation<void, AxiosError<{ error?: string }>, string>({
     mutationKey: ["users", "delete"],
     mutationFn: (id: string) => deleteUser(id),
     onSuccess: () => {
       toast.success("Utilisateur supprimé !", "L'utilisateur a bien été supprimé.")
       queryClient.invalidateQueries({ queryKey: ["users"] })
     },
-    onError: () => {
-      toast.error("Erreur", "Impossible de supprimer l'utilisateur.")
+    onError: (error) => {
+      const message = error.response?.data?.error || "Impossible de supprimer l'utilisateur."
+      toast.error("Erreur", message)
     },
   })
 
