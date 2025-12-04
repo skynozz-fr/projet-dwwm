@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from "express";
 /**
  * Middleware de gestion centralisée des erreurs
  */
-export const errorHandler = (
+export const error = (
   error: any,
   req: Request,
   res: Response,
@@ -58,7 +58,7 @@ export const errorHandler = (
 /**
  * Middleware pour les routes non trouvées
  */
-export const notFoundHandler = (
+export const notFound = (
   req: Request,
   res: Response,
   next: NextFunction

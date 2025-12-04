@@ -1,6 +1,6 @@
 import express, { Application } from "express";
 import cors from "cors";
-import { errorHandler, notFoundHandler } from "../middlewares/errorHandler";
+import { error, notFound } from "../middlewares/error.middleware";
 import authRoutes from "../routes/auth.routes";
 import userRoutes from "../routes/user.routes";
 import newsRoutes from "../routes/news.routes";
@@ -31,6 +31,6 @@ export const configureApp = (app: Application): void => {
   app.use("/match", matchRoutes);
 
   // Gestion des erreurs
-  app.use(notFoundHandler);
-  app.use(errorHandler);
+  app.use(notFound);
+  app.use(error);
 };
