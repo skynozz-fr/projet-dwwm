@@ -109,14 +109,6 @@ export class NewsService {
             email: true,
           },
         },
-        updated_by: {
-          select: {
-            id: true,
-            firstname: true,
-            lastname: true,
-            email: true,
-          },
-        },
       },
     });
   }
