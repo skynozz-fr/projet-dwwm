@@ -23,7 +23,7 @@ export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) 
 
   // Si un rôle spécifique est requis et que l'utilisateur ne l'a pas
   if (requiredRole && user.role !== requiredRole) {
-    return <Navigate to="/unauthorized" replace />;
+    return <Navigate to="/forbidden" replace />;
   }
 
   return <>{children}</>;

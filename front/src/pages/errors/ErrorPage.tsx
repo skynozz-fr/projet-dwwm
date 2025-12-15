@@ -20,7 +20,7 @@ export const ErrorPage = ({
   showGoBack = true,
 }: ErrorPageProps) => {
   return (
-  <div className="min-h-[70vh] flex flex-col items-center justify-center px-4">
+  <div className="min-h-[80vh] flex flex-col items-center justify-center px-4">
       <Card className="max-w-md w-full p-8 border border-border shadow-lg text-center">
         <div className="mb-6">
           <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4 opacity-80" />

@@ -11,3 +11,4 @@ export { Register } from "./register"
 
 export { NotFound } from "./errors/NotFound"
 export { Unauthorized } from "./errors/Unauthorized"
+export { Forbidden } from "./errors/Forbidden"

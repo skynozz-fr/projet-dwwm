@@ -15,6 +15,7 @@ import {
   Matches,
   News,
   Unauthorized,
+  Forbidden,
   NotFound,
 } from "@/pages/"
 
@@ -76,6 +77,7 @@ export const router = createBrowserRouter([
       },
 
       { path: "unauthorized", element: <Unauthorized /> },
+      { path: "forbidden", element: <Forbidden /> },
       { path: "*", element: <NotFound /> },
     ],
   },
