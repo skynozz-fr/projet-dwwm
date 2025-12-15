@@ -91,16 +91,20 @@ export const NewsForm = () => {
   })
 
   const confirmSave = () => {
-    if (!formData.category || !formData.title || !formData.excerpt || !formData.content) {
+    const title = formData.title.trim()
+    const excerpt = formData.excerpt.trim()
+    const content = formData.content.trim()
+
+    if (!formData.category || !title || !excerpt || !content) {
       toast.error("Champs requis", "Merci de remplir toutes les informations obligatoires")
       return
     }
 
     const payload: NewsPayload = {
-      title: formData.title,
+      title,
       category: formData.category as NewsCategory,
-      excerpt: formData.excerpt,
-      content: formData.content,
+      excerpt,
+      content,
     }
 
     if (isEditing && id) updateMutation({ id, payload })

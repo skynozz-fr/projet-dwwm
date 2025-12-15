@@ -24,7 +24,7 @@ export const AdminLayout = () => {
     {
       title: "Matchs",
       icon: Calendar,
-      action: "matchs",
+      action: "matches",
       color: "text-tertiary",
     },
     {

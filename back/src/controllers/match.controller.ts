@@ -108,7 +108,8 @@ export class MatchController {
         away_score: away_score !== undefined ? parseInt(away_score) : null,
         description,
         referee,
-        weather
+        weather,
+        author_id: req.user.id,
       })
 
       res.status(201).json(match)
@@ -173,6 +174,8 @@ export class MatchController {
       if (description !== undefined) updateData.description = description
       if (referee !== undefined) updateData.referee = referee
       if (weather !== undefined) updateData.weather = weather
+
+      updateData.updated_by_id = req.user.id
 
       const match = await matchService.updateMatch(id, updateData)
 

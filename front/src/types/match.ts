@@ -32,6 +32,8 @@ export type Match = {
   description?: string
   referee?: string
   weather?: string
+  author_id?: string | null
+  updated_by_id?: string | null
   created_at: string
   updated_at?: string
 }

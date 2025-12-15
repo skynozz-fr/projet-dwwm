@@ -7,6 +7,24 @@ export class MatchService {
    */
   async getAllMatches() {
     return await prisma.match.findMany({
+      include: {
+        author: {
+          select: {
+            id: true,
+            firstname: true,
+            lastname: true,
+            email: true,
+          },
+        },
+        updated_by: {
+          select: {
+            id: true,
+            firstname: true,
+            lastname: true,
+            email: true,
+          },
+        },
+      },
       orderBy: {
         datetime: "desc",
       },
@@ -19,6 +37,24 @@ export class MatchService {
   async getMatchById(id: string) {
     return await prisma.match.findUnique({
       where: { id },
+      include: {
+        author: {
+          select: {
+            id: true,
+            firstname: true,
+            lastname: true,
+            email: true,
+          },
+        },
+        updated_by: {
+          select: {
+            id: true,
+            firstname: true,
+            lastname: true,
+            email: true,
+          },
+        },
+      },
     })
   }
 
@@ -28,6 +64,24 @@ export class MatchService {
   async getMatchesByCompetition(competition: MatchCompetition) {
     return await prisma.match.findMany({
       where: { competition },
+      include: {
+        author: {
+          select: {
+            id: true,
+            firstname: true,
+            lastname: true,
+            email: true,
+          },
+        },
+        updated_by: {
+          select: {
+            id: true,
+            firstname: true,
+            lastname: true,
+            email: true,
+          },
+        },
+      },
       orderBy: {
         datetime: "desc",
       },
@@ -51,6 +105,7 @@ export class MatchService {
     description?: string | null
     referee?: string | null
     weather?: string | null
+    author_id: string
   }) {
     return await prisma.match.create({
       data: {
@@ -67,6 +122,17 @@ export class MatchService {
         description: data.description,
         referee: data.referee,
         weather: data.weather,
+        author_id: data.author_id,
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            firstname: true,
+            lastname: true,
+            email: true,
+          },
+        },
       },
     })
   }
@@ -90,6 +156,7 @@ export class MatchService {
       description?: string | null
       referee?: string | null
       weather?: string | null
+      updated_by_id: string
     }
   ) {
     // Si le statut change et n'est plus COMPLETED, remettre les scores à null
@@ -104,9 +171,29 @@ export class MatchService {
       updateData.datetime = new Date(data.datetime)
     }
 
+    updateData.updated_by_id = data.updated_by_id
+
     return await prisma.match.update({
       where: { id },
       data: updateData,
+      include: {
+        author: {
+          select: {
+            id: true,
+            firstname: true,
+            lastname: true,
+            email: true,
+          },
+        },
+        updated_by: {
+          select: {
+            id: true,
+            firstname: true,
+            lastname: true,
+            email: true,
+          },
+        },
+      },
     })
   }
 

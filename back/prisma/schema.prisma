@@ -51,6 +51,8 @@ model User {
   updated_at      DateTime @updatedAt
   authored_news   News[]   @relation("NewsAuthor")
   updated_news    News[]   @relation("NewsUpdater")
+  authored_matches Match[] @relation("MatchAuthor")
+  updated_matches  Match[] @relation("MatchUpdater")
 }
 
 model News {
@@ -82,6 +84,10 @@ model Match {
   description   String?        @db.Text
   referee       String?
   weather       String?
+  author_id     String?
+  author        User?          @relation("MatchAuthor", fields: [author_id], references: [id], onDelete: SetNull)
+  updated_by_id String?
+  updated_by    User?          @relation("MatchUpdater", fields: [updated_by_id], references: [id], onDelete: SetNull)
   created_at    DateTime       @default(now())
   updated_at    DateTime       @updatedAt
 }

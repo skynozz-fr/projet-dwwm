@@ -94,7 +94,7 @@ export const MatchForm = () => {
     onSuccess: () => {
       toast.success("Match créé !", "Le nouveau match a été créé.")
       queryClient.invalidateQueries({ queryKey: ["matches"] })
-      navigate("/admin/matchs")
+      navigate("/admin/matches")
     },
     onError: (error) => {
       const message = error.response?.data?.error || "Impossible d'enregistrer le match."
@@ -109,7 +109,7 @@ export const MatchForm = () => {
       toast.success("Match modifié !", "Les modifications ont été enregistrées.")
       queryClient.invalidateQueries({ queryKey: ["matches"] })
       queryClient.invalidateQueries({ queryKey: ["match", id] })
-      navigate("/admin/matchs")
+      navigate("/admin/matches")
     },
     onError: (error) => {
       const message = error.response?.data?.error || "Impossible d'enregistrer le match."
@@ -125,7 +125,15 @@ export const MatchForm = () => {
   }
 
   const confirmSave = () => {
-    if (!formData.home_team || !formData.away_team || !formData.datetime || !formData.venue || !formData.location || !formData.competition) {
+    const homeTeam = formData.home_team.trim()
+    const awayTeam = formData.away_team.trim()
+    const venue = formData.venue.trim()
+    const location = formData.location.trim()
+    const description = formData.description.trim()
+    const referee = formData.referee.trim()
+    const weather = formData.weather.trim()
+
+    if (!homeTeam || !awayTeam || !formData.datetime || !venue || !location || !formData.competition) {
       toast.error("Champs requis", "Merci de remplir toutes les informations obligatoires")
       setSaveAlertOpen(false)
       return
@@ -135,22 +143,22 @@ export const MatchForm = () => {
     const datetimeISO = new Date(formData.datetime).toISOString()
 
     const payload: MatchPayload = {
-      home_team: formData.home_team,
-      away_team: formData.away_team,
+      home_team: homeTeam,
+      away_team: awayTeam,
       is_home: formData.is_home,
       datetime: datetimeISO,
-      venue: formData.venue,
-      location: formData.location,
+      venue,
+      location,
       competition: formData.competition as MatchCompetition,
       status: formData.status as MatchStatus,
       home_score: formData.home_score !== "" ? Number(formData.home_score) : null,
       away_score: formData.away_score !== "" ? Number(formData.away_score) : null,
-      description: formData.description.trim() || null,
-      referee: formData.referee.trim() || null,
-      weather: formData.weather || null,
+      description: description || null,
+      referee: referee || null,
+      weather: weather || null,
     }
 
-  if (isEditing && id) updateMutation({ id, payload })
+    if (isEditing && id) updateMutation({ id, payload })
     else createMutation(payload)
     
     setSaveAlertOpen(false)

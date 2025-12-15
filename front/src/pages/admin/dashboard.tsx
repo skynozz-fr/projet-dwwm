@@ -16,7 +16,7 @@ export const AdminDashboard = () => {
       title: "Matchs",
       description: "Gérer les matchs",
       icon: Calendar,
-      link: "/admin/matchs",
+      link: "/admin/matches",
     },
     {
       title: "Utilisateurs",

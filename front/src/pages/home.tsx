@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card"
 import { Loader } from "@/components/Loader"
 
 import { formatDate, formatTime, getLatestItems, getUpcomingItems } from "@/lib/utils"
-import { getCompetitionColor } from "@/lib/match-helpers"
+import { getCompetitionColor, translateCompetition } from "@/lib/match-helpers"
 import { getNewsColor, getNewsIcon, translateNewsCategory } from "@/lib/news-helpers"
 
 import { getAllMatches } from "@/services/match.service"
@@ -122,7 +122,7 @@ export const Home = () => {
                         match.competition
                       )}`}
                     >
-                      {match.competition}
+                      {translateCompetition(match.competition)}
                     </span>
                     <div className="flex items-center text-muted-foreground text-sm">
                       <Calendar className="w-4 h-4 mr-1" />
