@@ -127,9 +127,9 @@ export const AdminLayout = () => {
               <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
                 {location.pathname === "/admin" 
                   ? "Tableau de bord"
-                  : location.pathname.includes("actualites") 
+                  : location.pathname.includes("news") 
                     ? "Gestion des actualités"
-                    : location.pathname.includes("matchs")
+                    : location.pathname.includes("matches")
                       ? "Gestion des matchs"
                       : location.pathname.includes("users")
                         ? "Gestion des utilisateurs"
@@ -139,9 +139,9 @@ export const AdminLayout = () => {
               <p className="text-muted-foreground mt-2 text-sm lg:text-base">
                 {location.pathname === "/admin" 
                   ? "Vue d'ensemble de votre administration"
-                  : location.pathname.includes("actualites") 
+                  : location.pathname.includes("news") 
                     ? "Créer, modifier et gérer les actualités"
-                    : location.pathname.includes("matchs")
+                    : location.pathname.includes("matches")
                       ? "Planifier et gérer les matchs"
                       : location.pathname.includes("users")
                         ? "Administrer les comptes utilisateurs"
