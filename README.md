@@ -52,3 +52,23 @@ Ce projet est divisé en deux parties : le backend et le frontend.
 ### Remarques
 - Assurez-vous que le backend est en cours d'exécution avant d'accéder au frontend.
 - Modifiez les fichiers de configuration selon vos besoins.
+
+## Déploiement gratuit (Render)
+
+Le repo contient un blueprint `render.yaml` pour déployer:
+- `fc-popcorn-api` (Node/Express + Prisma) en service web gratuit
+- `fc-popcorn-front` (Vite) en site statique gratuit
+- `fc-popcorn-db` (PostgreSQL) en base gratuite
+
+### Étapes
+1. Poussez la branche sur GitHub.
+2. Sur Render: `New` -> `Blueprint` -> connectez le repo.
+3. Lancez le déploiement.
+4. Quand les services sont créés, définissez les variables:
+   - Sur `fc-popcorn-api`: `FRONT_URL` = URL publique du front Render
+   - Sur `fc-popcorn-front`: `VITE_API_URL` = URL publique de l'API Render
+5. Redéployez le front après avoir défini `VITE_API_URL`.
+
+### Notes
+- Les offres gratuites Render peuvent se mettre en veille (cold start).
+- Le backend applique automatiquement les migrations Prisma au démarrage.
