@@ -2,6 +2,7 @@ import { useId } from "react"
 
 import { Label } from "@/components/ui/label"
 import { Input as InputBase } from "@/components/ui/input"
+import { cn } from "@/lib/utils"
 
 type InputProps = {
   label?: string
@@ -13,22 +14,26 @@ type InputProps = {
   min?: string
 }
 
-export const Input = ({ 
-  label, 
-  value, 
-  onChange, 
+export const Input = ({
+  label,
+  value,
+  onChange,
   placeholder = "",
   type = "text",
   className = "",
-  min
+  min,
 }: InputProps) => {
   const id = useId()
-  
+
   return (
-    <div className={className}>
-      {label && <Label htmlFor={id}>{label}</Label>}
+    <div className={cn("space-y-1.5", className)}>
+      {label && (
+        <Label htmlFor={id} className="text-sm text-foreground/90">
+          {label}
+        </Label>
+      )}
       <InputBase
-        id={id} 
+        id={id}
         type={type}
         placeholder={placeholder}
         value={value}

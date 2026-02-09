@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import type { AxiosError } from "axios"
 import { ArrowLeft, Home, Plane } from "lucide-react"
 
-import { Button } from "@/components/Button"
+import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/Input"
 import { RequiredInput } from "@/components/ui/required-input"
@@ -178,16 +178,16 @@ export const MatchForm = () => {
         title="Erreur de chargement"
         message="Impossible de charger le match"
         onRetry={() => refetch()}
-        onGoBack={() => navigate("/admin/matchs")}
+        onGoBack={() => navigate("/admin/matches")}
       />
     )
   }
 
   return (
-    <div className="space-y-8 px-2 md:px-6 py-8 max-w-full mx-auto">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-2">
+    <div className="space-y-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => navigate("/admin/matchs")}> 
+          <Button variant="ghost" onClick={() => navigate("/admin/matches")}> 
             <ArrowLeft className="w-4 h-4" />
           </Button>
           <h1 className="text-2xl font-bold text-foreground mb-1">
@@ -344,7 +344,7 @@ export const MatchForm = () => {
         <Button 
           type="button" 
           variant="secondary" 
-          onClick={() => navigate("/admin/matchs")}
+          onClick={() => navigate("/admin/matches")}
           disabled={isSaving}
         >
           Annuler

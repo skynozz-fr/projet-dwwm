@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Calendar, Globe, MapPin, Trophy } from "lucide-react"
 
-import { Button } from "@/components/Button"
+import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/Input"
 import { Pagination } from "@/components/Pagination"
@@ -113,15 +113,15 @@ export const MatchesAdmin = () => {
   }
 
   return (
-    <div className="space-y-8 px-2 md:px-6 py-8 max-w-full mx-auto">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-2">
+    <div className="space-y-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-2xl font-bold text-foreground">Matchs</h2>
         <Button className="w-full sm:w-auto" onClick={() => setAddAlertOpen(true)}>
           Nouveau match
         </Button>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4 md:items-end bg-muted/40 rounded-lg px-4 py-4 border border-border mb-4">
+      <div className="flex flex-col md:flex-row gap-4 md:items-end rounded-lg border border-border bg-surface-2/35 p-3 mb-4">
         <Input
           placeholder="Rechercher un match..."
           value={searchTerm}
@@ -136,14 +136,14 @@ export const MatchesAdmin = () => {
         />
       </div>
 
-      <div className="grid gap-6">
+      <div className="grid gap-4">
         {paginatedData.map((match) => (
           <Card 
             key={match.id} 
-            className="p-5 md:p-7 hover:shadow-lg transition-all cursor-pointer hover:border-primary"
+            className="p-4 md:p-5 cursor-pointer"
             onClick={() => navigate(`/admin/match/edit/${match.id}`)}
           >
-            <div className="flex flex-col md:flex-row md:justify-between gap-4">
+            <div className="flex flex-col gap-4 md:flex-row md:justify-between">
               <div className="flex-1 space-y-3">
                 <div className="flex items-start justify-between gap-3">
                   <h3 className="text-lg md:text-xl font-bold text-foreground">
@@ -163,7 +163,7 @@ export const MatchesAdmin = () => {
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-muted-foreground" />
                     <span className="text-foreground">{formatDateTime(match.datetime)}</span>
@@ -183,7 +183,7 @@ export const MatchesAdmin = () => {
                 </div>
 
                 {match.description && (
-                  <p className="text-sm text-muted-foreground line-clamp-2 pt-1 border-t border-border/50">
+                  <p className="line-clamp-2 border-t border-border/60 pt-3 text-sm text-muted-foreground">
                     {match.description}
                   </p>
                 )}
@@ -202,7 +202,7 @@ export const MatchesAdmin = () => {
                   Modifier
                 </Button>
                 <Button
-                  variant="danger"
+                  variant="destructive"
                   size="sm"
                   onClick={(e) => {
                     e.stopPropagation()

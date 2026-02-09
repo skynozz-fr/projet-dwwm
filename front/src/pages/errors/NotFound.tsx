@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card"
-import { Button } from "@/components/Button"
+import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router-dom"
 
 export const NotFound = () => {
@@ -14,7 +14,7 @@ export const NotFound = () => {
           <h2 className="text-xl font-semibold text-foreground mb-2">Page introuvable</h2>
           <p className="text-muted-foreground mb-4">Oups ! La page que vous cherchez n'existe pas ou a été déplacée.</p>
         </div>
-        <Button variant="primary" onClick={() => navigate("/")}>
+        <Button variant="default" onClick={() => navigate("/")}>
           Retour à l'accueil
         </Button>
       </Card>

@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import type { AxiosError } from "axios"
 
-import { Button } from "@/components/Button"
+import { Button } from "@/components/ui/button"
 import { Select } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Card } from "@/components/ui/card"
@@ -131,8 +131,8 @@ export const NewsForm = () => {
   }
 
   return (
-    <div className="space-y-8 px-2 md:px-6 py-8 max-w-full mx-auto">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-2">
+    <div className="space-y-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
           <Button variant="ghost" onClick={() => navigate("/admin/news")}> 
             <ArrowLeft className="w-4 h-4" />

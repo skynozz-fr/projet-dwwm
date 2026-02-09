@@ -13,36 +13,36 @@ type RequiredInputProps = {
   icon?: React.ReactNode
 }
 
-export const RequiredInput = ({ 
-  label, 
-  type = "text", 
-  placeholder, 
-  value, 
-  onChange, 
+export const RequiredInput = ({
+  label,
+  type = "text",
+  placeholder,
+  value,
+  onChange,
   className,
-  icon 
+  icon,
 }: RequiredInputProps) => {
   const id = useId()
-  
+
   return (
-    <div className="space-y-2">
-      <Label htmlFor={id} className="text-foreground">
+    <div className="space-y-1.5">
+      <Label htmlFor={id} className="text-sm text-foreground/90">
         {label} <span className="text-error">*</span>
       </Label>
       <div className="relative">
         {icon && (
-          <div className="absolute left-3 top-3 h-4 w-4 text-muted-foreground">
+          <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground">
             {icon}
           </div>
         )}
-        <Input 
-          id={id} 
+        <Input
+          id={id}
           type={type}
-          placeholder={placeholder} 
+          placeholder={placeholder}
           value={value}
           onChange={onChange}
           className={icon ? "pl-10" : className}
-          required 
+          required
         />
       </div>
     </div>

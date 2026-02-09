@@ -1,9 +1,9 @@
-import { useState, useMemo, useEffect, useDeferredValue } from "react"
+import { useDeferredValue, useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Calendar, MapPin, Clock, Trophy } from "lucide-react"
+import { Calendar, Clock, MapPin, Trophy } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 
-import { Button } from "@/components/Button"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/Input"
 import { Select } from "@/components/ui/select"
 import { Card } from "@/components/ui/card"
@@ -14,12 +14,7 @@ import { ErrorPage } from "./errors/ErrorPage"
 import { usePagination } from "@/hooks/usePagination"
 import { useUrlFilter } from "@/hooks/useUrlFilter"
 import { searchItems, formatDate, formatTime } from "@/lib/utils"
-import {
-  competitionFilterOptions,
-  getCompetitionColor,
-  translateCompetition,
-  translateMatchStatus,
-} from "@/lib/match-helpers"
+import { competitionFilterOptions, getCompetitionColor, translateCompetition, translateMatchStatus } from "@/lib/match-helpers"
 import { getAllMatches } from "@/services/match.service"
 
 import type { Match as MatchType } from "@/types/match"
@@ -28,188 +23,109 @@ export const Matches = () => {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState("")
   const deferredSearch = useDeferredValue(searchTerm)
+  const { filterValue: competitionFilter, setFilter: setCompetitionFilter } = useUrlFilter({ paramName: "competition" })
 
-  const { filterValue: competitionFilter, setFilter: setCompetitionFilter } = 
-    useUrlFilter({ paramName: "competition" })
+  const competition = competitionFilter !== "all" ? (competitionFilter as MatchType["competition"]) : undefined
 
-  const competition =
-    competitionFilter !== "all" ? (competitionFilter as MatchType["competition"]) : undefined
-
-  const {
-    data: allMatches = [],
-    isPending,
-    isError,
-    refetch,
-  } = useQuery<MatchType[]>({
+  const { data: allMatches = [], isPending, isError, refetch } = useQuery<MatchType[]>({
     queryKey: ["matches", competition ?? "all"],
     queryFn: () => getAllMatches(competition),
   })
 
-  const filteredMatches = useMemo(
-    () =>
-      searchItems(allMatches, deferredSearch, [
-        "home_team",
-        "away_team",
-        "venue",
-        "competition",
-        "location",
-      ]),
-    [deferredSearch, allMatches]
-  )
+  const filteredMatches = useMemo(() => searchItems(allMatches, deferredSearch, ["home_team", "away_team", "venue", "competition", "location"]), [deferredSearch, allMatches])
 
-  const {
-    currentPage,
-    totalPages,
-    paginatedData: paginatedMatches,
-    totalItems,
-    goToPage,
-    resetPagination,
-  } = usePagination({ data: filteredMatches, itemsPerPage: 6 })
+  const { currentPage, totalPages, paginatedData: paginatedMatches, totalItems, goToPage, resetPagination } = usePagination({ data: filteredMatches, itemsPerPage: 6 })
 
-  // Reset pagination when filters change
   useEffect(() => {
     resetPagination()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [deferredSearch, competitionFilter])
+  }, [deferredSearch, competitionFilter, resetPagination])
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" })
   }, [currentPage])
 
   if (isPending) return <Loader message="Chargement des matchs..." />
-
   if (isError) {
-    return (
-      <ErrorPage
-        title="Erreur de chargement"
-        message="Impossible de charger les matchs"
-        onRetry={() => refetch()}
-        onGoBack={() => navigate("/home")}
-      />
-    )
+    return <ErrorPage title="Erreur de chargement" message="Impossible de charger les matchs" onRetry={() => refetch()} onGoBack={() => navigate("/home")} />
   }
 
   return (
     <div>
-      <div className="bg-gradient-to-r from-primary to-secondary py-12">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-background mb-4">Tous les Matchs</h1>
-          <p className="text-xl text-background/90">Découvrez tous les matchs du FC Popcorn</p>
+      <section className="page-hero section-shell p-8 md:p-10">
+        <div className="relative z-10 text-center">
+          <h1 className="text-h1 text-white">Tous les Matchs</h1>
+          <p className="mx-auto mt-3 max-w-3xl text-lg text-white/85">Suivez l'ensemble des rencontres du FC Popcorn.</p>
         </div>
-      </div>
+      </section>
 
-      <div className="py-6 bg-muted/30">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex flex-col md:flex-row gap-4 md:items-end">
-            <Input
-              placeholder="Rechercher un match, une équipe, un lieu..."
-              value={searchTerm}
-              onChange={setSearchTerm}
-              className="flex-1"
-            />
-            <Select
-              options={competitionFilterOptions}
-              value={competitionFilter}
-              onChange={setCompetitionFilter}
-              className="md:max-w-xs"
-            />
+      <section className="section-shell">
+        <Card variant="glass" className="p-4 md:p-5">
+          <div className="flex flex-col gap-3 md:flex-row md:items-end">
+            <Input placeholder="Rechercher une equipe, un lieu..." value={searchTerm} onChange={setSearchTerm} className="flex-1" />
+            <Select options={competitionFilterOptions} value={competitionFilter} onChange={setCompetitionFilter} className="md:max-w-xs" />
           </div>
+          <p className="mt-3 text-sm text-muted-foreground">{filteredMatches.length} match{filteredMatches.length > 1 ? "s" : ""} trouve{filteredMatches.length > 1 ? "s" : ""}</p>
+        </Card>
+      </section>
 
-          <div className="mt-4 text-sm text-muted-foreground">
-            {filteredMatches.length} match{filteredMatches.length > 1 ? "s" : ""} trouvé
-            {filteredMatches.length > 1 ? "s" : ""}
-          </div>
-        </div>
-      </div>
+      <section className="section-shell">
+        {paginatedMatches.length === 0 ? (
+          <Card variant="glass" className="py-16 text-center">
+            <Trophy className="mx-auto mb-3 h-12 w-12 text-primary" />
+            <h3 className="text-h3">Aucun match trouve</h3>
+            <p className="mt-2 text-muted-foreground">Essayez de modifier vos filtres.</p>
+          </Card>
+        ) : (
+          <>
+            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {paginatedMatches.map((match) => (
+                <Card key={match.id} variant="interactive" className="cursor-pointer p-5" onClick={() => navigate(`/match/${match.id}`)}>
+                  <div className="mb-4 flex items-center justify-between">
+                    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${getCompetitionColor(match.competition)}`}>
+                      {translateCompetition(match.competition)}
+                    </span>
+                    <span className="text-xs text-muted-foreground">{translateMatchStatus(match.status)}</span>
+                  </div>
 
-      <div className="py-8">
-        <div className="max-w-7xl mx-auto px-4">
-          {paginatedMatches.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16">
-              <Trophy className="w-16 h-16 text-primary mb-4" />
-              <h3 className="text-2xl font-bold text-foreground mb-2">Aucun match trouvé</h3>
-              <p className="text-muted-foreground text-center">
-                Essayez de modifier vos critères de recherche ou de filtrage
-              </p>
+                  <div className="mb-4 text-center">
+                    <p className="text-base font-semibold">{match.home_team}</p>
+                    <p className="my-2 text-2xl font-display text-primary">
+                      {match.home_score !== null && match.away_score !== null ? `${match.home_score} - ${match.away_score}` : "VS"}
+                    </p>
+                    <p className="text-base font-semibold">{match.away_team}</p>
+                  </div>
+
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    <p className="flex items-center gap-2.5">
+                      <Calendar className="h-4 w-4 shrink-0" />
+                      <span>{formatDate(match.datetime)}</span>
+                    </p>
+                    <p className="flex items-center gap-2.5">
+                      <Clock className="h-4 w-4 shrink-0" />
+                      <span>{formatTime(match.datetime)}</span>
+                    </p>
+                    <p className="flex items-center gap-2.5">
+                      <MapPin className="h-4 w-4 shrink-0" />
+                      <span>{match.venue} - {match.location}</span>
+                    </p>
+                  </div>
+
+                  <Button variant="secondary" className="mt-5 w-full" onClick={(e) => {
+                    e.stopPropagation()
+                    navigate(`/match/${match.id}`)
+                  }}>
+                    Voir les details
+                  </Button>
+                </Card>
+              ))}
             </div>
-          ) : (
-            <>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                {paginatedMatches.map((match) => (
-                  <Card
-                    key={match.id}
-                    className="p-6 hover:shadow-lg transition-all cursor-pointer hover:border-primary"
-                    onClick={() => navigate(`/match/${match.id}`)}
-                  >
-                    <div className="flex items-center justify-between mb-4">
-                      <span
-                        className={`px-3 py-1 rounded-full text-sm font-medium ${getCompetitionColor(
-                          match.competition
-                        )}`}
-                      >
-                        {translateCompetition(match.competition)}
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        {translateMatchStatus(match.status)}
-                      </span>
-                    </div>
 
-                    <div className="text-center mb-4">
-                      <div className="text-lg font-semibold text-foreground mb-2">
-                        {match.home_team}
-                      </div>
-                      <div className="text-2xl font-bold text-primary mb-2">
-                        {match.home_score !== null && match.away_score !== null
-                          ? `${match.home_score} - ${match.away_score}`
-                          : "vs"}
-                      </div>
-                      <div className="text-lg font-semibold text-foreground">{match.away_team}</div>
-                    </div>
-
-                    <div className="space-y-2 text-sm text-muted-foreground">
-                      <div className="flex items-center">
-                        <Calendar className="w-4 h-4 mr-2" />
-                        {formatDate(match.datetime)}
-                      </div>
-                      <div className="flex items-center">
-                        <Clock className="w-4 h-4 mr-2" />
-                        {formatTime(match.datetime)}
-                      </div>
-                      <div className="flex items-center">
-                        <MapPin className="w-4 h-4 mr-2" />
-                        {match.venue} - {match.location}
-                      </div>
-                    </div>
-
-                    <div className="mt-4 pt-4 border-t border-border">
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        className="w-full"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          navigate(`/match/${match.id}`)
-                        }}
-                      >
-                        Voir les détails
-                      </Button>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                itemsPerPage={6}
-                totalItems={totalItems}
-                onPageChange={goToPage}
-                itemName="matchs"
-              />
-            </>
-          )}
-        </div>
-      </div>
+            <div className="mt-6">
+              <Pagination currentPage={currentPage} totalPages={totalPages} itemsPerPage={6} totalItems={totalItems} onPageChange={goToPage} itemName="matchs" />
+            </div>
+          </>
+        )}
+      </section>
     </div>
   )
 }

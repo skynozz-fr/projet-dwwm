@@ -2,7 +2,8 @@ import { useNavigate, useParams } from "react-router-dom"
 import { ArrowLeft, Calendar, Clock, Home, MapPin, Plane } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 
-import { Button } from "@/components/Button"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
 import { Loader } from "@/components/Loader"
 import { ErrorPage } from "../errors/ErrorPage"
 import { NotFound } from "../errors/NotFound"
@@ -19,175 +20,81 @@ export const MatchDetail = () => {
   const navigate = useNavigate()
   const { toast } = useToast()
 
-  const {
-    data: match,
-    isPending,
-    isError,
-    refetch,
-  } = useQuery<MatchType>({
+  const { data: match, isPending, isError, refetch } = useQuery<MatchType>({
     queryKey: ["match", id],
     queryFn: () => getMatchById(id as string),
     enabled: !!id,
   })
 
-  if (!id) {
-    return (
-      <ErrorPage
-        title="Erreur de chargement"
-        message="Identifiant de match invalide"
-        onGoBack={() => navigate("/matches")}
-      />
-    )
-  }
-
+  if (!id) return <ErrorPage title="Erreur de chargement" message="Identifiant de match invalide" onGoBack={() => navigate("/matches")} />
   if (isPending) return <Loader message="Chargement du match..." />
-
-  if (isError) {
-    return (
-      <ErrorPage
-        title="Erreur de chargement"
-        message="Impossible de charger le match"
-        onRetry={() => refetch()}
-        onGoBack={() => navigate("/matches")}
-      />
-    )
-  }
-
+  if (isError) return <ErrorPage title="Erreur de chargement" message="Impossible de charger le match" onRetry={() => refetch()} onGoBack={() => navigate("/matches")} />
   if (!match) return <NotFound />
 
-  const iconColor = getCompetitionColor(match.competition)
-  const translatedCategory = translateCompetition(match.competition)
-  const translatedStatus = translateMatchStatus(match.status)
+  const competitionStyle = getCompetitionColor(match.competition)
 
   return (
     <div>
-      <div className="bg-gradient-to-r from-primary to-secondary py-8">
-        <div className="max-w-7xl mx-auto px-4">
-          <Button
-            variant="ghost"
-            className="mb-6 text-background hover:bg-background/20"
-            onClick={() => navigate("/matches")}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Retour aux matchs
+      <section className="page-hero section-shell p-8 md:p-10">
+        <div className="relative z-10 text-center">
+          <Button variant="ghost" className="mb-6 text-white hover:bg-white/10" onClick={() => navigate("/matches")}>
+            <ArrowLeft className="h-4 w-4" />Retour aux matchs
           </Button>
+          <span className={`inline-flex rounded-full px-4 py-1.5 text-sm font-semibold ${competitionStyle}`}>{translateCompetition(match.competition)}</span>
+          <h1 className="mt-4 text-h1 text-white">{match.home_team} vs {match.away_team}</h1>
+          <p className="mt-2 inline-flex items-center gap-2 text-white/85"><Calendar className="h-4 w-4" />{formatDateTime(match.datetime)}</p>
+        </div>
+      </section>
 
-          <div className="text-center">
-            <div className={`inline-block px-4 py-2 rounded-full text-sm font-medium mb-4 ${iconColor}`}>
-              {translatedCategory}
+      <section className="section-shell">
+        <Card variant="elevated" className="p-8 text-center">
+          <div className="mb-5 grid items-center gap-4 md:grid-cols-3">
+            <div>
+              <p className="inline-flex items-center gap-2 text-xl font-semibold"><Home className="h-5 w-5 text-primary" />{match.home_team}</p>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-background mb-4">
-              {match.home_team} vs {match.away_team}
-            </h1>
-            <div className="flex items-center justify-center text-background/90 text-lg">
-              <Calendar className="w-5 h-5 mr-2" />
-              {formatDateTime(match.datetime)}
+            <div>
+              <p className="text-5xl font-display text-primary">{match.home_score ?? "-"} : {match.away_score ?? "-"}</p>
+              <p className="text-sm text-muted-foreground">{translateMatchStatus(match.status)}</p>
+            </div>
+            <div>
+              <p className="inline-flex items-center gap-2 text-xl font-semibold"><Plane className="h-5 w-5 text-secondary" />{match.away_team}</p>
             </div>
           </div>
-        </div>
-      </div>
+          <p className="inline-flex items-center gap-2 text-sm text-muted-foreground"><MapPin className="h-4 w-4" />{match.venue} - {match.location}</p>
+        </Card>
+      </section>
 
-      <div className="py-6 bg-muted/30">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="bg-background border border-border rounded-lg p-8 text-center">
-            <div className="flex items-center justify-center space-x-8 mb-6">
-              <div className="text-center">
-                <div className="flex items-center justify-center mb-2">
-                  <Home className="w-6 h-6 text-primary mr-2" />
-                  <span className="text-2xl font-bold text-foreground">{match.home_team}</span>
-                </div>
-              </div>
+      <section className="section-shell grid gap-5 md:grid-cols-2">
+        <Card variant="elevated" className="p-6">
+          <h2 className="mb-3 text-h3">A propos du match</h2>
+          <p className="text-muted-foreground">{match.description || "Aucune description disponible pour ce match."}</p>
+        </Card>
 
-              <div className="text-center">
-                <div className="text-6xl font-bold text-primary mb-2">
-                  {match.home_score ?? "-"} : {match.away_score ?? "-"}
-                </div>
-                <div className="text-lg font-medium text-muted-foreground">{translatedStatus}</div>
-              </div>
+        <div className="space-y-5">
+          <Card variant="elevated" className="p-6">
+            <h3 className="mb-3 text-h3">Informations pratiques</h3>
+            <p className="mb-2 inline-flex items-center gap-2 text-sm"><Clock className="h-4 w-4 text-primary" />Coup d'envoi: {formatTime(match.datetime)}</p>
+            <p className="inline-flex items-center gap-2 text-sm"><MapPin className="h-4 w-4 text-primary" />{match.venue}</p>
+          </Card>
 
-              <div className="text-center">
-                <div className="flex items-center justify-center mb-2">
-                  <Plane className="w-6 h-6 text-secondary mr-2" />
-                  <span className="text-2xl font-bold text-foreground">{match.away_team}</span>
-                </div>
-              </div>
+          <Card variant="elevated" className="p-6">
+            <h3 className="mb-3 text-h3">Details</h3>
+            <div className="space-y-2 text-sm">
+              {match.referee && <p className="flex justify-between gap-3"><span className="text-muted-foreground">Arbitre:</span><span>{match.referee}</span></p>}
+              {match.weather && <p className="flex justify-between gap-3"><span className="text-muted-foreground">Meteo:</span><span>{match.weather}</span></p>}
+              <p className="flex justify-between gap-3"><span className="text-muted-foreground">Competition:</span><span>{translateCompetition(match.competition)}</span></p>
             </div>
-
-            <div className="flex items-center justify-center text-muted-foreground">
-              <MapPin className="w-4 h-4 mr-1" />
-              {match.venue} - {match.location}
-            </div>
-          </div>
+          </Card>
         </div>
-      </div>
+      </section>
 
-      <div className="py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-muted border border-border rounded-lg p-6">
-              <h2 className="text-2xl font-bold text-foreground mb-4">À propos du match</h2>
-              {match.description ? (
-                <p className="text-muted-foreground leading-relaxed">{match.description}</p>
-              ) : (
-                <p className="text-muted-foreground italic">Aucune description disponible pour ce match.</p>
-              )}
-            </div>
-
-            <div className="space-y-6">
-              <div className="bg-muted border border-border rounded-lg p-6">
-                <h3 className="text-xl font-semibold text-foreground mb-4">Informations pratiques</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center">
-                    <Clock className="w-5 h-5 text-primary mr-3" />
-                    <span className="text-foreground">Coup d'envoi : {formatTime(match.datetime)}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <MapPin className="w-5 h-5 text-primary mr-3" />
-                    <span className="text-foreground">{match.venue}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-muted border border-border rounded-lg p-6">
-                <h3 className="text-xl font-semibold text-foreground mb-4">Détails du match</h3>
-                <div className="space-y-3">
-                  {match.referee && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Arbitre :</span>
-                      <span className="text-foreground">{match.referee}</span>
-                    </div>
-                  )}
-                  {match.weather && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Météo :</span>
-                      <span className="text-foreground">{match.weather}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Compétition :</span>
-                    <span className="text-foreground">{translateCompetition(match.competition)}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="py-12 bg-muted/30">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-foreground mb-6">Venez nous encourager !</h2>
-          <p className="text-xl text-muted-foreground mb-8">
-            Votre soutien est précieux pour nos joueurs. Rejoignez-nous au stade !
-          </p>
-          <Button
-            variant="secondary"
-            onClick={() => copyToClipboardWithToast(window.location.href, toast)}
-          >
-            Partager le match
-          </Button>
-        </div>
-      </div>
+      <section className="section-shell">
+        <Card variant="glass" className="p-8 text-center">
+          <h2 className="text-h2">Venez nous encourager</h2>
+          <p className="mt-3 text-muted-foreground">Votre soutien est precieux pour nos joueurs. Rejoignez-nous au stade.</p>
+          <Button className="mt-5" variant="secondary" onClick={() => copyToClipboardWithToast(window.location.href, toast)}>Partager le match</Button>
+        </Card>
+      </section>
     </div>
   )
 }

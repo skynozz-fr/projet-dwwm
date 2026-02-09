@@ -1,6 +1,6 @@
-import { Button } from "@/components/Button"
+import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { AlertCircle, RefreshCw, ArrowLeft } from "lucide-react"
+import { AlertCircle, ArrowLeft, RefreshCw } from "lucide-react"
 
 type ErrorPageProps = {
   title?: string
@@ -20,24 +20,24 @@ export const ErrorPage = ({
   showGoBack = true,
 }: ErrorPageProps) => {
   return (
-  <div className="min-h-[80vh] flex flex-col items-center justify-center px-4">
-      <Card className="max-w-md w-full p-8 border border-border shadow-lg text-center">
-        <div className="mb-6">
-          <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4 opacity-80" />
-          <h2 className="text-xl font-semibold text-foreground mb-2">{title}</h2>
-          <p className="text-muted-foreground mb-4">{message}</p>
+    <div className="min-h-[75vh] flex items-center justify-center px-4">
+      <Card variant="elevated" className="w-full max-w-xl p-8 text-center">
+        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-error/10">
+          <AlertCircle className="h-7 w-7 text-error" />
         </div>
-        
-        <div className="flex gap-4 justify-center flex-wrap">
+        <h2 className="mb-2 text-h3 text-foreground">{title}</h2>
+        <p className="mb-7 text-muted-foreground">{message}</p>
+
+        <div className="flex flex-wrap justify-center gap-3">
           {showRetry && onRetry && (
-            <Button onClick={onRetry} variant="primary">
-              <RefreshCw className="w-4 h-4 mr-2" />
+            <Button onClick={onRetry}>
+              <RefreshCw className="h-4 w-4" />
               Réessayer
             </Button>
           )}
           {showGoBack && onGoBack && (
-            <Button onClick={onGoBack} variant="secondary">
-              <ArrowLeft className="w-4 h-4 mr-2" />
+            <Button onClick={onGoBack} variant="outline">
+              <ArrowLeft className="h-4 w-4" />
               Retour
             </Button>
           )}

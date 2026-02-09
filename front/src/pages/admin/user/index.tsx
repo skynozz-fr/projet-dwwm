@@ -175,12 +175,12 @@ export const UsersAdmin = () => {
   }
 
   return (
-    <div className="space-y-8 px-2 md:px-6 py-8 max-w-full mx-auto">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-2">
+    <div className="space-y-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-2xl font-bold text-foreground">Utilisateurs</h2>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4 md:items-end bg-muted/40 rounded-lg px-4 py-4 border border-border mb-4">
+      <div className="flex flex-col md:flex-row gap-4 md:items-end rounded-lg border border-border bg-surface-2/35 p-3 mb-4">
         <Input
           label=""
           placeholder="Rechercher un utilisateur..."

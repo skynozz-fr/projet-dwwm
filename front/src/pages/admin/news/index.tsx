@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom"
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 
-import { Button } from "@/components/Button"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/Input"
 import { Select } from "@/components/ui/select"
 import { Card } from "@/components/ui/card"
@@ -112,15 +112,15 @@ export const NewsAdmin = () => {
   }
 
   return (
-  <div className="space-y-8 px-2 md:px-6 py-8 max-w-full mx-auto">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-2">
+  <div className="space-y-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-2xl font-bold text-foreground">Actualités</h2>
         <Button className="w-full sm:w-auto" onClick={() => setAddAlertOpen(true)}>
           Nouvelle Actualité
         </Button>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4 md:items-end bg-muted/40 rounded-lg px-4 py-4 border border-border mb-4">
+      <div className="flex flex-col md:flex-row gap-4 md:items-end rounded-lg border border-border bg-surface-2/35 p-3 mb-4">
         <Input
           placeholder="Rechercher une actualité..."
           value={searchTerm}
@@ -135,22 +135,22 @@ export const NewsAdmin = () => {
         />
       </div>
 
-      <div className="grid gap-6">
+      <div className="grid gap-4">
         {paginatedData.map((news) => (
           <Card 
             key={news.id} 
-            className="p-5 md:p-7 hover:shadow-lg transition-all cursor-pointer hover:border-primary"
+            className="p-4 md:p-5 cursor-pointer"
             onClick={() => navigate(`/admin/news/edit/${news.id}`)}
           >
-            <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
-              <div className="flex-1 min-w-0">
+            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+              <div className="min-w-0 flex-1 space-y-3">
                 <div className="flex flex-wrap items-center gap-2 mb-2">
                   <h3 className="text-lg md:text-xl font-semibold text-foreground truncate max-w-xs md:max-w-md">{news.title}</h3>
                   <span className={`px-2 py-1 ${getNewsColor(news.category)} text-xs rounded-full font-semibold`}>
                     {translateNewsCategory(news.category)}
                   </span>
                 </div>
-                <p className="text-muted-foreground mb-2 line-clamp-2 pt-1 border-t border-border/50">{news.excerpt}</p>
+                <p className="line-clamp-2 border-t border-border/60 pt-3 text-muted-foreground">{news.excerpt}</p>
                 <div className="text-xs text-muted-foreground">
                   Par {news.author ? `${news.author.firstname} ${news.author.lastname}` : "Auteur inconnu"} • {formatDate(news.created_at)}
                 </div>
@@ -161,7 +161,8 @@ export const NewsAdmin = () => {
                   </div>
                 )}
               </div>
-              <div className="flex gap-2 md:ml-4 shrink-0">
+              <div className="shrink-0 md:ml-4">
+                <div className="flex gap-2 md:flex-col">
                 <Button 
                   variant="secondary" 
                   size="sm"
@@ -173,7 +174,7 @@ export const NewsAdmin = () => {
                   Modifier
                 </Button>
                 <Button
-                  variant="danger"
+                  variant="destructive"
                   size="sm"
                   onClick={(e) => {
                     e.stopPropagation()
@@ -183,6 +184,7 @@ export const NewsAdmin = () => {
                 >
                   Supprimer
                 </Button>
+                </div>
               </div>
             </div>
           </Card>

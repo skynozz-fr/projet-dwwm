@@ -6,9 +6,10 @@ import type { AxiosError } from "axios"
 
 import { ArrowLeft, CheckIcon, Mail, User, UserPlus, XIcon } from "lucide-react"
 
-import { Button } from "@/components/Button"
-import { RequiredInput } from "@/components/ui/required-input"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
 import { PasswordStrengthInput } from "@/components/ui/password-strength-input"
+import { RequiredInput } from "@/components/ui/required-input"
 
 import { useAuth } from "@/hooks/useAuth"
 import { useToast } from "@/hooks/useToast"
@@ -27,18 +28,13 @@ export const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [isPasswordValid, setIsPasswordValid] = useState(false)
 
-  const isFormValid =
-    firstName.trim() !== "" &&
-    lastName.trim() !== "" &&
-    email.trim() !== "" &&
-    isPasswordValid &&
-    password === confirmPassword
+  const isFormValid = firstName.trim() !== "" && lastName.trim() !== "" && email.trim() !== "" && isPasswordValid && password === confirmPassword
 
   const { mutate, isPending } = useMutation<void, AxiosError<{ error?: string }>, RegisterPayload>({
     mutationKey: ["auth", "register"],
     mutationFn: (payload: RegisterPayload) => register(payload),
     onSuccess: () => {
-      toast.success("Inscription réussie", "Bienvenue !")
+      toast.success("Inscription reussie", "Bienvenue !")
       navigate("/")
     },
     onError: (error) => {
@@ -47,145 +43,91 @@ export const Register = () => {
     },
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!isFormValid || isPending) return
-
-    mutate({ firstname: firstName, lastname: lastName, email, password })
-  }
-
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-md space-y-8">
-        <div className="flex items-center">
-          <Link
-            to="/login"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Retour à la connexion
+    <div className="min-h-screen p-4 md:p-8">
+      <div className="mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl gap-6 md:grid-cols-2">
+        <Card variant="glass" className="relative hidden overflow-hidden p-10 md:flex md:flex-col md:justify-between">
+          <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-glow-gold" />
+          <div className="absolute -bottom-28 -right-20 h-80 w-80 rounded-full bg-glow-blue" />
+          <div className="relative z-10">
+            <p className="text-caption text-primary">FC Popcorn</p>
+            <h1 className="mt-4 text-h1">Entrez dans l'aventure.</h1>
+            <p className="mt-4 max-w-md text-muted-foreground">Creez votre compte pour acceder a l'experience complete du club.</p>
+          </div>
+          <p className="relative z-10 text-sm text-muted-foreground">"La force d'une equipe commence par ses membres."</p>
+        </Card>
+
+        <Card variant="elevated" className="mx-auto w-full max-w-xl p-6 md:p-10">
+          <Link to="/login" className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary">
+            <ArrowLeft className="h-4 w-4" />Retour a la connexion
           </Link>
-        </div>
 
-        <div className="text-center space-y-2">
-          <div className="flex justify-center">
-            <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center">
-              <UserPlus className="w-8 h-8 text-secondary-foreground" />
-            </div>
-          </div>
-          <h1 className="text-2xl font-bold text-foreground">Créer un compte</h1>
-          <p className="text-muted-foreground">Rejoignez-nous dès aujourd'hui</p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <RequiredInput
-                label="Prénom"
-                type="text"
-                placeholder="Votre prénom"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                icon={<User className="h-4 w-4" />}
-              />
-              <RequiredInput
-                label="Nom"
-                type="text"
-                placeholder="Votre nom"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                icon={<User className="h-4 w-4" />}
-              />
-            </div>
-
-            <RequiredInput
-              label="Adresse email"
-              type="email"
-              placeholder="Votre adresse email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              icon={<Mail className="h-4 w-4" />}
-            />
-
-            <PasswordStrengthInput
-              label="Mot de passe"
-              placeholder="Créez un mot de passe fort"
-              value={password}
-              onChange={setPassword}
-              showStrength={true}
-              onValidationChange={setIsPasswordValid}
-            />
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
-                Confirmer le mot de passe <span className="text-error">*</span>
-              </label>
-              <div className="relative">
-                <input
-                  type="password"
-                  placeholder="Confirmez votre mot de passe"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className={`flex h-9 w-full rounded border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 ${
-                    confirmPassword && password !== confirmPassword
-                      ? "border-error"
-                      : confirmPassword && password === confirmPassword
-                      ? "border-success"
-                      : ""
-                  }`}
-                  required
-                />
-                {confirmPassword && (
-                  <div className="mt-1 text-xs">
-                    {password === confirmPassword ? (
-                      <span className="text-success flex items-center gap-1">
-                        <CheckIcon size={16} />
-                        Les mots de passe correspondent
-                      </span>
-                    ) : (
-                      <span className="text-error flex items-center gap-1">
-                        <XIcon size={16} />
-                        Les mots de passe ne correspondent pas
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
+          <div className="mb-6 text-center">
+            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-secondary/20 text-secondary"><UserPlus className="h-7 w-7" /></div>
+            <h2 className="text-h2">Creer un compte</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Rejoignez le FC Popcorn</p>
           </div>
 
-          <Button
-            type="submit"
-            variant="secondary"
-            size="lg"
-            className="w-full"
-            disabled={isPending || !isFormValid}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              if (!isFormValid || isPending) return
+              mutate({ firstname: firstName, lastname: lastName, email, password })
+            }}
+            className="space-y-4"
           >
-            {isPending ? (
-              <>
-                <div className="w-4 h-4 mr-2 border-2 border-secondary-foreground border-t-transparent rounded-full animate-spin" />
-                Création du compte...
-              </>
-            ) : (
-              <>
-                <UserPlus className="w-4 h-4 mr-2" />
-                Créer mon compte
-              </>
-            )}
-          </Button>
-        </form>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <RequiredInput label="Prenom" placeholder="Votre prenom" value={firstName} onChange={(e) => setFirstName(e.target.value)} icon={<User className="h-4 w-4" />} />
+              <RequiredInput label="Nom" placeholder="Votre nom" value={lastName} onChange={(e) => setLastName(e.target.value)} icon={<User className="h-4 w-4" />} />
+            </div>
 
-        <div className="text-center">
-          <p className="text-sm text-muted-foreground">
-            Déjà un compte ?{" "}
-            <Link
-              to="/login"
-              className="hover:text-secondary font-medium underline underline-offset-4"
-            >
-              Se connecter
-            </Link>
+            <RequiredInput label="Adresse email" type="email" placeholder="Votre adresse email" value={email} onChange={(e) => setEmail(e.target.value)} icon={<Mail className="h-4 w-4" />} />
+
+            <PasswordStrengthInput label="Mot de passe" placeholder="Creez un mot de passe fort" value={password} onChange={setPassword} showStrength={true} onValidationChange={setIsPasswordValid} />
+
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-foreground">Confirmer le mot de passe <span className="text-error">*</span></label>
+              <input
+                type="password"
+                placeholder="Confirmez votre mot de passe"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className={`h-10 w-full rounded-md border bg-surface px-3 text-sm shadow-sm outline-none transition focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/40 ${
+                  confirmPassword && password !== confirmPassword
+                    ? "border-error"
+                    : confirmPassword && password === confirmPassword
+                    ? "border-success"
+                    : "border-input"
+                }`}
+                required
+              />
+              {confirmPassword && (
+                <p className={`inline-flex items-center gap-1 text-xs ${password === confirmPassword ? "text-success" : "text-error"}`}>
+                  {password === confirmPassword ? <CheckIcon size={14} /> : <XIcon size={14} />}
+                  {password === confirmPassword ? "Les mots de passe correspondent" : "Les mots de passe ne correspondent pas"}
+                </p>
+              )}
+            </div>
+
+            <Button type="submit" variant="secondary" className="w-full" disabled={isPending || !isFormValid}>
+              {isPending ? (
+                <>
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-secondary-foreground/40 border-t-secondary-foreground" />
+                  Creation du compte...
+                </>
+              ) : (
+                <>
+                  <UserPlus className="h-4 w-4" />
+                  Creer mon compte
+                </>
+              )}
+            </Button>
+          </form>
+
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            Deja un compte ? <Link to="/login" className="font-semibold text-secondary hover:underline">Se connecter</Link>
           </p>
-        </div>
+        </Card>
       </div>
     </div>
   )

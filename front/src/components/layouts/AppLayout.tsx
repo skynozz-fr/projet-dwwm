@@ -5,13 +5,15 @@ import { ScrollToTop } from "../ScrollToTop"
 
 export const AppLayout = () => {
   return (
-    <div className="min-h-screen p-3">
+    <div className="min-h-screen pb-8">
       <ScrollToTop />
       <Navbar />
-      <div className="flex items-center justify-end my-2">
-        <ThemeToggle />
-      </div>
-      <Outlet />
+      <main className="app-container">
+        <div className="mt-4 mb-6 flex justify-end">
+          <ThemeToggle />
+        </div>
+        <Outlet />
+      </main>
     </div>
   )
 }
