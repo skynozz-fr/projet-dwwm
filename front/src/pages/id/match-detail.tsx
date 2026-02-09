@@ -73,8 +73,20 @@ export const MatchDetail = () => {
         <div className="space-y-5">
           <Card variant="elevated" className="p-6">
             <h3 className="mb-3 text-h3">Informations pratiques</h3>
-            <p className="mb-2 inline-flex items-center gap-2 text-sm"><Clock className="h-4 w-4 text-primary" />Coup d'envoi: {formatTime(match.datetime)}</p>
-            <p className="inline-flex items-center gap-2 text-sm"><MapPin className="h-4 w-4 text-primary" />{match.venue}</p>
+            <div className="space-y-3 text-sm">
+              <p className="flex items-center gap-2.5">
+                <Clock className="h-4 w-4 shrink-0 text-primary" />
+                <span>Coup d'envoi: {formatTime(match.datetime)}</span>
+              </p>
+              <p className="flex items-center gap-2.5">
+                <MapPin className="h-4 w-4 shrink-0 text-primary" />
+                <span>{match.venue}</span>
+              </p>
+              <p className="flex items-center gap-2.5">
+                <MapPin className="h-4 w-4 shrink-0 text-primary" />
+                <span>{match.location}</span>
+              </p>
+            </div>
           </Card>
 
           <Card variant="elevated" className="p-6">
