@@ -186,6 +186,11 @@
 }
 
 @layer utilities {
+  /* Manrope en 600 peut paraitre flou selon les écrans: on ramène semibold à 500 */
+  .font-semibold {
+    font-weight: 500;
+  }
+
   .font-display {
     font-family: "Bebas Neue", "Manrope", sans-serif;
   }
