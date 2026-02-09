@@ -1,46 +1,35 @@
+/* eslint-disable react-refresh/only-export-components */
 "use client"
 
 import {
   composeRenderProps,
-  DateFieldProps,
   DateField as DateFieldRac,
-  DateInputProps as DateInputPropsRac,
   DateInput as DateInputRac,
-  DateSegmentProps,
   DateSegment as DateSegmentRac,
+  TimeField as TimeFieldRac,
+} from "react-aria-components"
+import type {
+  DateFieldProps,
+  DateInputProps as DateInputPropsRac,
+  DateSegmentProps,
   DateValue as DateValueRac,
   TimeFieldProps,
-  TimeField as TimeFieldRac,
   TimeValue as TimeValueRac,
 } from "react-aria-components"
 
 import { cn } from "@/lib/utils"
 
-function DateField<T extends DateValueRac>({
-  className,
-  children,
-  ...props
-}: DateFieldProps<T>) {
+function DateField<T extends DateValueRac>({ className, children, ...props }: DateFieldProps<T>) {
   return (
-    <DateFieldRac
-      className={composeRenderProps(className, (className) => cn(className))}
-      {...props}
-    >
+    <DateFieldRac className={composeRenderProps(className, (className) => cn(className))} {...props}>
       {children}
     </DateFieldRac>
   )
 }
 
-function TimeField<T extends TimeValueRac>({
-  className,
-  children,
-  ...props
-}: TimeFieldProps<T>) {
+function TimeField<T extends TimeValueRac>({ className, children, ...props }: TimeFieldProps<T>) {
   return (
-    <TimeFieldRac
-      className={composeRenderProps(className, (className) => cn(className))}
-      {...props}
-    >
+    <TimeFieldRac className={composeRenderProps(className, (className) => cn(className))} {...props}>
       {children}
     </TimeFieldRac>
   )
@@ -62,23 +51,17 @@ function DateSegment({ className, ...props }: DateSegmentProps) {
 }
 
 const dateInputStyle =
-  "relative inline-flex h-9 w-full items-center overflow-hidden whitespace-nowrap rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none data-focus-within:border-ring data-focus-within:ring-ring/50 data-focus-within:ring-[3px] data-focus-within:has-aria-invalid:ring-destructive/20 dark:data-focus-within:has-aria-invalid:ring-destructive/40 data-focus-within:has-aria-invalid:border-destructive"
+  "relative inline-flex h-10 w-full items-center overflow-hidden whitespace-nowrap rounded-md border border-input bg-surface px-3 py-2 text-sm shadow-sm transition-[color,box-shadow] outline-none data-focus-within:border-ring data-focus-within:ring-2 data-focus-within:ring-ring/40 data-focus-within:has-aria-invalid:ring-destructive/20 data-focus-within:has-aria-invalid:border-destructive"
 
 interface DateInputProps extends DateInputPropsRac {
   className?: string
   unstyled?: boolean
 }
 
-function DateInput({
-  className,
-  unstyled = false,
-  ...props
-}: Omit<DateInputProps, "children">) {
+function DateInput({ className, unstyled = false, ...props }: Omit<DateInputProps, "children">) {
   return (
     <DateInputRac
-      className={composeRenderProps(className, (className) =>
-        cn(!unstyled && dateInputStyle, className)
-      )}
+      className={composeRenderProps(className, (className) => cn(!unstyled && dateInputStyle, className))}
       {...props}
     >
       {(segment) => <DateSegment segment={segment} />}

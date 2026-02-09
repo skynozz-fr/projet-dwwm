@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card"
-import { Button } from "@/components/Button"
+import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router-dom"
 
 export const Unauthorized = () => {
@@ -15,7 +15,7 @@ export const Unauthorized = () => {
 					<p className="text-muted-foreground mb-4">Vous devez vous connecter pour accéder à cette page.</p>
 				</div>
 				<div className="flex gap-3 justify-center">
-					<Button variant="primary" onClick={() => navigate("/login")}>
+					<Button variant="default" onClick={() => navigate("/login")}>
 						Se connecter
 					</Button>
 					<Button variant="secondary" onClick={() => navigate("/")}>

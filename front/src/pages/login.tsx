@@ -4,9 +4,10 @@ import { Link, useNavigate } from "react-router-dom"
 import { useMutation } from "@tanstack/react-query"
 import type { AxiosError } from "axios"
 
-import { LogIn, User, Mail } from "lucide-react"
+import { LogIn, Mail, User } from "lucide-react"
 
-import { Button } from "@/components/Button"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
 import { RequiredInput } from "@/components/ui/required-input"
 import { SimplePasswordInput } from "@/components/ui/simple-password-input"
 
@@ -29,7 +30,7 @@ export const Login = () => {
     mutationKey: ["auth", "login"],
     mutationFn: (payload: LoginPayload) => login(payload),
     onSuccess: () => {
-      toast.success("Connexion réussie", "Bienvenue !")
+      toast.success("Connexion reussie", "Bienvenue !")
       navigate("/")
     },
     onError: (error) => {
@@ -38,90 +39,66 @@ export const Login = () => {
     },
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!isFormValid || isPending) return
-    
-    mutate({ email, password })
-  }
-
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center space-y-2">
-          <div className="flex justify-center">
-            <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center">
-              <LogIn className="w-8 h-8 text-primary-foreground" />
-            </div>
+    <div className="min-h-screen p-4 md:p-8">
+      <div className="mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl gap-6 md:grid-cols-2">
+        <Card variant="glass" className="relative hidden overflow-hidden p-10 md:flex md:flex-col md:justify-between">
+          <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-glow-gold" />
+          <div className="absolute -bottom-28 -right-20 h-80 w-80 rounded-full bg-glow-blue" />
+          <div className="relative z-10">
+            <p className="text-caption text-primary">FC Popcorn</p>
+            <h1 className="mt-4 text-h1">Esprit club. Energie collective.</h1>
+            <p className="mt-4 max-w-md text-muted-foreground">Suivez les matchs, consultez les actualites et rejoignez la communaute du club.</p>
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Connexion</h1>
-          <p className="text-muted-foreground">Connectez-vous à votre compte</p>
-        </div>
+          <p className="relative z-10 text-sm text-muted-foreground">"Chaque entrainement est une promesse de progres."</p>
+        </Card>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-4">
-            <RequiredInput
-              label="Adresse email"
-              type="email"
-              placeholder="Votre adresse email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              icon={<Mail className="h-4 w-4" />}
-              aria-label="Adresse email"
-            />
-
-            <SimplePasswordInput
-              label="Mot de passe"
-              placeholder="Votre mot de passe"
-              value={password}
-              onChange={setPassword}
-              required
-              aria-label="Mot de passe"
-            />
+        <Card variant="elevated" className="mx-auto flex w-full max-w-xl flex-col justify-center p-6 md:p-10">
+          <div className="mb-7 text-center">
+            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary"><LogIn className="h-7 w-7" /></div>
+            <h2 className="text-h2">Connexion</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Connectez-vous a votre compte</p>
           </div>
 
-          <Button type="submit" className="w-full" disabled={isPending || !isFormValid}>
-            {isPending ? (
-              <>
-                <div className="w-4 h-4 border-2 mr-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
-                Connexion...
-              </>
-            ) : (
-              <>
-                <LogIn className="w-4 h-4 mr-2" />
-                Se connecter
-              </>
-            )}
-          </Button>
-        </form>
-
-        <div className="text-center">
-          <Link
-            to="/home"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors underline underline-offset-4"
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              if (!isFormValid || isPending) return
+              mutate({ email, password })
+            }}
+            className="space-y-4"
           >
-            <User className="w-4 h-4" />
-            Continuer en tant qu'invité
-          </Link>
-        </div>
+            <RequiredInput label="Adresse email" type="email" placeholder="Votre adresse email" value={email} onChange={(e) => setEmail(e.target.value)} icon={<Mail className="h-4 w-4" />} />
+            <SimplePasswordInput label="Mot de passe" placeholder="Votre mot de passe" value={password} onChange={setPassword} required />
 
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-border" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">Ou</span>
-          </div>
-        </div>
+            <Button type="submit" className="mt-2 w-full" disabled={isPending || !isFormValid}>
+              {isPending ? (
+                <>
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground/40 border-t-primary-foreground" />
+                  Connexion...
+                </>
+              ) : (
+                <>
+                  <LogIn className="h-4 w-4" />
+                  Se connecter
+                </>
+              )}
+            </Button>
+          </form>
 
-        <div className="text-center space-y-2">
-          <p className="text-sm text-muted-foreground">
-            Pas encore de compte ?{" "}
-            <Link to="/register" className="hover:text-primary font-medium underline underline-offset-4">
-              Créer un compte
+          <div className="mt-6 text-center">
+            <Link to="/home" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary">
+              <User className="h-4 w-4" />
+              Continuer en tant qu'invite
             </Link>
+          </div>
+
+          <div className="my-6 border-t border-border" />
+
+          <p className="text-center text-sm text-muted-foreground">
+            Pas encore de compte ? <Link to="/register" className="font-semibold text-primary hover:underline">Creer un compte</Link>
           </p>
-        </div>
+        </Card>
       </div>
     </div>
   )
