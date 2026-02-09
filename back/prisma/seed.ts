@@ -1,12 +1,31 @@
-import { PrismaClient, Role } from "@prisma/client";
+import { MatchCompetition, MatchStatus, PrismaClient, Role } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
 const hash = (raw: string) => bcrypt.hashSync(raw, bcrypt.genSaltSync(10));
 
+const atTime = (base: Date, hour: number, minute: number) => {
+  const d = new Date(base);
+  d.setHours(hour, minute, 0, 0);
+  return d;
+};
+
+const addDays = (base: Date, days: number) => {
+  const d = new Date(base);
+  d.setDate(d.getDate() + days);
+  return d;
+};
+
+const addHours = (base: Date, hours: number) => {
+  const d = new Date(base);
+  d.setHours(d.getHours() + hours);
+  return d;
+};
+
 async function main() {
-  // Read defaults from env or use sensible local dev fallbacks
+  const now = new Date();
+
   const ADMIN_EMAIL = process.env.DEFAULT_ADMIN_EMAIL || "admin@admin.test";
   const ADMIN_PASSWORD = process.env.DEFAULT_ADMIN_PASSWORD || "Admin1234";
   const ADMIN_FIRSTNAME = process.env.DEFAULT_ADMIN_FIRSTNAME || "Admin";
@@ -17,10 +36,9 @@ async function main() {
   const USER_FIRSTNAME = process.env.DEFAULT_USER_FIRSTNAME || "User";
   const USER_LASTNAME = process.env.DEFAULT_USER_LASTNAME || "User";
 
-  // Create ADMIN if it doesn't exist
   const admin = await prisma.user.upsert({
     where: { email: ADMIN_EMAIL },
-    update: {}, // do not overwrite existing data on repeated seeds
+    update: {},
     create: {
       firstname: ADMIN_FIRSTNAME,
       lastname: ADMIN_LASTNAME,
@@ -30,8 +48,7 @@ async function main() {
     },
   });
 
-  // Create USER if it doesn't exist
-  const user = await prisma.user.upsert({
+  await prisma.user.upsert({
     where: { email: USER_EMAIL },
     update: {},
     create: {
@@ -43,175 +60,193 @@ async function main() {
     },
   });
 
-  // Create 6 matches (mix of completed & scheduled)
-  const match1 = await prisma.match.create({
-    data: {
-      home_team: "FC Popcorn",
-      away_team: "SC Butter",
-      is_home: true,
-      datetime: new Date("2025-11-26T15:00:00"),
-      venue: "Stade du Maïs",
-      location: "Popcorn City",
-      competition: "LEAGUE",
-      status: "SCHEDULED",
-      description: "Affiche pour la 12e journée : duel pour la tête du classement",
-      referee: "J. Martin",
-      weather: "Frais, couvert",
-    },
-  });
+  // Clean current domain data for deterministic seeding.
+  await prisma.news.deleteMany();
+  await prisma.match.deleteMany();
 
-  const match2 = await prisma.match.create({
-    data: {
-      home_team: "AS Caramel",
+  const matches = [
+    {
+      home_team: "FC Popcorn",
+      away_team: "AS Caramel",
+      is_home: true,
+      datetime: atTime(addDays(now, -18), 20, 30),
+      venue: "Stade du Mais",
+      location: "Popcorn City",
+      competition: MatchCompetition.LEAGUE,
+      status: MatchStatus.COMPLETED,
+      home_score: 3,
+      away_score: 1,
+      description: "Victoire reference avec une seconde periode de haut niveau.",
+      referee: "J. Martin",
+      weather: "Sec, 9C",
+      author_id: admin.id,
+      updated_by_id: admin.id,
+    },
+    {
+      home_team: "Grain United",
       away_team: "FC Popcorn",
       is_home: false,
-      datetime: new Date("2025-11-20T20:45:00"),
-      venue: "Arena Sucrée",
-      location: "Sweet Town",
-      competition: "CUP",
-      status: "COMPLETED",
-      home_score: 1,
-      away_score: 3,
-      description: "Quart de finale : qualification solide avec un jeu maîtrisé",
-      referee: "M. Kernelle",
-      weather: "Sec, 8°C",
-    },
-  });
-
-  const match3 = await prisma.match.create({
-    data: {
-      home_team: "FC Popcorn",
-      away_team: "Grain United",
-      is_home: true,
-      datetime: new Date("2025-11-18T18:30:00"),
-      venue: "Stade du Maïs",
-      location: "Popcorn City",
-      competition: "LEAGUE",
-      status: "COMPLETED",
+      datetime: atTime(addDays(now, -11), 18, 0),
+      venue: "Stade des Moissons",
+      location: "Grainville",
+      competition: MatchCompetition.CUP,
+      status: MatchStatus.COMPLETED,
       home_score: 2,
       away_score: 2,
-      description: "Match accroché : égalisation dans le temps additionnel",
-      referee: "S. Lefèvre",
-      weather: "Pluie légère",
+      description: "Match intense, qualification obtenue aux tirs au but.",
+      referee: "M. Bernard",
+      weather: "Frais, couvert",
+      author_id: admin.id,
+      updated_by_id: admin.id,
     },
-  });
-
-  const match4 = await prisma.match.create({
-    data: {
-      home_team: "Popcorn City",
-      away_team: "FC Popcorn",
-      is_home: false,
-      datetime: new Date("2025-11-14T14:00:00"),
-      venue: "Centre Sportif Municipal",
-      location: "Popcorn City",
-      competition: "FRIENDLY",
-      status: "COMPLETED",
-      home_score: 0,
-      away_score: 4,
-      description: "Match amical pour faire tourner l'effectif : clean sheet",
-      referee: "A. Roche",
-      weather: "Ensoleillé, 12°C",
-    },
-  });
-
-  const match5 = await prisma.match.create({
-    data: {
-      home_team: "FC Popcorn",
-      away_team: "Maïs Athletic",
-      is_home: true,
-      datetime: new Date("2025-12-02T21:00:00"),
-      venue: "Stade du Maïs",
-      location: "Popcorn City",
-      competition: "LEAGUE",
-      status: "SCHEDULED",
-      description: "Rencontre importante avant la trêve : objectif victoire",
-      referee: "T. Gravier",
-      weather: "Froid attendu",
-    },
-  });
-
-  const match6 = await prisma.match.create({
-    data: {
+    {
       home_team: "FC Popcorn",
       away_team: "Butter Royals",
       is_home: true,
-      datetime: new Date("2025-12-10T19:00:00"),
-      venue: "Stade du Maïs",
+      datetime: atTime(addDays(now, -4), 21, 0),
+      venue: "Stade du Mais",
       location: "Popcorn City",
-      competition: "TOURNAMENT",
-      status: "SCHEDULED",
-      description: "Tournoi d'hiver : entrée en lice contre un rival historique",
-      referee: "L. Perrin",
-      weather: "Froid sec",
-    },
-  });
-
-  // Create 6 news (authored by admin)
-  const news1 = await prisma.news.create({
-    data: {
-      title: "Qualification méritée en coupe face à AS Caramel",
-      excerpt: "Victoire 3-1 : solidité défensive et réalisme offensif.",
-      content: "Le FC Popcorn s'est imposé 3-1 à l'extérieur grâce à une prestation collective sérieuse. Après une entame prudente, l'équipe a accéléré au retour des vestiaires. Le coach a salué l'attitude et l'engagement de tous les joueurs.",
-      category: "MATCH",
+      competition: MatchCompetition.FRIENDLY,
+      status: MatchStatus.COMPLETED,
+      home_score: 4,
+      away_score: 0,
+      description: "Rotation reussie, bon rythme collectif avant la reprise.",
+      referee: "S. Roche",
+      weather: "Clair, 6C",
       author_id: admin.id,
+      updated_by_id: admin.id,
     },
-  });
-
-  const news2 = await prisma.news.create({
-    data: {
-      title: "Match nul frustrant mais encourageant contre Grain United",
-      excerpt: "2-2 : égalisation tardive qui évite la défaite.",
-      content: "Un match intense où le FC Popcorn a montré du caractère en revenant au score dans les dernières secondes. Le staff souligne la capacité mentale du groupe à ne jamais abandonner.",
-      category: "MATCH",
+    {
+      home_team: "FC Popcorn",
+      away_team: "Mais Athletic",
+      is_home: true,
+      datetime: atTime(addDays(now, 3), 19, 30),
+      venue: "Stade du Mais",
+      location: "Popcorn City",
+      competition: MatchCompetition.LEAGUE,
+      status: MatchStatus.SCHEDULED,
+      description: "Objectif: enchaîner à domicile et sécuriser le top 3.",
+      referee: "T. Perrin",
+      weather: "Froid sec attendu",
       author_id: admin.id,
+      updated_by_id: admin.id,
     },
-  });
-
-  const news3 = await prisma.news.create({
-    data: {
-      title: "Large succès en amical : rotation réussie",
-      excerpt: "Victoire 4-0 : les remplaçants ont répondu présent.",
-      content: "Dans un match de préparation, plusieurs jeunes joueurs ont eu leur chance et ont impressionné par leur dynamique et leur discipline tactique. De bon augure pour la suite de la saison.",
-      category: "MATCH",
+    {
+      home_team: "Corn City FC",
+      away_team: "FC Popcorn",
+      is_home: false,
+      datetime: atTime(addDays(now, 10), 17, 0),
+      venue: "Arena Centrale",
+      location: "Corn City",
+      competition: MatchCompetition.TOURNAMENT,
+      status: MatchStatus.SCHEDULED,
+      description: "Debut du tournoi regional contre un adversaire direct.",
+      referee: "L. Dufour",
+      weather: "Vent faible",
       author_id: admin.id,
+      updated_by_id: admin.id,
     },
-  });
-
-  const news4 = await prisma.news.create({
-    data: {
-      title: "Rumeur de transfert : un milieu ciblé pour janvier",
-      excerpt: "Le club explore le marché pour renforcer l'entrejeu.",
-      content: "Selon plusieurs sources internes, le FC Popcorn étudie la possibilité d'ajouter un milieu relayeur technique pour anticiper la deuxième partie de saison. Aucune offre officielle n'a encore été formulée mais des discussions préliminaires existent.",
-      category: "TRANSFER",
+    {
+      home_team: "FC Popcorn",
+      away_team: "SC Butter",
+      is_home: true,
+      datetime: atTime(addDays(now, 17), 20, 45),
+      venue: "Stade du Mais",
+      location: "Popcorn City",
+      competition: MatchCompetition.LEAGUE,
+      status: MatchStatus.SCHEDULED,
+      description: "Affiche importante pour rester au contact du podium.",
+      referee: "A. Morel",
+      weather: "A confirmer",
       author_id: admin.id,
+      updated_by_id: admin.id,
     },
-  });
+  ];
 
-  const news5 = await prisma.news.create({
-    data: {
-      title: "Point santé : effectif presque au complet",
-      excerpt: "Seul un joueur en reprise individuelle cette semaine.",
-      content: "Le staff médical a confirmé que la majorité des petits pépins musculaires sont résorbés. Le groupe devrait être presque complet pour le prochain match de championnat, hormis un joueur encore en phase de réathlétisation.",
-      category: "OTHER",
-      author_id: admin.id,
-    },
-  });
+  await prisma.match.createMany({ data: matches });
 
-  const news6 = await prisma.news.create({
-    data: {
-      title: "Focus sur la formation : trois jeunes avec le groupe pro",
-      excerpt: "Intégration progressive de talents issus de l'académie.",
-      content: "Le club poursuit sa stratégie d'intégration des jeunes en invitant trois espoirs à s'entraîner régulièrement avec le groupe professionnel. Objectif : leur offrir un cadre exigeant tout en accélérant leur adaptation au niveau supérieur.",
-      category: "OTHER",
+  const news = [
+    {
+      title: "FC Popcorn confirme sa bonne dynamique",
+      excerpt: "Troisieme resultat positif de suite pour l'equipe premiere.",
+      content:
+        "Le groupe continue de monter en puissance. Le staff souligne la qualite des intentions de jeu, la discipline tactique et l'engagement collectif sur les deux derniers matchs.",
+      category: "MATCH" as const,
       author_id: admin.id,
+      updated_by_id: admin.id,
+      created_at: addHours(addDays(now, -10), 9),
+      updated_at: addHours(addDays(now, -10), 11),
     },
-  });
+    {
+      title: "Qualification en coupe apres un match a suspense",
+      excerpt: "Le FC Popcorn passe au tour suivant au terme d'un duel accroche.",
+      content:
+        "Menes a la pause, les joueurs ont reagi avec caractere. L'equipe obtient une qualification meritee grace a une seconde mi-temps plus agressive dans le pressing.",
+      category: "MATCH" as const,
+      author_id: admin.id,
+      updated_by_id: admin.id,
+      created_at: addHours(addDays(now, -8), 14),
+      updated_at: addHours(addDays(now, -8), 16),
+    },
+    {
+      title: "Point effectif avant la prochaine journee",
+      excerpt: "Le groupe recupere plusieurs joueurs, un seul absent de longue duree.",
+      content:
+        "Le preparateur physique confirme le retour progressif de plusieurs titulaires. Le staff va adapter les charges sur les prochains jours pour arriver frais au match de championnat.",
+      category: "OTHER" as const,
+      author_id: admin.id,
+      updated_by_id: admin.id,
+      created_at: addHours(addDays(now, -5), 10),
+      updated_at: addHours(addDays(now, -5), 12),
+    },
+    {
+      title: "Mercato: un milieu polyvalent suivi par le club",
+      excerpt: "La cellule recrutement explore une piste pour densifier l'entrejeu.",
+      content:
+        "Sans urgence, le club anticipe la suite de saison et observe un profil capable d'evoluer sur plusieurs postes au milieu. Aucune offre officielle n'est encore formulee.",
+      category: "TRANSFER" as const,
+      author_id: admin.id,
+      updated_by_id: admin.id,
+      created_at: addHours(addDays(now, -3), 15),
+      updated_at: addHours(addDays(now, -3), 18),
+    },
+    {
+      title: "Programme de la semaine: focus sur l'intensite",
+      excerpt: "Trois seances cles avant la reception de Mais Athletic.",
+      content:
+        "La semaine est orientee sur les transitions et les coups de pied arretes. Le staff veut maintenir la maitrise avec ballon et gagner en tranchant dans la surface adverse.",
+      category: "OTHER" as const,
+      author_id: admin.id,
+      updated_by_id: admin.id,
+      created_at: addHours(addDays(now, -1), 8),
+      updated_at: addHours(addDays(now, -1), 9),
+    },
+    {
+      title: "Prochain rendez-vous au Stade du Mais",
+      excerpt: "Le club compte sur le public pour pousser l'equipe dimanche soir.",
+      content:
+        "La reception de Mais Athletic s'annonce disputee. Le FC Popcorn appelle ses supporters a venir nombreux pour accompagner l'equipe dans une rencontre importante du championnat.",
+      category: "MATCH" as const,
+      author_id: admin.id,
+      updated_by_id: admin.id,
+      created_at: addHours(now, -2),
+      updated_at: addHours(now, -1),
+    },
+  ];
+
+  await prisma.news.createMany({ data: news });
+
+  const [newsCount, matchCount, userCount] = await Promise.all([
+    prisma.news.count(),
+    prisma.match.count(),
+    prisma.user.count(),
+  ]);
 
   console.log("Seed complete:", {
-    admin: { id: admin.id, email: admin.email, role: admin.role },
-    user: { id: user.id, email: user.email, role: user.role },
-    matches: [match1, match2, match3, match4, match5, match6].map(m => ({ id: m.id, home_team: m.home_team, away_team: m.away_team, status: m.status })),
-    news: [news1, news2, news3, news4, news5, news6].map(n => ({ id: n.id, title: n.title, category: n.category })),
+    users: userCount,
+    matches: matchCount,
+    news: newsCount,
+    adminEmail: admin.email,
   });
 }
 

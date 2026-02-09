@@ -88,7 +88,10 @@ export const About = () => {
           </div>
           <ul className="space-y-2 text-sm text-muted-foreground">
             {aboutFacilityMain.map((f) => (
-              <li key={f} className="inline-flex items-center gap-2"><CheckCircle className="h-4 w-4 text-success" />{f}</li>
+              <li key={f} className="flex items-start gap-2">
+                <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-success" />
+                <span>{f}</span>
+              </li>
             ))}
           </ul>
         </Card>
@@ -100,7 +103,10 @@ export const About = () => {
           </div>
           <ul className="space-y-2 text-sm text-muted-foreground">
             {aboutFacilityEquip.map((f) => (
-              <li key={f} className="inline-flex items-center gap-2"><CheckCircle className="h-4 w-4 text-success" />{f}</li>
+              <li key={f} className="flex items-start gap-2">
+                <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-success" />
+                <span>{f}</span>
+              </li>
             ))}
           </ul>
         </Card>
