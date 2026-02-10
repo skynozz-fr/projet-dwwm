@@ -102,7 +102,7 @@ export const News = () => {
                       </div>
 
                       {news.updated_by && news.updated_by_id !== news.author_id && (
-                        <p className="mb-2 inline-flex items-center gap-1 text-xs text-info-foreground"><Edit3 className="h-3 w-3" />Modifie par {news.updated_by.firstname} {news.updated_by.lastname}</p>
+                        <p className="mb-2 inline-flex items-center gap-1 text-xs text-info"><Edit3 className="h-3 w-3" />Modifie par {news.updated_by.firstname} {news.updated_by.lastname}</p>
                       )}
 
                       <p className="line-clamp-3 flex-1 border-t border-border/60 pt-3 text-sm text-muted-foreground">{news.excerpt}</p>

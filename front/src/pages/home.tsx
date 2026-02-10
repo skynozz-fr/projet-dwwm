@@ -170,7 +170,7 @@ export const Home = () => {
                     </div>
 
                     {it.updated_by && it.updated_by_id !== it.author_id && (
-                      <p className="mb-2 inline-flex items-center gap-1 text-xs text-info-foreground"><Edit3 className="h-3 w-3" />Modifie par {it.updated_by.firstname} {it.updated_by.lastname}</p>
+                      <p className="mb-2 inline-flex items-center gap-1 text-xs text-info"><Edit3 className="h-3 w-3" />Modifie par {it.updated_by.firstname} {it.updated_by.lastname}</p>
                     )}
 
                     <p className="line-clamp-3 flex-1 border-t border-border/60 pt-3 text-sm text-muted-foreground">{it.excerpt}</p>
