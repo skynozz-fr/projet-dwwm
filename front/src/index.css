@@ -22,10 +22,13 @@
   --primary-foreground: #152035;
   --secondary: #1d3557;
   --secondary-foreground: #eef5ff;
+  --secondary-text: var(--secondary);
   --tertiary: #2f4f79;
   --tertiary-foreground: #eef5ff;
+  --tertiary-text: var(--tertiary);
   --accent: #2e86ff;
   --accent-foreground: #eaf3ff;
+  --accent-text: var(--accent);
 
   --success: #1fa77a;
   --success-foreground: #eafdf6;
@@ -51,16 +54,19 @@
   --surface: #111e33;
   --surface-2: #182740;
   --foreground: #eff4fb;
-  --muted-foreground: #9caec9;
+  --muted-foreground: #b1c1d8;
 
   --primary: #f3c96b;
   --primary-foreground: #162039;
   --secondary: #223a60;
   --secondary-foreground: #f2f6ff;
+  --secondary-text: #8ebcf5;
   --tertiary: #29486f;
   --tertiary-foreground: #f2f6ff;
+  --tertiary-text: #82abd9;
   --accent: #5ca4ff;
   --accent-foreground: #eff6ff;
+  --accent-text: #8fc0ff;
 
   --success: #2ec796;
   --success-foreground: #e8fff7;
@@ -253,10 +259,10 @@
 
   .text-foreground { color: var(--foreground); }
   .text-primary { color: var(--primary); }
-  .text-secondary { color: var(--secondary); }
-  .text-tertiary { color: var(--tertiary); }
+  .text-secondary { color: var(--secondary-text); }
+  .text-tertiary { color: var(--tertiary-text); }
   .text-muted { color: var(--surface-2); }
-  .text-accent { color: var(--accent); }
+  .text-accent { color: var(--accent-text); }
   .text-success { color: var(--success); }
   .text-info { color: var(--info); }
   .text-warning { color: var(--warning); }

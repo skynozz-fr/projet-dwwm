@@ -155,7 +155,7 @@ export const NewsAdmin = () => {
                   Par {news.author ? `${news.author.firstname} ${news.author.lastname}` : "Auteur inconnu"} • {formatDate(news.created_at)}
                 </div>
                 {news.updated_by && news.updated_by_id !== news.author_id && (
-                  <div className="flex items-center gap-1 text-xs text-info-foreground mt-1">
+                  <div className="mt-1 flex items-center gap-1 text-xs text-info">
                     <Edit3 className="w-3 h-3" />
                     <span>Modifié par {news.updated_by.firstname} {news.updated_by.lastname}</span>
                   </div>
