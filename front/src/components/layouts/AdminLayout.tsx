@@ -3,6 +3,7 @@ import { Calendar, FileText, Menu, Users, X } from "lucide-react"
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
+import { Footer } from "@/components/Footer"
 
 export const AdminLayout = () => {
   const navigate = useNavigate()
@@ -29,7 +30,7 @@ export const AdminLayout = () => {
     <div className="grid min-h-[calc(100vh-4rem)] lg:grid-cols-[260px_1fr]">
       {sidebarOpen && <div className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
-      <aside className={`fixed inset-y-0 left-0 z-50 w-[260px] border-r border-border bg-surface p-3 shadow-xl transition-transform lg:static lg:translate-x-0 lg:shadow-none ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      <aside className={`fixed inset-y-0 left-0 z-50 w-[260px] border-r border-border bg-surface p-3 shadow-xl transition-transform lg:static lg:translate-x-0 lg:shadow-none ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} rounded-md`}>
         <div className="mb-4 flex items-center justify-between rounded-lg border border-border bg-surface-2/40 px-3 py-2">
           <Link to="/admin" onClick={() => setSidebarOpen(false)} className="font-display text-2xl text-foreground">Admin</Link>
           <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setSidebarOpen(false)}><X className="h-4 w-4" /></Button>
@@ -56,7 +57,7 @@ export const AdminLayout = () => {
         </nav>
       </aside>
 
-      <section className="min-w-0">
+      <section className="flex min-w-0 flex-col">
         <header className="border-b border-border bg-surface/80 px-4 py-4 backdrop-blur md:px-6">
           <div className="flex items-center gap-3">
             <Button variant="outline" size="icon" className="lg:hidden" onClick={() => setSidebarOpen(true)}><Menu className="h-4 w-4" /></Button>
@@ -67,9 +68,10 @@ export const AdminLayout = () => {
           </div>
         </header>
 
-        <div className="p-4 md:p-6">
+        <div className="flex-1 p-4 md:p-6">
           <Outlet />
         </div>
+        <Footer />
       </section>
     </div>
   )
