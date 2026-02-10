@@ -10,7 +10,6 @@ export const Footer = () => {
         <nav className="flex items-center gap-3">
           <a
             href="#"
-            target="_blank"
             rel="noreferrer"
             aria-label="Instagram"
             className="no-link-anim rounded-md p-1.5 text-muted-foreground transition hover:bg-surface-2 hover:text-foreground"
@@ -19,7 +18,6 @@ export const Footer = () => {
           </a>
           <a
             href="#"
-            target="_blank"
             rel="noreferrer"
             aria-label="Facebook"
             className="no-link-anim rounded-md p-1.5 text-muted-foreground transition hover:bg-surface-2 hover:text-foreground"
@@ -28,7 +26,6 @@ export const Footer = () => {
           </a>
           <a
             href="#"
-            target="_blank"
             rel="noreferrer"
             aria-label="Twitter"
             className="no-link-anim rounded-md p-1.5 text-muted-foreground transition hover:bg-surface-2 hover:text-foreground"
