@@ -192,6 +192,48 @@
 }
 
 @layer utilities {
+  @keyframes loader-progress-slide {
+    0% {
+      transform: translateX(-140%);
+    }
+    100% {
+      transform: translateX(360%);
+    }
+  }
+
+  @keyframes loader-ring-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .loader-progress-bar {
+    animation: loader-progress-slide 1.3s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  .loader-orbit {
+    border-radius: 999px;
+    background: conic-gradient(
+      from 0deg,
+      color-mix(in oklab, var(--primary) 25%, transparent) 0deg,
+      var(--primary) 110deg,
+      color-mix(in oklab, var(--primary) 45%, transparent) 220deg,
+      transparent 360deg
+    );
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 0);
+    mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 0);
+    animation: loader-ring-spin 0.95s linear infinite;
+    will-change: transform;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .loader-progress-bar,
+    .loader-orbit {
+      animation-duration: 2.4s;
+    }
+  }
+
   /* Manrope en 600 peut paraitre flou selon les écrans: on ramène semibold à 500 */
   .font-semibold {
     font-weight: 500;
